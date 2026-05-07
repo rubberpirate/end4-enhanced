@@ -1,14 +1,11 @@
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
-import qs.modules.ii.mediaControls
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Qt.labs.synchronizer
-import Quickshell.Io
-import Quickshell.Services.Mpris
 
 Item {
     id: root
@@ -33,13 +30,6 @@ Item {
     function focusActiveItem() {
         swipeView.currentItem.forceActiveFocus()
     }
-
-    onAiChatEnabledChanged:     swipeView.rebuildTabs()
-    onTranslatorEnabledChanged: swipeView.rebuildTabs()
-    onMediaEnabledChanged:      swipeView.rebuildTabs()
-    onWallpapersEnabledChanged: swipeView.rebuildTabs()
-    onAnimeEnabledChanged:      swipeView.rebuildTabs()
-    onAnimeClosetChanged:       swipeView.rebuildTabs()
 
     Keys.onPressed: (event) => {
         if (event.modifiers === Qt.ControlModifier) {
@@ -81,10 +71,12 @@ Item {
             bottomRightRadius: Appearance.rounding.normal
             color: Appearance.colors.colLayer1
 
-            SwipeView {
+            SwipeView { // Content pages
                 id: swipeView
                 anchors.fill: parent
                 spacing: 10
+                currentIndex: tabBar.currentIndex
+
                 clip: true
                 layer.enabled: true
                 layer.effect: OpacityMask {
@@ -95,34 +87,17 @@ Item {
                     }
                 }
 
-                Component.onCompleted: rebuildTabs()
-
-                function rebuildTabs() {
-                    while (count > 0) removeItem(itemAt(0))
-
-                    const componentMap = {
-                        "neurology":      aiChat,
-                        "translate":      translator,
-                        "music_note":     media,
-                        "panorama":       wallpaperBrowser,
-                        "bookmark_heart": anime,
-                    }
-
-                    for (const tab of root.tabButtonList) {
-                        const comp = componentMap[tab.icon]
-                        if (comp) addItem(comp.createObject(swipeView))
-                    }
-
-                    if (count === 0)
-                        addItem(placeholder.createObject(swipeView))
-                }
+                contentChildren: [
+                    ...(root.aiChatEnabled ? [aiChat.createObject()] : []),
+                    ...(root.translatorEnabled ? [translator.createObject()] : []),
+                    ...(root.mediaEnabled ? [media.createObject()] : []),
+                    ...(root.wallpapersEnabled ? [wallpaperBrowser.createObject()] : []),
+                    ...((root.tabButtonList.length === 0 || (!root.aiChatEnabled && !root.translatorEnabled && root.animeCloset)) ? [placeholder.createObject()] : []),
+                    ...(root.animeEnabled ? [anime.createObject()] : []),
+                ]
             }
         }
 
-        Component {
-            id: media
-            SidebarPlayerControl {}
-        }
         Component {
             id: aiChat
             AiChat {}
@@ -130,6 +105,10 @@ Item {
         Component {
             id: translator
             Translator {}
+        }
+        Component {
+            id: media
+            SidebarPlayerControl {}
         }
         Component {
             id: wallpaperBrowser
