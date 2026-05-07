@@ -48,7 +48,8 @@ ContentPage {
         { id: "batteryIndicator",  name: Translation.tr("Battery"),              icon: "battery_android_frame_full" },
         { id: "activeWindow",      name: Translation.tr("Active Window"),        icon: "subtitles" },
         { id: "powerButton",       name: Translation.tr("Power Button"),         icon: "power_settings_new" },
-        { id: "updatesCount",      name: Translation.tr("Updates"),              icon: "deployed_code_update" }
+        { id: "updatesCount",      name: Translation.tr("Updates"),              icon: "deployed_code_update" },
+        { id: "docktoPanel",       name: Translation.tr("Dock to Panel"),        icon: "apps" }
     ]
 
     function availableFor() {
