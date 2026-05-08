@@ -109,6 +109,13 @@ Item {
                     property bool   appActive:    appEntry?.toplevels?.find(t => t.activated) !== undefined
                     property int    _lastFocused: -1
 
+                    Connections {
+                        target: DesktopEntries
+                        function onApplicationsChanged() {
+                            slotItem.deskEntry = DesktopEntries.heuristicLookup(slotItem.appId)
+                        }
+                    }
+
                     width:  root.btnSize
                     height: root.btnSize
 
