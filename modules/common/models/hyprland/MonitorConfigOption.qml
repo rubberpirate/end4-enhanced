@@ -7,7 +7,9 @@ import "../"
 
 NestableObject {
     id: root
+
     property var monitors: []
+
     Component.onCompleted: fetchProc.running = true
 
     function updateMonitor(index, changes) {
@@ -16,29 +18,48 @@ NestableObject {
         root.monitors = m
     }
 
+    function _buildLuaLine(m) {
+        if (m.disabled)
+            return `hl.monitor({ output = "${m.name}", mode = "disabled" })`
+
+        const pos = `${m.x}x${m.y}`
+        let line = `hl.monitor({ output = "${m.name}", mode = "${m.currentMode}", position = "${pos}", scale = ${m.scale}`
+
+        if (m.transform && m.transform !== 0)
+            line += `, transform = ${m.transform}`
+
+        line += ` })`
+        return line
+    }
+
     function save() {
         if (root.monitors.length === 0) return
         if (root.monitors.some(m => !m.name)) return
 
         const lines = root.monitors.map(m => {
-            if (m.disabled) return `monitor=${m.name},disable`
-            const base = `monitor=${m.name},${m.currentMode},${m.x}x${m.y},${m.scale}`
-            const line = (m.transform && m.transform !== 0) ? `${base},transform,${m.transform}` : base
+            const line = root._buildLuaLine(m)
             console.log(`[MonitorConfig] saving line: "${line}"`)
             return line
         }).join("\n")
+
         console.log(`[MonitorConfig] full file:\n${lines}`)
+
+        const escaped = lines.replace(/'/g, "'\\''")
         saveProc.command = ["bash", "-c",
-            `printf '%s\n' '${lines}' > ~/.config/hypr/monitors.conf`]
+            `printf '%s\n' '${escaped}' > ~/.config/hypr/monitors.lua`]
         saveProc.running = true
     }
 
     function applyMonitor(m) {
-        if (!m.name) return 
+        if (!m.name) return
+
         const base = `${m.name},${m.currentMode},${m.x}x${m.y},${m.scale}`
         applyProc.command = ["hyprctl", "keyword", "monitor",
-            m.disabled ? `${m.name},disable`
-                    : (m.transform && m.transform !== 0) ? `${base},transform,${m.transform}` : base]
+            m.disabled
+                ? `${m.name},disable`
+                : (m.transform && m.transform !== 0)
+                    ? `${base},transform,${m.transform}`
+                    : base]
         applyProc.running = true
     }
 
@@ -62,31 +83,33 @@ NestableObject {
             onStreamFinished: {
                 try {
                     root.monitors = JSON.parse(text).map(m => ({
-                        name: m.name,
-                        description: m.description,
-                        width: m.width,
-                        height: m.height,
-                        refreshRate: m.refreshRate,
-                        x: m.x,
-                        y: m.y,
-                        scale: m.scale,
-                        transform: m.transform ?? 0,
-                        disabled: m.disabled,
+                        name:          m.name,
+                        description:   m.description,
+                        width:         m.width,
+                        height:        m.height,
+                        refreshRate:   m.refreshRate,
+                        x:             m.x,
+                        y:             m.y,
+                        scale:         m.scale,
+                        transform:     m.transform ?? 0,
+                        disabled:      m.disabled,
                         availableModes: m.availableModes,
-                        currentMode: `${m.width}x${m.height}@${m.refreshRate.toFixed(2)}Hz`
+                        currentMode:   `${m.width}x${m.height}@${m.refreshRate.toFixed(2)}Hz`
                     }))
                 } catch(e) {
-                    console.log("[MonitorConfigOption] Error:", e)
+                    console.log("[MonitorConfig] Error parseando JSON:", e)
                 }
             }
         }
     }
 
     Process { id: applyProc }
+
     Process {
         id: saveProc
         onRunningChanged: if (!running) reloadProc.running = true
     }
+
     Process {
         id: reloadProc
         command: ["hyprctl", "reload"]

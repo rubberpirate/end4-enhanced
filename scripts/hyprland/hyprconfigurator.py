@@ -1,102 +1,193 @@
-#!/usr/bin/env -S\_/bin/sh\_-c\_"source\_\$(eval\_echo\_\$ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate&&exec\_python\_-E\_"\$0"\_"\$@""
+#!/usr/bin/env -S /bin/sh -c "source $(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate&&exec python -E \"$0\" \"$@\""
 import argparse
-import re
 import os
+import re
 import tempfile
 
-def edit_hyprland_config(file_path, set_args, reset_args):
+BOOL_KEYS = {
+    "decoration:blur:enabled",
+    "decoration:shadow:enabled",
+    "animations:enabled",
+    "input:numlock_by_default",
+    "input:touchpad:natural_scroll",
+    "input:touchpad:disable_while_typing",
+    "input:touchpad:clickfinger_behavior",
+}
+
+ANIM_PRESETS = {
+    "fast": """\
+hl.curve("pc_wobble", { type = "bezier", points = { {0.15, 1.15}, {0.35, 1.0}  } })
+hl.curve("pc_decel",  { type = "bezier", points = { {0.05, 0.9},  {0.1,  1.05} } })
+hl.curve("pc_accel",  { type = "bezier", points = { {0.3,  0},    {0.8,  0.15} } })
+hl.animation({ leaf = "windowsIn",           enabled = true, speed = 5, bezier = "pc_wobble", style = "slide"     })
+hl.animation({ leaf = "windowsOut",          enabled = true, speed = 5, bezier = "pc_accel",  style = "slide"     })
+hl.animation({ leaf = "windowsMove",         enabled = true, speed = 5, bezier = "pc_decel",  style = "slide"     })
+hl.animation({ leaf = "fadeIn",              enabled = true, speed = 4, bezier = "pc_decel"                       })
+hl.animation({ leaf = "fadeOut",             enabled = true, speed = 4, bezier = "pc_accel"                       })
+hl.animation({ leaf = "layersIn",            enabled = true, speed = 4, bezier = "pc_decel",  style = "slide"     })
+hl.animation({ leaf = "layersOut",           enabled = true, speed = 4, bezier = "pc_accel",  style = "slide"     })
+hl.animation({ leaf = "workspaces",          enabled = true, speed = 6, bezier = "pc_decel",  style = "slide"     })
+hl.animation({ leaf = "specialWorkspaceIn",  enabled = true, speed = 2, bezier = "pc_wobble", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 2, bezier = "pc_accel",  style = "slidevert" })
+""",
+    "normal": """\
+hl.curve("emphasizedDecel", { type = "bezier", points = { {0.05, 0.7},  {0.1,  1}    } })
+hl.curve("emphasizedAccel", { type = "bezier", points = { {0.3,  0},    {0.8,  0.15} } })
+hl.curve("menu_decel",      { type = "bezier", points = { {0.1,  1},    {0,    1}    } })
+hl.curve("menu_accel",      { type = "bezier", points = { {0.52, 0.03}, {0.72, 0.08} } })
+hl.curve("stall",           { type = "bezier", points = { {1,    -0.1}, {0.7,  0.85} } })
+hl.animation({ leaf = "windowsIn",           enabled = true, speed = 3,   bezier = "emphasizedDecel", style = "popin 80%" })
+hl.animation({ leaf = "windowsOut",          enabled = true, speed = 2,   bezier = "emphasizedDecel", style = "popin 90%" })
+hl.animation({ leaf = "windowsMove",         enabled = true, speed = 3,   bezier = "emphasizedDecel", style = "slide"     })
+hl.animation({ leaf = "fadeIn",              enabled = true, speed = 3,   bezier = "emphasizedDecel"  })
+hl.animation({ leaf = "fadeOut",             enabled = true, speed = 2,   bezier = "emphasizedDecel"  })
+hl.animation({ leaf = "border",              enabled = true, speed = 10,  bezier = "emphasizedDecel"  })
+hl.animation({ leaf = "layersIn",            enabled = true, speed = 2.7, bezier = "emphasizedDecel", style = "popin 93%" })
+hl.animation({ leaf = "layersOut",           enabled = true, speed = 2.4, bezier = "menu_accel",      style = "popin 94%" })
+hl.animation({ leaf = "fadeLayersIn",        enabled = true, speed = 0.5, bezier = "menu_decel"       })
+hl.animation({ leaf = "fadeLayersOut",       enabled = true, speed = 2.7, bezier = "stall"            })
+hl.animation({ leaf = "workspaces",          enabled = true, speed = 7,   bezier = "menu_decel",      style = "slide"     })
+hl.animation({ leaf = "specialWorkspaceIn",  enabled = true, speed = 2.8, bezier = "emphasizedDecel", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 1.2, bezier = "emphasizedAccel", style = "slidevert" })
+""",
+    "niri": """\
+hl.curve("niri_wobble", { type = "bezier", points = { {0.15, 1.15}, {0.35, 1.0}  } })
+hl.curve("niri_decel",  { type = "bezier", points = { {0.05, 0.9},  {0.1,  1.05} } })
+hl.curve("niri_accel",  { type = "bezier", points = { {0.3,  0},    {0.8,  0.15} } })
+hl.animation({ leaf = "windowsIn",           enabled = true, speed = 5, bezier = "niri_wobble", style = "slide"     })
+hl.animation({ leaf = "windowsOut",          enabled = true, speed = 5, bezier = "niri_accel",  style = "slide"     })
+hl.animation({ leaf = "windowsMove",         enabled = true, speed = 5, bezier = "niri_decel",  style = "slide"     })
+hl.animation({ leaf = "fadeIn",              enabled = true, speed = 4, bezier = "niri_decel"                       })
+hl.animation({ leaf = "fadeOut",             enabled = true, speed = 4, bezier = "niri_accel"                       })
+hl.animation({ leaf = "layersIn",            enabled = true, speed = 4, bezier = "niri_decel",  style = "slide"     })
+hl.animation({ leaf = "layersOut",           enabled = true, speed = 4, bezier = "niri_accel",  style = "slide"     })
+hl.animation({ leaf = "workspaces",          enabled = true, speed = 6, bezier = "niri_decel",  style = "slidevert" })
+hl.animation({ leaf = "specialWorkspaceIn",  enabled = true, speed = 4, bezier = "niri_wobble", style = "slidevert" })
+hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 4, bezier = "niri_accel",  style = "slidevert" })
+""",
+}
+
+
+def to_lua_value(key, value):
+    if key in BOOL_KEYS:
+        return "false" if value == "0" else "true"
     try:
-        with open(file_path, 'r') as file:
-            lines = file.readlines()
-    except FileNotFoundError:
-        print(f"Error: File '{file_path}' not found.")
-        return
-    
-    set_dict = {k: v for k, v in set_args} if set_args else {}
-    reset_set = set(reset_args) if reset_args else set()
-    
-    new_lines = []
-    found_keys = set()
-    
-    patterns = {}
-    for k in list(set_dict.keys()) + list(reset_set):
-        patterns[k] = re.compile(rf'^\s*{re.escape(k)}\s*=')
-        
-    for line in lines:
-        matched = False
-        
-        # Check if line matches a key to be reset
-        for key in reset_set:
-            if patterns[key].match(line):
-                matched = True
-                break
-                
-        if matched:
-            continue
-            
-        # Check if line matches a key to be set
-        for key, value in set_dict.items():
-            if patterns[key].match(line):
-                new_line = f"{key} = {value}\n"
-                new_lines.append(new_line)
-                found_keys.add(key)
-                matched = True
-                break
-                
-        if matched:
-            continue
-            
-        new_lines.append(line)
-        
-    if set_dict:
-        for key, value in set_dict.items():
-            if key not in found_keys:
-                if new_lines and not new_lines[-1].endswith('\n'):
-                    new_lines[-1] += '\n'
-                new_lines.append(f"{key} = {value}\n")
-                
-    dir_name = os.path.dirname(os.path.abspath(file_path))
-    temp_path = None
+        return str(int(value))
+    except ValueError:
+        pass
     try:
-        with tempfile.NamedTemporaryFile(mode='w', dir=dir_name, delete=False) as temp_file:
-            temp_file.writelines(new_lines)
-            temp_path = temp_file.name
-        os.chmod(temp_path, os.stat(file_path).st_mode)
-        os.replace(temp_path, file_path)
+        return str(float(value))
+    except ValueError:
+        pass
+    return f'"{value}"'
+
+
+def to_lua_line(key, value):
+    parts = key.replace(":", ".").split(".")
+    val = to_lua_value(key, value)
+    inner = f"{{ {parts[-1]} = {val} }}"
+    for part in reversed(parts[:-1]):
+        inner = f"{{ {part} = {inner} }}"
+    return f"hl.config({inner})\n"
+
+
+def make_marker(key):
+    parts = key.replace(":", ".").split(".")
+
+    fragment = " = { ".join(parts[:-1])
+    if fragment:
+        fragment += " = { " + parts[-1] + " ="
+    else:
+        fragment = parts[-1] + " ="
+    return fragment
+
+
+def write_atomic(path, content):
+    dir_name = os.path.dirname(os.path.abspath(path))
+    os.makedirs(dir_name, exist_ok=True)
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", dir=dir_name, delete=False) as f:
+            f.write(content)
+            tmp_path = f.name
+        if os.path.exists(path):
+            os.chmod(tmp_path, os.stat(path).st_mode)
+        os.replace(tmp_path, path)
     except Exception as e:
-        if temp_path and os.path.exists(temp_path):
-            os.remove(temp_path)
-        print(f"Error saving file: {e}")
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
+        raise e
+
+
+def edit_lua(file_path, set_pairs, reset_keys):
+    try:
+        with open(file_path) as f:
+            lines = f.readlines()
+    except FileNotFoundError:
+        lines = []
+
+    set_dict   = dict(set_pairs)
+    reset_set  = set(reset_keys)
+    all_keys   = list(set_dict) + list(reset_set)
+    markers    = {k: make_marker(k) for k in all_keys}
+
+    new_lines  = []
+    found_keys = set()
+
+    for line in lines:
+        matched = None
+        for k in all_keys:
+            if markers[k] in line:
+                matched = k
+                break
+        if matched is None:
+            new_lines.append(line)
+        elif matched in reset_set:
+            print(f"Removed: {matched}")
+        else:
+            new_lines.append(to_lua_line(matched, set_dict[matched]))
+            found_keys.add(matched)
+            print(f"Updated: {to_lua_line(matched, set_dict[matched]).strip()}")
+
+    for k, v in set_dict.items():
+        if k not in found_keys:
+            new_lines.append(to_lua_line(k, v))
+            print(f"Added:   {to_lua_line(k, v).strip()}")
+
+    write_atomic(file_path, "".join(new_lines))
+
+
+def save_preset(anim_file, preset_name):
+    content = ANIM_PRESETS.get(preset_name)
+    if not content:
+        print(f"Unknown preset '{preset_name}'")
         return
-        
-    for key in reset_set:
-        print(f"Removed '{key}' from '{file_path}'")
-    for key, value in set_dict.items():
-        print(f"Updated '{file_path}' with {key} = {value}")
+    write_atomic(anim_file, content)
+    print(f"Wrote preset '{preset_name}' -> {anim_file}")
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Edit a Hyprland config file.")
-    parser.add_argument("--file", default="~/.config/hypr/hyprland.conf", help="Path to the Hyprland config file (default: ~/.config/hypr/hyprland.conf).")
-    
-    parser.add_argument("--set", nargs=2, action="append", metavar=("KEY", "VALUE"), help="Set a configuration key to a value.")
-    parser.add_argument("--reset", action="append", metavar="KEY", help="Remove a configuration key.")
-    
-    args = parser.parse_args()
-    
-    file_path = os.path.expanduser(args.file)
-    
-    raw_set_args = args.set or []
-    reset_args = args.reset or []
-    
-    set_args = []
-    for key, value in raw_set_args:
-        if value == "[[EMPTY]]":
-            reset_args.append(key)
+    p = argparse.ArgumentParser()
+    p.add_argument("--file", default="~/.config/hypr/hyprland/shellOverrides/main.lua")
+    p.add_argument("--set", nargs=2, action="append", metavar=("KEY", "VALUE"))
+    p.add_argument("--reset", action="append", metavar="KEY")
+    p.add_argument("--anim-preset", metavar="PRESET")
+    p.add_argument("--anim-file", default="~/.config/hypr/hyprland/shellOverrides/animations.lua")
+    args = p.parse_args()
+
+    if args.anim_preset:
+        save_preset(os.path.expanduser(args.anim_file), args.anim_preset)
+
+    raw_sets   = args.set or []
+    reset_keys = args.reset or []
+    set_pairs  = []
+    for k, v in raw_sets:
+        if v == "[[EMPTY]]":
+            reset_keys.append(k)
         else:
-            set_args.append((key, value))
-    
-    if not set_args and not reset_args:
-        print("Error: Must specify at least one key to set or reset.")
-    else:
-        edit_hyprland_config(file_path, set_args, reset_args)
-        
+            set_pairs.append((k, v))
+
+    if set_pairs or reset_keys:
+        edit_lua(os.path.expanduser(args.file), set_pairs, reset_keys)
+    elif not args.anim_preset:
+        print("Error: specify --set, --reset, or --anim-preset")

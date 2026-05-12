@@ -38,92 +38,38 @@ ContentPage {
     }
 
     // ── Options ──────────────────────────────────────────────────────────────
-    HyprlandConfigOption { id: rounding;      key: "decoration:rounding" }
-    HyprlandConfigOption { id: blurEnabled;   key: "decoration:blur:enabled" }
-    HyprlandConfigOption { id: blurSize;      key: "decoration:blur:size" }
-    HyprlandConfigOption { id: blurPasses;    key: "decoration:blur:passes" }
-    HyprlandConfigOption { id: shadowEnabled; key: "decoration:shadow:enabled" }
-    HyprlandConfigOption { id: shadowRange;   key: "decoration:shadow:range" }
-    HyprlandConfigOption { id: borderSize;    key: "general:border_size" }
-    HyprlandConfigOption { id: gapsIn;        key: "general:gaps_in" }
-    HyprlandConfigOption { id: gapsOut;       key: "general:gaps_out" }
-    HyprlandConfigOption { id: animEnabled;   key: "animations:enabled" }
-    HyprlandConfigOption { id: activeBorder;  key: "general:col.active_border" }
-    HyprlandConfigOption { id: inactiveBorder;key: "general:col.inactive_border" }
-    HyprlandConfigOption { id: activeOpacity; key: "decoration:active_opacity" }
+    HyprlandConfigOption { id: rounding;        key: "decoration:rounding" }
+    HyprlandConfigOption { id: blurEnabled;     key: "decoration:blur:enabled" }
+    HyprlandConfigOption { id: blurSize;        key: "decoration:blur:size" }
+    HyprlandConfigOption { id: blurPasses;      key: "decoration:blur:passes" }
+    HyprlandConfigOption { id: shadowEnabled;   key: "decoration:shadow:enabled" }
+    HyprlandConfigOption { id: shadowRange;     key: "decoration:shadow:range" }
+    HyprlandConfigOption { id: borderSize;      key: "general:border_size" }
+    HyprlandConfigOption { id: gapsIn;          key: "general:gaps_in" }
+    HyprlandConfigOption { id: gapsOut;         key: "general:gaps_out" }
+    HyprlandConfigOption { id: animEnabled;     key: "animations:enabled" }
+    HyprlandConfigOption { id: activeBorder;    key: "general:col.active_border" }
+    HyprlandConfigOption { id: inactiveBorder;  key: "general:col.inactive_border" }
+    HyprlandConfigOption { id: activeOpacity;   key: "decoration:active_opacity" }
     HyprlandConfigOption { id: inactiveOpacity; key: "decoration:inactive_opacity" }
-    HyprlandConfigOption { id: layout;        key: "general:layout" }
-    HyprlandConfigOption { id: kbLayout;      key: "input:kb_layout" }
-    HyprlandConfigOption { id: numlock;       key: "input:numlock_by_default" }
-    HyprlandConfigOption { id: repeatDelay;   key: "input:repeat_delay" }
-    HyprlandConfigOption { id: repeatRate;    key: "input:repeat_rate" }
-    HyprlandConfigOption { id: followMouse;   key: "input:follow_mouse" }
-    HyprlandConfigOption { id: naturalScroll; key: "input:touchpad:natural_scroll" }
-    HyprlandConfigOption { id: disableTyping; key: "input:touchpad:disable_while_typing" }
-    HyprlandConfigOption { id: scrollFactor;  key: "input:touchpad:scroll_factor" }
-    HyprlandConfigOption { id: clickfinger;   key: "input:touchpad:clickfinger_behavior" }
+    HyprlandConfigOption { id: layout;          key: "general:layout" }
+    HyprlandConfigOption { id: kbLayout;        key: "input:kb_layout" }
+    HyprlandConfigOption { id: numlock;         key: "input:numlock_by_default" }
+    HyprlandConfigOption { id: repeatDelay;     key: "input:repeat_delay" }
+    HyprlandConfigOption { id: repeatRate;      key: "input:repeat_rate" }
+    HyprlandConfigOption { id: followMouse;     key: "input:follow_mouse" }
+    HyprlandConfigOption { id: naturalScroll;   key: "input:touchpad:natural_scroll" }
+    HyprlandConfigOption { id: disableTyping;   key: "input:touchpad:disable_while_typing" }
+    HyprlandConfigOption { id: scrollFactor;    key: "input:touchpad:scroll_factor" }
+    HyprlandConfigOption { id: clickfinger;     key: "input:touchpad:clickfinger_behavior" }
     MonitorConfigOption  { id: monitorConfig }
-
-    // ── Animation presets ────────────────────────────────────────────────────
-    property string presetFast: `animations {
-  bezier = pc_wobble, 0.15, 1.15, 0.35, 1.0
-  bezier = pc_decel, 0.05, 0.9, 0.1, 1.05
-  bezier = pc_accel, 0.3, 0, 0.8, 0.15
-  animation = windowsIn, 1, 5, pc_wobble, slide
-  animation = windowsOut, 1, 5, pc_accel, slide
-  animation = windowsMove, 1, 5, pc_decel, slide
-  animation = fadeIn, 1, 4, default
-  animation = fadeOut, 1, 4, default
-  animation = layersIn, 1, 4, pc_decel, slide
-  animation = layersOut, 1, 4, pc_accel, slide
-  animation = workspaces, 1, 6, pc_decel, slide
-  animation = specialWorkspaceIn, 1, 2, pc_wobble, slidevert
-  animation = specialWorkspaceOut, 1, 2, pc_accel, slidevert
-}`
-
-    property string presetNormal: `animations {
-  bezier = emphasizedDecel, 0.05, 0.7, 0.1, 1
-  bezier = emphasizedAccel, 0.3, 0, 0.8, 0.15
-  bezier = menu_decel, 0.1, 1, 0, 1
-  bezier = menu_accel, 0.52, 0.03, 0.72, 0.08
-  bezier = stall, 1, -0.1, 0.7, 0.85
-  animation = windowsIn, 1, 3, emphasizedDecel, popin 80%
-  animation = fadeIn, 1, 3, emphasizedDecel
-  animation = windowsOut, 1, 2, emphasizedDecel, popin 90%
-  animation = fadeOut, 1, 2, emphasizedDecel
-  animation = windowsMove, 1, 3, emphasizedDecel, slide
-  animation = border, 1, 10, emphasizedDecel
-  animation = layersIn, 1, 2.7, emphasizedDecel, popin 93%
-  animation = layersOut, 1, 2.4, menu_accel, popin 94%
-  animation = fadeLayersIn, 1, 0.5, menu_decel
-  animation = fadeLayersOut, 1, 2.7, stall
-  animation = workspaces, 1, 7, menu_decel, slide
-  animation = specialWorkspaceIn, 1, 2.8, emphasizedDecel, slidevert
-  animation = specialWorkspaceOut, 1, 1.2, emphasizedAccel, slidevert
-}`
-
-    property string presetNiri: `animations {
-  bezier = niri_wobble, 0.15, 1.15, 0.35, 1.0
-  bezier = niri_decel, 0.05, 0.9, 0.1, 1.05
-  bezier = niri_accel, 0.3, 0, 0.8, 0.15
-  animation = windowsIn, 1, 5, niri_wobble, slide
-  animation = windowsOut, 1, 5, niri_accel, slide
-  animation = windowsMove, 1, 5, niri_decel, slide
-  animation = fadeIn, 1, 4, default
-  animation = fadeOut, 1, 4, default
-  animation = layersIn, 1, 4, niri_decel, slide
-  animation = layersOut, 1, 4, niri_accel, slide
-  animation = workspaces, 1, 6, niri_decel, slidevert
-  animation = specialWorkspaceIn, 1, 4, niri_wobble, slidevert
-  animation = specialWorkspaceOut, 1, 4, niri_accel, slidevert
-}`
-
 
     ColumnLayout {
         id: mainLayout 
         Layout.fillWidth: true   
         Layout.fillHeight: true
         spacing: 20
+
         // ── Displays ─────────────────────────────────────────────────────────────
         ContentSection {
             icon: "monitor"
@@ -435,7 +381,7 @@ ContentPage {
 
             AutostartApps {}
         }
-        
+
         // ── Animations ───────────────────────────────────────────────────────────
         ContentSection {
             icon: "animation"
@@ -454,39 +400,28 @@ ContentPage {
 
                 ConfigSelectionArray {
                     currentValue: Config.options.hyprland.animations.animation
-                    
+
                     onSelected: newValue => {
-                        Config.options.hyprland.animations.animation = newValue;
-
-                        const presets = {
-                            "fast":   presetFast,
-                            "normal": presetNormal,
-                            "niri":   presetNiri
-                        };
-                        
-                        const content = presets[newValue] ?? "";
-
-                        if (content !== "") {
-                            saveAnimProc.command = [
-                                "bash", 
-                                "-c", 
-                                "echo '" + content + "' > ~/.config/hypr/hyprland/shellOverrides/animations.conf"
-                            ];
-                            saveAnimProc.running = true;
-                        }
+                        Config.options.hyprland.animations.animation = newValue
+                        saveAnimProc.command = [
+                            "python3",
+                            HyprlandConfig.configuratorScriptPath,
+                            "--anim-preset", newValue
+                        ]
+                        saveAnimProc.running = true
                     }
                     options: [
-                        { displayName: Translation.tr("Elastic"),   icon: "move_selection_right", value: "fast" },
-                        { displayName: Translation.tr("Normal"), icon: "animation", value: "normal" },
-                        { displayName: Translation.tr("Niri Like"),   icon: "mobiledata_arrows", value: "niri" },
+                        { displayName: Translation.tr("Elastic"),   icon: "move_selection_right", value: "fast"   },
+                        { displayName: Translation.tr("Normal"),    icon: "animation",            value: "normal" },
+                        { displayName: Translation.tr("Niri Like"), icon: "mobiledata_arrows",    value: "niri"   },
                     ]
                 }
             }
-            
+
             NoticeBox {
                 Layout.fillWidth: true
                 Layout.topMargin: 15
-                text: Translation.tr("Animation presets require a source line in your hyprland.conf. Add the following line to enable presets:") + "\n\nsource = ~/.config/hypr/hyprland/shellOverrides/animations.conf"
+                text: Translation.tr("Animation presets require a require line in your hyprland.lua. Add the following line to enable presets:") + '\n\nrequire("hyprland/shellOverrides/animations")'
 
                 Item { Layout.fillWidth: true }
 
@@ -499,7 +434,7 @@ ContentPage {
                     mainText: justCopied ? Translation.tr("Copied!") : Translation.tr("Copy line")
                     onClicked: {
                         copySourceButton.justCopied = true
-                        Quickshell.clipboardText = "source = ~/.config/hypr/hyprland/shellOverrides/animations.conf"
+                        Quickshell.clipboardText = 'require("hyprland/shellOverrides/animations")'
                         revertSourceTimer.restart()
                     }
                     colBackground: ColorUtils.transparentize(Appearance.colors.colPrimaryContainer)
@@ -512,7 +447,7 @@ ContentPage {
                     }
                 }
             }
-            
+
             Process {
                 id: saveAnimProc
                 onRunningChanged: if (!running) reloadAnimProc.running = true
