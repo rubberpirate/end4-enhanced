@@ -151,64 +151,69 @@ Item {
         Component {
             id: rowMaterial
             RowLayout {
-                spacing: 2
-                property var timeParts: DateTime.time.split(/[: ]/)
-                property string hours: timeParts[0] ?? "00"
-                property string minutes: timeParts[1] ?? "00"
-                property string ampm: timeParts[2] ?? ""
+                spacing: 4
 
                 Rectangle {
-                    color: Appearance.colors.colPrimary
+                    id: pill
+                    color: Appearance.colors.colPrimaryContainer
                     radius: Appearance.rounding.full
-                    implicitWidth: hoursText.implicitWidth + 34
                     implicitHeight: 30
-                    StyledText {
-                        id: hoursText
+                    implicitWidth: pillRow.implicitWidth + 4 + 4
+
+                    property var timeParts: DateTime.time.split(/[: ]/)
+                    property string hours: timeParts[0] ?? "00"
+                    property string minutes: timeParts[1] ?? "00"
+                    property string ampm: timeParts[2] ?? ""
+
+                    RowLayout {
+                        id: pillRow
                         anchors.centerIn: parent
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colOnPrimary
-                        text: parent.parent.hours.padStart(2, "0")
-                        font.features: { "tnum": 1 }
-                        font.letterSpacing: -0.4
+                        spacing: 6
+
+                        StyledText {
+                            id: hoursText
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colPrimary
+                            text: pill.hours.padStart(2, "0")
+                            font.features: { "tnum": 1 }
+                            font.letterSpacing: -0.4
+                            Layout.alignment: Qt.AlignVCenter
+                            leftPadding: 5
+                        }
+
+                        Rectangle {
+                            width: 24
+                            height: 24
+                            radius: Appearance.rounding.full
+                            color: Appearance.colors.colPrimary
+
+                            StyledText {
+                                id: minutesText
+                                anchors.centerIn: parent
+                                font.pixelSize: Appearance.font.pixelSize.smallie
+                                color: Appearance.colors.colOnPrimary
+                                text: pill.minutes.padStart(2, "0")
+                                font.features: { "tnum": 1 }
+                                font.letterSpacing: -0.4
+                            }
+                        }
                     }
                 }
 
-                StyledText {
-                    text: ":"
-                    color: Appearance.colors.colPrimary
-                    font.pixelSize: Appearance.font.pixelSize.hugeass
-                    Layout.alignment: Qt.AlignVCenter
-                    Layout.topMargin: -6
-                }
-
                 Rectangle {
-                    color: Appearance.colors.colSecondaryContainer
+                    visible: pill.ampm !== ""
+                    implicitWidth: ampmText.implicitWidth + 8
+                    implicitHeight: 24
                     radius: Appearance.rounding.full
-                    implicitWidth: minutesText.implicitWidth + 34
-                    implicitHeight: 30
-                    StyledText {
-                        id: minutesText
-                        anchors.centerIn: parent
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        color: Appearance.colors.colPrimary
-                        text: parent.parent.minutes.padStart(2, "0")
-                        font.features: { "tnum": 1 }
-                        font.letterSpacing: -0.4
-                    }
-                }
-
-                Rectangle {
-                    visible: parent.ampm !== ""
                     color: Appearance.colors.colTertiaryContainer
-                    radius: Appearance.rounding.full
-                    implicitWidth: ampmText.implicitWidth + 12
-                    implicitHeight: 30
+                    Layout.alignment: Qt.AlignVCenter
+
                     StyledText {
                         id: ampmText
                         anchors.centerIn: parent
                         font.pixelSize: Appearance.font.pixelSize.smaller
                         color: Appearance.colors.colPrimary
-                        text: parent.parent.ampm
+                        text: pill.ampm
                     }
                 }
             }
