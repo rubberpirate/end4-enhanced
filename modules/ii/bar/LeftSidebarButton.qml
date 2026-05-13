@@ -63,8 +63,8 @@ Item {
                 anchors.centerIn: parent
                 width: 19.5
                 height: 19.5
-                source: Config.options.bar.topLeftIcon == 'distro' ? SystemInfo.distroIcon : `${Config.options.bar.topLeftIcon}-symbolic`
-                colorize: true
+                source: Config.options.custom.distroIcon
+                colorize: Config.options.custom.colorizeIcon
                 color: Appearance.colors.colPrimary
                 Rectangle {
                     opacity: root.showPing ? 1 : 0
