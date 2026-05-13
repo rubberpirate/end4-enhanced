@@ -22,7 +22,6 @@ ContentPage {
                     return child
                 }
             }
-
             for (let i = 0; i < rootItem.children.length; i++) {
                 let found = findTarget(rootItem.children[i])
                 if (found) return found
@@ -37,40 +36,38 @@ ContentPage {
         }
     }
 
-    // ── Options ──────────────────────────────────────────────────────────────
-    HyprlandConfigOption { id: rounding;        key: "decoration:rounding" }
-    HyprlandConfigOption { id: blurEnabled;     key: "decoration:blur:enabled" }
-    HyprlandConfigOption { id: blurSize;        key: "decoration:blur:size" }
-    HyprlandConfigOption { id: blurPasses;      key: "decoration:blur:passes" }
-    HyprlandConfigOption { id: shadowEnabled;   key: "decoration:shadow:enabled" }
-    HyprlandConfigOption { id: shadowRange;     key: "decoration:shadow:range" }
-    HyprlandConfigOption { id: borderSize;      key: "general:border_size" }
-    HyprlandConfigOption { id: gapsIn;          key: "general:gaps_in" }
-    HyprlandConfigOption { id: gapsOut;         key: "general:gaps_out" }
-    HyprlandConfigOption { id: animEnabled;     key: "animations:enabled" }
-    HyprlandConfigOption { id: activeBorder;    key: "general:col.active_border" }
-    HyprlandConfigOption { id: inactiveBorder;  key: "general:col.inactive_border" }
-    HyprlandConfigOption { id: activeOpacity;   key: "decoration:active_opacity" }
-    HyprlandConfigOption { id: inactiveOpacity; key: "decoration:inactive_opacity" }
-    HyprlandConfigOption { id: layout;          key: "general:layout" }
-    HyprlandConfigOption { id: kbLayout;        key: "input:kb_layout" }
-    HyprlandConfigOption { id: numlock;         key: "input:numlock_by_default" }
-    HyprlandConfigOption { id: repeatDelay;     key: "input:repeat_delay" }
-    HyprlandConfigOption { id: repeatRate;      key: "input:repeat_rate" }
-    HyprlandConfigOption { id: followMouse;     key: "input:follow_mouse" }
-    HyprlandConfigOption { id: naturalScroll;   key: "input:touchpad:natural_scroll" }
-    HyprlandConfigOption { id: disableTyping;   key: "input:touchpad:disable_while_typing" }
-    HyprlandConfigOption { id: scrollFactor;    key: "input:touchpad:scroll_factor" }
-    HyprlandConfigOption { id: clickfinger;     key: "input:touchpad:clickfinger_behavior" }
-    MonitorConfigOption  { id: monitorConfig }
+    Component.onCompleted: {
+        const h = Config.options.hyprland
+        HyprlandConfig.set("decoration:rounding",                   h.decoration.rounding)
+        HyprlandConfig.set("decoration:blur:enabled",               h.decoration.blur.enabled ? 1 : 0)
+        HyprlandConfig.set("decoration:blur:size",                  h.decoration.blur.size)
+        HyprlandConfig.set("decoration:blur:passes",                h.decoration.blur.passes)
+        HyprlandConfig.set("decoration:active_opacity",             h.decoration.activeOpacity)
+        HyprlandConfig.set("decoration:inactive_opacity",           h.decoration.inactiveOpacity)
+        HyprlandConfig.set("general:border_size",                   h.general.borderSize)
+        HyprlandConfig.set("general:gaps_in",                       h.general.gapsIn)
+        HyprlandConfig.set("general:gaps_out",                      h.general.gapsOut)
+        HyprlandConfig.set("general:layout",                        h.general.layout)
+        HyprlandConfig.set("animations:enabled",                    h.animations.enable ? 1 : 0)
+        HyprlandConfig.set("input:kb_layout",                       h.input.kbLayout)
+        HyprlandConfig.set("input:numlock_by_default",              h.input.numlock ? 1 : 0)
+        HyprlandConfig.set("input:repeat_delay",                    h.input.repeatDelay)
+        HyprlandConfig.set("input:repeat_rate",                     h.input.repeatRate)
+        HyprlandConfig.set("input:follow_mouse",                    h.input.followMouse)
+        HyprlandConfig.set("input:touchpad:natural_scroll",         h.input.touchpad.naturalScroll ? 1 : 0)
+        HyprlandConfig.set("input:touchpad:disable_while_typing",   h.input.touchpad.disableWhileTyping ? 1 : 0)
+        HyprlandConfig.set("input:touchpad:clickfinger_behavior",   h.input.touchpad.clickfingerBehavior ? 1 : 0)
+        HyprlandConfig.set("input:touchpad:scroll_factor",          h.input.touchpad.scrollFactor)
+    }
+    MonitorConfigOption { id: monitorConfig }
 
     ColumnLayout {
-        id: mainLayout 
-        Layout.fillWidth: true   
+        id: mainLayout
+        Layout.fillWidth: true
         Layout.fillHeight: true
         spacing: 20
 
-        // ── Displays ─────────────────────────────────────────────────────────────
+        // ── Displays ──────────────────────────────────────────────────────────
         ContentSection {
             icon: "monitor"
             shape: MaterialShape.Shape.ClamShell
@@ -174,7 +171,7 @@ ContentPage {
             }
         }
 
-        // ── Layout ───────────────────────────────────────────────────────────────
+        // ── Layout ────────────────────────────────────────────────────────────
         ContentSection {
             icon: "auto_awesome_mosaic"
             shape: MaterialShape.Shape.Gem
@@ -183,8 +180,11 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Tiling Layout")
                 ConfigSelectionArray {
-                    currentValue: layout.value ?? "dwindle"
-                    onSelected: newValue => HyprlandConfig.set("general:layout", newValue)
+                    currentValue: Config.options.hyprland.general.layout
+                    onSelected: newValue => {
+                        Config.options.hyprland.general.layout = newValue
+                        HyprlandConfig.set("general:layout", newValue)
+                    }
                     options: [
                         { displayName: Translation.tr("Dwindle"),   icon: "browse",             value: "dwindle"   },
                         { displayName: Translation.tr("Master"),    icon: "auto_awesome_mosaic", value: "master"    },
@@ -194,7 +194,7 @@ ContentPage {
             }
         }
 
-        // ── Input ────────────────────────────────────────────────────────────────
+        // ── Input ─────────────────────────────────────────────────────────────
         ContentSection {
             icon: "trackpad_input"
             shape: MaterialShape.Shape.Pentagon
@@ -208,19 +208,15 @@ ContentPage {
                     Layout.fillWidth: true
                     placeholderText: Translation.tr("Keyboard layout (e.g., us, es, latam)")
                     wrapMode: TextEdit.NoWrap
-                    Component.onCompleted: text = kbLayout.value ?? "us"
-                    Connections {
-                        target: kbLayout
-                        function onValueChanged() {
-                            if (kbLayoutTextArea.text !== kbLayout.value)
-                                kbLayoutTextArea.text = kbLayout.value ?? "us"
-                        }
-                    }
+                    Component.onCompleted: text = Config.options.hyprland.input.kbLayout
                     Timer {
                         id: kbLayoutDebounceTimer
                         interval: 1000
                         running: false
-                        onTriggered: HyprlandConfig.set("input:kb_layout", kbLayoutTextArea.text)
+                        onTriggered: {
+                            Config.options.hyprland.input.kbLayout = kbLayoutTextArea.text
+                            HyprlandConfig.set("input:kb_layout", kbLayoutTextArea.text)
+                        }
                     }
                     onTextChanged: kbLayoutDebounceTimer.restart()
                 }
@@ -228,34 +224,46 @@ ContentPage {
                 ConfigSwitch {
                     buttonIcon: "numbers"
                     text: Translation.tr("Numlock by default")
-                    checked: numlock.value ?? true
-                    onCheckedChanged: HyprlandConfig.set("input:numlock_by_default", checked ? 1 : 0)
+                    checked: Config.options.hyprland.input.numlock
+                    onCheckedChanged: {
+                        Config.options.hyprland.input.numlock = checked
+                        HyprlandConfig.set("input:numlock_by_default", checked ? 1 : 0)
+                    }
                 }
 
                 ConfigSpinBox {
                     icon: "keyboard_return"
                     text: Translation.tr("Repeat delay (ms)")
-                    value: repeatDelay.value ?? 250
+                    value: Config.options.hyprland.input.repeatDelay
                     from: 100; to: 1000; stepSize: 10
-                    onValueChanged: HyprlandConfig.set("input:repeat_delay", value)
+                    onValueChanged: {
+                        Config.options.hyprland.input.repeatDelay = value
+                        HyprlandConfig.set("input:repeat_delay", value)
+                    }
                 }
 
                 ConfigSpinBox {
                     icon: "speed"
                     text: Translation.tr("Repeat rate")
-                    value: repeatRate.value ?? 35
+                    value: Config.options.hyprland.input.repeatRate
                     from: 10; to: 100; stepSize: 1
-                    onValueChanged: HyprlandConfig.set("input:repeat_rate", value)
+                    onValueChanged: {
+                        Config.options.hyprland.input.repeatRate = value
+                        HyprlandConfig.set("input:repeat_rate", value)
+                    }
                 }
 
                 ConfigSelectionArray {
-                    currentValue: followMouse.value ?? 1
-                    onSelected: newValue => HyprlandConfig.set("input:follow_mouse", newValue)
+                    currentValue: Config.options.hyprland.input.followMouse
+                    onSelected: newValue => {
+                        Config.options.hyprland.input.followMouse = newValue
+                        HyprlandConfig.set("input:follow_mouse", newValue)
+                    }
                     options: [
-                        { displayName: Translation.tr("Disabled"), icon: "mouse",    value: 0 },
-                        { displayName: Translation.tr("Full"),     icon: "open_with", value: 1 },
-                        { displayName: Translation.tr("Loose"),    icon: "drag_pan",  value: 2 },
-                        { displayName: Translation.tr("Explicit"), icon: "ads_click", value: 3 },
+                        { displayName: Translation.tr("Disabled"), icon: "mouse",     value: 0 },
+                        { displayName: Translation.tr("Full"),     icon: "open_with",  value: 1 },
+                        { displayName: Translation.tr("Loose"),    icon: "drag_pan",   value: 2 },
+                        { displayName: Translation.tr("Explicit"), icon: "ads_click",  value: 3 },
                     ]
                 }
             }
@@ -266,35 +274,47 @@ ContentPage {
                 ConfigSwitch {
                     buttonIcon: "swap_vert"
                     text: Translation.tr("Natural scroll")
-                    checked: naturalScroll.value ?? false
-                    onCheckedChanged: HyprlandConfig.set("input:touchpad:natural_scroll", checked ? 1 : 0)
+                    checked: Config.options.hyprland.input.touchpad.naturalScroll
+                    onCheckedChanged: {
+                        Config.options.hyprland.input.touchpad.naturalScroll = checked
+                        HyprlandConfig.set("input:touchpad:natural_scroll", checked ? 1 : 0)
+                    }
                 }
 
                 ConfigSwitch {
                     buttonIcon: "keyboard_hide"
                     text: Translation.tr("Disable while typing")
-                    checked: disableTyping.value ?? true
-                    onCheckedChanged: HyprlandConfig.set("input:touchpad:disable_while_typing", checked ? 1 : 0)
+                    checked: Config.options.hyprland.input.touchpad.disableWhileTyping
+                    onCheckedChanged: {
+                        Config.options.hyprland.input.touchpad.disableWhileTyping = checked
+                        HyprlandConfig.set("input:touchpad:disable_while_typing", checked ? 1 : 0)
+                    }
                 }
 
                 ConfigSwitch {
                     buttonIcon: "touch_app"
                     text: Translation.tr("Clickfinger behavior")
-                    checked: clickfinger.value ?? false
-                    onCheckedChanged: HyprlandConfig.set("input:touchpad:clickfinger_behavior", checked ? 1 : 0)
+                    checked: Config.options.hyprland.input.touchpad.clickfingerBehavior
+                    onCheckedChanged: {
+                        Config.options.hyprland.input.touchpad.clickfingerBehavior = checked
+                        HyprlandConfig.set("input:touchpad:clickfinger_behavior", checked ? 1 : 0)
+                    }
                 }
 
                 ConfigSpinBox {
                     icon: "swipe"
                     text: Translation.tr("Scroll factor")
-                    value: Math.round((scrollFactor.value ?? 0.7) * 10)
+                    value: Math.round(Config.options.hyprland.input.touchpad.scrollFactor * 10)
                     from: 1; to: 30; stepSize: 1
-                    onValueChanged: HyprlandConfig.set("input:touchpad:scroll_factor", value / 10.0)
+                    onValueChanged: {
+                        Config.options.hyprland.input.touchpad.scrollFactor = value / 10.0
+                        HyprlandConfig.set("input:touchpad:scroll_factor", value / 10.0)
+                    }
                 }
             }
         }
 
-        // ── Visual & Aesthetics ──────────────────────────────────────────────────
+        // ── Visual & Aesthetics ───────────────────────────────────────────────
         ContentSection {
             icon: "deblur"
             shape: MaterialShape.Shape.PixelCircle
@@ -303,76 +323,103 @@ ContentPage {
             ConfigSpinBox {
                 icon: "rounded_corner"
                 text: Translation.tr("Window Rounding")
-                value: rounding.value ?? 22
+                value: Config.options.hyprland.decoration.rounding
                 from: 0; to: 30; stepSize: 1
-                onValueChanged: HyprlandConfig.set("decoration:rounding", value)
+                onValueChanged: {
+                    Config.options.hyprland.decoration.rounding = value
+                    HyprlandConfig.set("decoration:rounding", value)
+                }
             }
 
             ConfigSwitch {
                 buttonIcon: "blur_on"
                 text: Translation.tr("Blur")
-                checked: blurEnabled.value ?? true
-                onCheckedChanged: HyprlandConfig.set("decoration:blur:enabled", checked ? 1 : 0)
+                checked: Config.options.hyprland.decoration.blur.enabled
+                onCheckedChanged: {
+                    Config.options.hyprland.decoration.blur.enabled = checked
+                    HyprlandConfig.set("decoration:blur:enabled", checked ? 1 : 0)
+                }
             }
 
             ConfigSpinBox {
                 icon: "blur_circular"
                 text: Translation.tr("Blur Size")
-                value: blurSize.value ?? 1
+                value: Config.options.hyprland.decoration.blur.size
                 from: 1; to: 20; stepSize: 1
-                onValueChanged: HyprlandConfig.set("decoration:blur:size", value)
+                onValueChanged: {
+                    Config.options.hyprland.decoration.blur.size = value
+                    HyprlandConfig.set("decoration:blur:size", value)
+                }
             }
 
             ConfigSpinBox {
                 icon: "layers"
                 text: Translation.tr("Blur Passes")
-                value: blurPasses.value ?? 3
+                value: Config.options.hyprland.decoration.blur.passes
                 from: 1; to: 6; stepSize: 1
-                onValueChanged: HyprlandConfig.set("decoration:blur:passes", value)
+                onValueChanged: {
+                    Config.options.hyprland.decoration.blur.passes = value
+                    HyprlandConfig.set("decoration:blur:passes", value)
+                }
             }
 
             ConfigSpinBox {
                 icon: "border_outer"
                 text: Translation.tr("Border Size")
-                value: borderSize.value ?? 1
+                value: Config.options.hyprland.general.borderSize
                 from: 0; to: 10; stepSize: 1
-                onValueChanged: HyprlandConfig.set("general:border_size", value)
+                onValueChanged: {
+                    Config.options.hyprland.general.borderSize = value
+                    HyprlandConfig.set("general:border_size", value)
+                }
             }
 
             ConfigSpinBox {
                 icon: "margin"
                 text: Translation.tr("Gaps In")
-                value: gapsIn.value ?? 2
+                value: Config.options.hyprland.general.gapsIn
                 from: 0; to: 40; stepSize: 1
-                onValueChanged: HyprlandConfig.set("general:gaps_in", value)
+                onValueChanged: {
+                    Config.options.hyprland.general.gapsIn = value
+                    HyprlandConfig.set("general:gaps_in", value)
+                }
             }
 
             ConfigSpinBox {
                 icon: "open_in_full"
                 text: Translation.tr("Gaps Out")
-                value: gapsOut.value ?? 5
+                value: Config.options.hyprland.general.gapsOut
                 from: 0; to: 60; stepSize: 1
-                onValueChanged: HyprlandConfig.set("general:gaps_out", value)
+                onValueChanged: {
+                    Config.options.hyprland.general.gapsOut = value
+                    HyprlandConfig.set("general:gaps_out", value)
+                }
             }
 
             ConfigSpinBox {
                 icon: "opacity"
                 text: Translation.tr("Active Opacity")
-                value: Math.round((activeOpacity.value ?? 1.0) * 100)
+                value: Math.round(Config.options.hyprland.decoration.activeOpacity * 100)
                 from: 10; to: 100; stepSize: 5
-                onValueChanged: HyprlandConfig.set("decoration:active_opacity", value / 100.0)
+                onValueChanged: {
+                    Config.options.hyprland.decoration.activeOpacity = value / 100.0
+                    HyprlandConfig.set("decoration:active_opacity", value / 100.0)
+                }
             }
 
             ConfigSpinBox {
                 icon: "opacity"
                 text: Translation.tr("Inactive Opacity")
-                value: Math.round((inactiveOpacity.value ?? 0.9) * 100)
+                value: Math.round(Config.options.hyprland.decoration.inactiveOpacity * 100)
                 from: 10; to: 100; stepSize: 5
-                onValueChanged: HyprlandConfig.set("decoration:inactive_opacity", value / 100.0)
+                onValueChanged: {
+                    Config.options.hyprland.decoration.inactiveOpacity = value / 100.0
+                    HyprlandConfig.set("decoration:inactive_opacity", value / 100.0)
+                }
             }
         }
 
-        // ── Autostart Apps ───────────────────────────────────────────────────────────
+        // ── Autostart Apps ────────────────────────────────────────────────────
         ContentSection {
             icon: "app_registration"
             shape: MaterialShape.Shape.Sunny
@@ -382,7 +429,7 @@ ContentPage {
             AutostartApps {}
         }
 
-        // ── Animations ───────────────────────────────────────────────────────────
+        // ── Animations ────────────────────────────────────────────────────────
         ContentSection {
             icon: "animation"
             shape: MaterialShape.Shape.Oval
@@ -391,8 +438,11 @@ ContentPage {
             ConfigSwitch {
                 buttonIcon: "check"
                 text: Translation.tr("Enable Animations")
-                checked: animEnabled.value ?? true
-                onCheckedChanged: HyprlandConfig.set("animations:enabled", checked ? 1 : 0)
+                checked: Config.options.hyprland.animations.enable
+                onCheckedChanged: {
+                    Config.options.hyprland.animations.enable = checked
+                    HyprlandConfig.set("animations:enabled", checked ? 1 : 0)
+                }
             }
 
             ContentSubsection {
@@ -400,7 +450,6 @@ ContentPage {
 
                 ConfigSelectionArray {
                     currentValue: Config.options.hyprland.animations.animation
-
                     onSelected: newValue => {
                         Config.options.hyprland.animations.animation = newValue
                         saveAnimProc.command = [
