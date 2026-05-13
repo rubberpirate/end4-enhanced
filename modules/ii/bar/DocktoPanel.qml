@@ -70,7 +70,7 @@ Item {
         implicitHeight: root.isMaterial && root.vertical
             ? flow.implicitHeight + 10
             : root.isMaterial
-                ? 30
+                ? 32
                 : root.vertical
                     ? flow.implicitHeight + 4
                     : Appearance.sizes.barHeight
