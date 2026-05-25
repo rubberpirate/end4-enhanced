@@ -141,6 +141,7 @@ ContentPage {
                     }
                     RippleButtonWithIcon {
                         enabled: !randomWallProc.running
+                        visible: Config.options.policies.weeb === 1
                         Layout.fillWidth: true
                         buttonRadius: Appearance.rounding.small
                         materialIcon: "ifl"
@@ -151,6 +152,7 @@ ContentPage {
                         }
                     }
                     RippleButtonWithIcon {
+                        visible: Config.options.policies.weeb === 1
                         enabled: !randomWallProc.running
                         Layout.fillWidth: true
                         buttonRadius: Appearance.rounding.small
