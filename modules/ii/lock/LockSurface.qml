@@ -255,7 +255,7 @@ MouseArea {
             Layout.rightMargin: 2
             Layout.alignment: Qt.AlignVCenter
             active: MprisController.activePlayer !== null
-            visible: active
+            visible: active && Config.options.lock.showMedia
             
             sourceComponent: Item {
                 implicitWidth: mediaRow.implicitWidth

@@ -265,6 +265,15 @@ ContentPage {
                 }
             }
 
+            ConfigSwitch {
+                buttonIcon: "music_note"
+                text: Translation.tr('Show media player info')
+                checked: Config.options.lock.showMedia
+                onCheckedChanged: {
+                    Config.options.lock.showMedia = checked;
+                }
+            }
+
             ContentSubsection {
                 title: Translation.tr("Security")
 
