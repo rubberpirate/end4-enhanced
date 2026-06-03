@@ -314,19 +314,36 @@ ContentPage {
                 onValueChanged: { Config.options.bar.workspaces.shown = value; }
             }
         }
+        
+        ConfigRow {
 
-        ContentSubsection {
-            title: Translation.tr("Number style")
-            ConfigSelectionArray {
-                currentValue: JSON.stringify(Config.options.bar.workspaces.numberMap)
-                onSelected: newValue => {
-                    Config.options.bar.workspaces.numberMap = JSON.parse(newValue)
+            ContentSubsection {
+                title: Translation.tr("Number style")
+                ConfigSelectionArray {
+                    currentValue: JSON.stringify(Config.options.bar.workspaces.numberMap)
+                    onSelected: newValue => {
+                        Config.options.bar.workspaces.numberMap = JSON.parse(newValue)
+                    }
+                    options: [
+                        { displayName: Translation.tr("Normal"),    icon: "timer_10",        value: '[]' },
+                        { displayName: Translation.tr("Han chars"), icon: "glyphs",          value: '["一","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十"]' },
+                        { displayName: Translation.tr("Roman"),     icon: "account_balance", value: '["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"]' }
+                    ]
                 }
-                options: [
-                    { displayName: Translation.tr("Normal"),    icon: "timer_10",        value: '[]' },
-                    { displayName: Translation.tr("Han chars"), icon: "glyphs",          value: '["一","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十"]' },
-                    { displayName: Translation.tr("Roman"),     icon: "account_balance", value: '["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"]' }
-                ]
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Indicator style")
+                ConfigSelectionArray {
+                    currentValue: Config.options.bar.workspaces.indicatorStyle ?? "icon"
+                    onSelected: newValue => {
+                        Config.options.bar.workspaces.indicatorStyle = newValue
+                    }
+                    options: [
+                        { displayName: Translation.tr("Dots"),  icon: "radio_button_checked",   value: "dot" },
+                        { displayName: Translation.tr("Icons"), icon: "interests",              value: "icon" },
+                    ]
+                }
             }
         }
 

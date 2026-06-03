@@ -235,36 +235,58 @@ Item {
                             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                         }
                     }
-                    MaterialSymbol {
+                    Loader {
                         id: wsDot
+                        anchors.centerIn: parent
                         opacity: (Config.options?.bar.workspaces.alwaysShowNumbers
                             || root.showNumbers
                             || (Config.options?.bar.workspaces.showAppIcons && workspaceButtonBackground.biggestWindow)
                         ) ? 0 : 1
                         visible: opacity > 0
-                        anchors.centerIn: parent
-                        iconSize: workspaceButtonWidth * 0.55
-                        color: (root.effectiveActiveWorkspaceId == button.workspaceValue) ?
+
+                        property color wsColor: (root.effectiveActiveWorkspaceId == button.workspaceValue) ?
                             Appearance.m3colors.m3onPrimary :
                             (workspaceOccupied[index] ? Appearance.m3colors.m3onSecondaryContainer :
                                 Appearance.colors.colOnLayer1Inactive)
-                        text: {
-                            switch (button.workspaceValue) {
-                                case 1:  return "code"
-                                case 2:  return "public"
-                                case 3:  return "music_note"
-                                case 4:  return "edit_square"
-                                case 5:  return "image"
-                                case 6:  return "forum"
-                                case 7:  return "browser_updated"
-                                case 8:  return "finance_mode"
-                                case 9:  return "monitor"
-                                case 10: return "analytics"
-                                default: return "circle"
-                            }
-                        }
+
+                        sourceComponent: (Config.options?.bar.workspaces.indicatorStyle ?? "icon") === "dot"
+                            ? dotComponent : iconComponent
+
                         Behavior on opacity {
                             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                        }
+                    }
+
+                    Component {
+                        id: dotComponent
+                        Rectangle {
+                            width: workspaceButtonWidth * 0.18
+                            height: width
+                            radius: width / 2
+                            color: wsDot.wsColor
+                        }
+                    }
+
+                    Component {
+                        id: iconComponent
+                        MaterialSymbol {
+                            iconSize: workspaceButtonWidth * 0.55
+                            color: wsDot.wsColor
+                            text: {
+                                switch (button.workspaceValue) {
+                                    case 1:  return "code"
+                                    case 2:  return "public"
+                                    case 3:  return "music_note"
+                                    case 4:  return "edit_square"
+                                    case 5:  return "image"
+                                    case 6:  return "forum"
+                                    case 7:  return "browser_updated"
+                                    case 8:  return "finance_mode"
+                                    case 9:  return "monitor"
+                                    case 10: return "analytics"
+                                    default: return "circle"
+                                }
+                            }
                         }
                     }
                     Item { // Main app icon
@@ -321,12 +343,7 @@ Item {
                         }
                     }
                 }
-                
-
             }
-
         }
-
     }
-
 }
