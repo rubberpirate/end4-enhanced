@@ -669,6 +669,8 @@ Singleton {
                 property bool useSystemFileDialog: false
                 property bool showBlurBackground: false
                 property bool showHomePath: true
+                property string userPath: "" // This can be set to any path and it will show up as a quick access in the wallpaper selector"
+                property bool showSearchbar: true
                 property int columns: 4
                 property bool closeAfterSelection: true
                 property int changeInterval: 0 

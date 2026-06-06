@@ -625,6 +625,35 @@ ContentPage {
                 }
             }
 
+            ConfigSwitch {
+                buttonIcon: "search"
+                text: Translation.tr('Show search bar')
+                checked: Config.options.wallpaperSelector.showSearchbar
+                onCheckedChanged: {
+                    Config.options.wallpaperSelector.showSearchbar = checked;
+                }
+            }
+
+            MaterialTextArea {
+                id: userPathTextArea
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Custom wallpaper folder path (e.g., /home/user/Pictures)")
+                text: Config.options.wallpaperSelector.userPath ?? ""
+                wrapMode: TextEdit.NoWrap
+
+                Timer {
+                    id: userPathDebounceTimer
+                    interval: 1000
+                    running: false
+                    onTriggered: {
+                        Config.options.wallpaperSelector.userPath = userPathTextArea.text
+                    }
+                }
+
+                onTextChanged: {
+                    userPathDebounceTimer.restart()
+                }
+            }
         }
 
         ContentSection {

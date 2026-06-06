@@ -11,7 +11,7 @@ import Quickshell.Io
 Item {
     id: root
 
-    property string provider: "wallhaven"  // "wallhaven" | "unsplash"
+    property string provider: "wallhaven"
     property string resolution: "1080p"
     property int columns: Config.options.wallpaperSelector.columns || 4
     property real previewCellAspectRatio: 4 / 3
@@ -30,10 +30,35 @@ Item {
     onResolutionChanged: _syncAndFetch()
 
     function _syncAndFetch() {
-        if (root.missingKey) return;
-        OnlineWallpapers.provider   = root.provider;
-        OnlineWallpapers.resolution = root.resolution;
-        OnlineWallpapers.fetch();
+        if (root.missingKey) return
+        OnlineWallpapers.provider   = root.provider
+        OnlineWallpapers.resolution = root.resolution
+        OnlineWallpapers.fetch()
+    }
+
+    function moveSelection(delta) {
+        grid.currentIndex = Math.max(0, Math.min(wallpaperModel.count - 1, grid.currentIndex + delta))
+        grid.positionViewAtIndex(grid.currentIndex, GridView.Contain)
+    }
+
+    function activateCurrent() {
+        const item = wallpaperModel.get(grid.currentIndex)
+        if (!item) return
+        const url = item.full
+        const urlLower = url.toLowerCase().split("?")[0]
+        const ext = urlLower.includes(".png") ? "png"
+            : urlLower.includes(".webp") ? "webp"
+            : urlLower.includes(".jpeg") ? "jpg"
+            : "jpg"
+        const fileName = `${item.provider}-${item.id}.${ext}`
+        const picturesPath = Directories.pictures.toString().replace("file://", "")
+        const fullPath = `${picturesPath}/Wallpapers/${fileName}`
+        downloadProc.filePath = fullPath
+        downloadProc.applyAfter = true
+        downloadProc.command = ["bash", "-c",
+            `mkdir -p '${picturesPath}/Wallpapers' && curl -L --silent '${item.full}' -o '${fullPath}'`
+        ]
+        downloadProc.running = true
     }
 
     Component.onCompleted: _syncAndFetch()
@@ -43,18 +68,17 @@ Item {
     Connections {
         target: OnlineWallpapers
         function onFetched() {
-            wallpaperModel.clear();
-            root.hoveredItem = null;
+            wallpaperModel.clear()
+            root.hoveredItem = null
             for (const item of OnlineWallpapers.results) {
-                wallpaperModel.append(item);
+                wallpaperModel.append(item)
             }
         }
         function onFetchError(message) {
-            console.log("[OnlineWallpaperGrid] Error:", message);
+            console.log("[OnlineWallpaperGrid] Error:", message)
         }
     }
 
-    // ─── Download proc ───
     Process {
         id: downloadProc
         property string filePath: ""
@@ -66,24 +90,22 @@ Item {
 
         onExited: (exitCode) => {
             if (exitCode === 0) {
-                if (applyAfter) {
-                    root.wallpaperSelected(filePath)
-                }
+                if (applyAfter) root.wallpaperSelected(filePath)
                 Wallpapers.setDirectory(Wallpapers.effectiveDirectory)
                 Qt.callLater(() => root.updateThumbnailsRequested())
                 Quickshell.execDetached(["notify-send",
                     applyAfter ? Translation.tr("Wallpaper applied") : Translation.tr("Download complete"),
                     filePath, "-a", "Shell"
-                ]);
+                ])
             } else {
                 Quickshell.execDetached(["notify-send",
                     Translation.tr("Download failed"), filePath, "-a", "Shell"
-                ]);
+                ])
             }
         }
     }
 
-    // ─── Request API key (Unsplash only) ───
+    // Missing key
     Item {
         anchors.fill: parent
         visible: root.missingKey
@@ -132,7 +154,7 @@ Item {
         }
     }
 
-    // ─── Loading ───
+    // Loading
     StyledIndeterminateProgressBar {
         visible: OnlineWallpapers.loading
         anchors {
@@ -144,16 +166,16 @@ Item {
         }
     }
 
-    // ─── Grid online ───
+    // Grid online
     Item {
         id: gridContainer
         anchors.fill: parent
         visible: !root.missingKey
 
-        // ─── Unsplash header ───
+        // Unsplash header
         Item {
             id: unsplashHeader
-            visible: root.provider === "unsplash" 
+            visible: root.provider === "unsplash"
             height: visible ? headerLayout.implicitHeight + 20 : 0
             anchors {
                 top: parent.top
@@ -175,7 +197,6 @@ Item {
                     font.letterSpacing: 4
                     color: Appearance.colors.colSubtext
                 }
-
                 StyledText {
                     text: root.hoveredItem?.title ?? ""
                     font.pixelSize: Appearance.font.pixelSize.larger
@@ -183,7 +204,6 @@ Item {
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                 }
-
                 RowLayout {
                     spacing: 6
                     StyledText {
@@ -204,9 +224,7 @@ Item {
                         color: Appearance.colors.colSubtext
                     }
                     StyledText {
-                        text: root.hoveredItem
-                            ? "♥ " + root.hoveredItem.likes
-                            : ""
+                        text: root.hoveredItem ? "♥ " + root.hoveredItem.likes : ""
                         font.pixelSize: Appearance.font.pixelSize.small
                         color: Appearance.colors.colSubtext
                     }
@@ -214,7 +232,6 @@ Item {
             }
         }
 
-        // ─── Grid ───
         GridView {
             id: grid
             anchors {
@@ -264,7 +281,7 @@ Item {
                     Rectangle {
                         anchors.fill: parent
                         radius: Appearance.rounding.normal
-                        color: (delegateItem.index === grid.currentIndex)
+                        color: delegateItem.index === grid.currentIndex
                             ? Qt.rgba(
                                 Appearance.colors.colPrimary.r,
                                 Appearance.colors.colPrimary.g,
@@ -295,25 +312,24 @@ Item {
                     onEntered: {
                         grid.currentIndex = delegateItem.index
                         root.hoveredItem = delegateItem.model
+                        root.forceActiveFocus()
                     }
                     onClicked: event => {
-                    const url = delegateItem.model.full;
-                    const urlLower = url.toLowerCase().split("?")[0];
-                    const ext = urlLower.includes(".png") ? "png"
+                        const url = delegateItem.model.full
+                        const urlLower = url.toLowerCase().split("?")[0]
+                        const ext = urlLower.includes(".png") ? "png"
                             : urlLower.includes(".webp") ? "webp"
                             : urlLower.includes(".jpeg") ? "jpg"
-                            : "jpg";
-                        const fileName = `${delegateItem.model.provider}-${delegateItem.model.id}.${ext}`;
-                        const picturesPath = Directories.pictures.toString().replace("file://", "");
-                        const fullPath = `${picturesPath}/Wallpapers/${fileName}`;
-                        console.log("[download] starting:", fullPath, "from:", delegateItem.model.full)
-
-                        downloadProc.filePath = fullPath;
-                        downloadProc.applyAfter = event.button === Qt.LeftButton;
+                            : "jpg"
+                        const fileName = `${delegateItem.model.provider}-${delegateItem.model.id}.${ext}`
+                        const picturesPath = Directories.pictures.toString().replace("file://", "")
+                        const fullPath = `${picturesPath}/Wallpapers/${fileName}`
+                        downloadProc.filePath = fullPath
+                        downloadProc.applyAfter = event.button === Qt.LeftButton
                         downloadProc.command = ["bash", "-c",
                             `mkdir -p '${picturesPath}/Wallpapers' && curl -L --silent '${delegateItem.model.full}' -o '${fullPath}'`
-                        ];
-                        downloadProc.running = true;
+                        ]
+                        downloadProc.running = true
                     }
                 }
             }
@@ -328,7 +344,7 @@ Item {
             }
         }
 
-        // ─── Empty state ───
+        // Empty state
         ColumnLayout {
             anchors.centerIn: parent
             visible: wallpaperModel.count === 0 && !OnlineWallpapers.loading

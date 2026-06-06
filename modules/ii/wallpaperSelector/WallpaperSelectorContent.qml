@@ -18,12 +18,21 @@ MouseArea {
     property bool showControls: false
     property string source: "local"
     property string selectedResolution: "1080p"
+    property bool toolbarVisible: showControls || Config.options.wallpaperSelector.showSearchbar
 
     property var quickDirs: [
         { icon: "home",       name: "Home   ",       path: `${Directories.home}`,                alwaysVisible: Config.options.wallpaperSelector.showHomePath },
         { icon: "wallpaper",  name: "Wallpapers   ", path: `${Directories.pictures}/Wallpapers`, alwaysVisible: true },
-        { icon: "imagesmode", name: "Homework   ",   path: `${Directories.pictures}/homework`,   alwaysVisible: true },
+        { icon: "imagesmode", name: "Homework   ",   path: `${Directories.pictures}/homework`,   alwaysVisible: Config.options.policies.weeb },
         { icon: "casino",     name: "Random   ",     path: `${Directories.pictures}/Random`,     alwaysVisible: true },
+        { 
+            icon: "image",     
+            name: Config.options.wallpaperSelector.userPath?.trim().length > 0 
+                ? Config.options.wallpaperSelector.userPath.split("/").filter(s => s.length > 0).pop() + "   "
+                : "Custom   ",
+            path: Config.options.wallpaperSelector.userPath, 
+            alwaysVisible: Config.options.wallpaperSelector.userPath?.trim().length > 0 
+        }
     ]
 
     function updateThumbnails() {
@@ -223,6 +232,7 @@ MouseArea {
                         textRole: "displayName"
                         onCurrentIndexChanged: {
                             root.source = model[currentIndex].value
+                            root.forceActiveFocus()
                         }
                     }
 
@@ -307,14 +317,21 @@ MouseArea {
                         implicitWidth: 36
                         implicitHeight: 36
                         buttonRadius: height / 2
-                        toggled: showControls
+                        toggled: root.toolbarVisible
                         colBackground: Appearance.colors.colSecondaryContainer
-                        onClicked: showControls = !showControls
+                        onClicked: {
+                            if (Config.options.wallpaperSelector.showSearchbar) {
+                                Config.options.wallpaperSelector.showSearchbar = false
+                                showControls = false
+                            } else {
+                                showControls = !showControls
+                            }
+                        }
                         contentItem: MaterialSymbol {
                             anchors.centerIn: parent
                             text: "search"
                             iconSize: Appearance.font.pixelSize.larger
-                            color: showControls
+                            color: root.toolbarVisible
                                 ? Appearance.colors.colOnPrimary
                                 : Appearance.colors.colOnSecondaryContainer
                         }
@@ -364,10 +381,10 @@ MouseArea {
                             bottomMargin: 8
                         }
                         spacing: 6
-                        z: showControls ? 2 : -1
-                        opacity: showControls ? 1 : 0
+                        z: root.toolbarVisible ? 2 : -1
+                        opacity: root.toolbarVisible ? 1 : 0
                         transform: Translate {
-                            y: showControls ? 0 : 20
+                            y: root.toolbarVisible ? 0 : 20
                             Behavior on y {
                                 NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
                             }
@@ -517,7 +534,10 @@ MouseArea {
         target: GlobalStates
         function onWallpaperSelectorOpenChanged() {
             if (GlobalStates.wallpaperSelectorOpen && monitorIsFocused) {
-                filterField.forceActiveFocus();
+                if (root.source === "local")
+                    filterField.forceActiveFocus()
+                else
+                    root.forceActiveFocus()
             }
         }
     }
