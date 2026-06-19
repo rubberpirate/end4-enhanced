@@ -54,13 +54,15 @@ Singleton {
             : "0%"
         temp.humidity = (data?.main?.humidity || 0) + "%"
 
-        temp.sunrise = data?.sys?.sunrise
-            ? new Date(data.sys.sunrise * 1000).toLocaleTimeString()
-            : "0"
+        const fmt = (unix) => new Date(unix * 1000).toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+        })
 
-        temp.sunset = data?.sys?.sunset
-            ? new Date(data.sys.sunset * 1000).toLocaleTimeString()
-            : "0"
+        temp.sunrise = data?.sys?.sunrise ? fmt(data.sys.sunrise) : "0"
+        temp.sunset  = data?.sys?.sunset  ? fmt(data.sys.sunset)  : "0"
 
         temp.windDir = data?.wind?.deg || 0
         temp.wCode = data?.weather?.[0]?.id || 0
