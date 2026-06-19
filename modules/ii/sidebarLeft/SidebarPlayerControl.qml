@@ -82,16 +82,6 @@ Item {
         color: Appearance.colors.colLayer2
         radius: Appearance.rounding.normal
 
-        WaveVisualizer {
-            id: visualizerCanvas
-            anchors.fill: parent
-            live: root.player?.isPlaying ?? false  
-            points: root.visualizerPoints
-            maxVisualizerValue: root.maxVisualizerValue
-            smoothing: root.visualizerSmoothing
-            color: blendedColors.colPrimary
-        }
-
         ColumnLayout {
             anchors.fill: parent
             anchors.margins: parent.height * 0.04
