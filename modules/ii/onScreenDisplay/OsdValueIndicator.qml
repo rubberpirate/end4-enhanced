@@ -13,17 +13,13 @@ Item {
     property bool scaleIcon: false
     property alias from: valueProgressBar.from
     property alias to: valueProgressBar.to
-
     property real valueIndicatorVerticalPadding: 9
     property real valueIndicatorLeftPadding: 10
     property real valueIndicatorRightPadding: 20 // An icon is circle ish, a column isn't, hence the extra padding
 
-    implicitWidth: Appearance.sizes.osdWidth + 2 * Appearance.sizes.elevationMargin
+    implicitWidth: Appearance.sizes.osdWidth + 4 * Appearance.sizes.elevationMargin
     implicitHeight: valueIndicator.implicitHeight + 2 * Appearance.sizes.elevationMargin
 
-    StyledRectangularShadow {
-        target: valueIndicator
-    }
     Rectangle {
         id: valueIndicator
         anchors {
@@ -31,35 +27,37 @@ Item {
             margins: Appearance.sizes.elevationMargin
         }
         radius: Appearance.rounding.full
-        color: Appearance.colors.colLayer0
-
+        color: "transparent"
         implicitWidth: valueRow.implicitWidth
         implicitHeight: valueRow.implicitHeight
 
-        RowLayout { // Icon on the left, stuff on the right
+        RowLayout { 
             id: valueRow
             Layout.margins: 10
             anchors.fill: parent
             spacing: 10
 
-            Item {
-                implicitWidth: 30
-                implicitHeight: 30
+            StyledSlider {
+                id: valueProgressBar
+                Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
-                Layout.leftMargin: valueIndicatorLeftPadding
-                Layout.topMargin: valueIndicatorVerticalPadding
-                Layout.bottomMargin: valueIndicatorVerticalPadding
+                Layout.rightMargin: root.valueIndicatorRightPadding
+                Layout.leftMargin: root.valueIndicatorLeftPadding
+                configuration: StyledSlider.Configuration.M
+                stopIndicatorValues: []
+                value: root.value
 
-                MaterialSymbol { // Icon
+               MaterialSymbol {
+                    property bool handlePassed: valueProgressBar.value >= 0.15
                     anchors {
-                        centerIn: parent
-                        alignWhenCentered: !root.rotateIcon
+                        verticalCenter: valueProgressBar.verticalCenter
+                        left: handlePassed ? valueProgressBar.left : valueProgressBar.handle.left
+                        leftMargin: 5
                     }
-                    color: Appearance.colors.colOnLayer0
+                    color: handlePassed ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer0
                     renderType: Text.QtRendering
-
                     text: root.icon
-                    iconSize: 20 + 10 * (root.scaleIcon ? value : 1)
+                    iconSize: 25
                     rotation: 180 * (root.rotateIcon ? value : 0)
 
                     Behavior on iconSize {
@@ -68,39 +66,31 @@ Item {
                     Behavior on rotation {
                         animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
                     }
-                
-                }
-            }
-            ColumnLayout { // Stuff
-                Layout.alignment: Qt.AlignVCenter
-                Layout.rightMargin: valueIndicatorRightPadding
-                spacing: 5
-
-                RowLayout { // Name fill left, value on the right end
-                    Layout.leftMargin: valueProgressBar.height / 2 // Align text with progressbar radius curve's left end
-                    Layout.rightMargin: valueProgressBar.height / 2 // Align text with progressbar radius curve's left end
-
-                    StyledText {
-                        color: Appearance.colors.colOnLayer0
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        Layout.fillWidth: true
-                        text: root.name
-                    }
-
-                    StyledText {
-                        color: Appearance.colors.colOnLayer0
-                        font.pixelSize: Appearance.font.pixelSize.small
-                        Layout.fillWidth: false
-                        font.features: { "tnum": 1 }
-                        font.letterSpacing: -0.4
-                        text: Math.round(root.value * 100)
+                    Behavior on anchors.leftMargin {
+                        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                     }
                 }
-                
-                StyledProgressBar {
-                    id: valueProgressBar
-                    Layout.fillWidth: true
-                    value: root.value
+
+                StyledText { 
+                    id: valueText
+                    property bool nearFull: valueProgressBar.value >= 0.85
+                    anchors {
+                        verticalCenter: valueProgressBar.verticalCenter
+                        right: nearFull ? valueProgressBar.handle.right : valueProgressBar.right
+                        rightMargin: nearFull ? 14 : 10
+                    }
+                    color: nearFull ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer0
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    font.features: { "tnum": 1 }
+                    font.letterSpacing: 0.2
+                    text: Math.round(root.value * 100)
+
+                    Behavior on color {
+                        animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+                    }
+                    Behavior on anchors.rightMargin {
+                        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                    }
                 }
             }
         }
