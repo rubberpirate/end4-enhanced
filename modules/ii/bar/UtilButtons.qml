@@ -35,11 +35,17 @@ Item {
             Loader {
                 active: Config.options.bar.utilButtons.showScreenSnip
                 visible: active
-                sourceComponent: isMaterial ? utilButtonM3.createObject(this, {
-                    iconText: "screenshot_region",
-                    onClicked: () => Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "region", "screenshot"])
-                }) : legacyScreenSnip
+                sourceComponent: isMaterial ? screenSnipM3 : legacyScreenSnip
             }
+
+            Component {
+                id: screenSnipM3
+                UtilButton {
+                    iconText: "screenshot_region"
+                    onClicked: Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "region", "screenshot"])
+                }
+            }
+
             Component {
                 id: legacyScreenSnip
                 CircleUtilButton {

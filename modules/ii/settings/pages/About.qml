@@ -201,7 +201,8 @@ ContentPage {
 
                         IconImage {
                             anchors.centerIn: parent
-                            implicitSize: 240
+                            implicitWidth: 240
+                            implicitHeight: 240
                             source: Quickshell.iconPath(SystemInfo.logo)
                         }
                     }

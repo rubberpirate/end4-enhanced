@@ -209,7 +209,7 @@ Item {
                                 StyledText {
                                     text: (Quickshell.env("USER") ?? "user") + "@" + hostname
                                     font.pixelSize: Appearance.font.pixelSize.small
-                                    font.weight: Font.SemiBold
+                                    font.weight: Font.DemiBold
                                     color: Appearance.colors.colOnLayer1
                                 }
 
@@ -316,7 +316,6 @@ Item {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillHeight: false
                 Layout.fillWidth: true
-                Layout.preferredHeight: implicitHeight
             }
         }
     }

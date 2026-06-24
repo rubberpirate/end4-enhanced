@@ -76,16 +76,10 @@ Item {
                     : Appearance.sizes.barHeight
 
         Behavior on implicitWidth {
-            NumberAnimation {
-                duration: Appearance.animation.elementMoveFast.duration
-                easing.type: Appearance.animation.elementMoveFast.easing
-            }
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
         }
         Behavior on implicitHeight {
-            NumberAnimation {
-                duration: Appearance.animation.elementMoveFast.duration
-                easing.type: Appearance.animation.elementMoveFast.easing
-            }
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
         }
 
         Flow {

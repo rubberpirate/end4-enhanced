@@ -90,6 +90,7 @@ ContentPage {
                     text: Translation.tr("Enabled")
                     checked: !(monitorConfig.monitors[monitorCanvas.selectedIndex]?.disabled ?? false)
                     onCheckedChanged: {
+                        if (checked === !(monitorConfig.monitors[monitorCanvas.selectedIndex]?.disabled ?? false)) return
                         monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { disabled: !checked })
                         monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
                     }
@@ -142,7 +143,9 @@ ContentPage {
                     value: Math.round((monitorConfig.monitors[monitorCanvas.selectedIndex]?.scale ?? 1.0) * 100)
                     from: 50; to: 300; stepSize: 25
                     onValueChanged: {
-                        monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { scale: value / 100.0 })
+                        const newVal = value / 100.0
+                        if (newVal === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.scale ?? 1.0)) return
+                        monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { scale: newVal })
                         monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
                     }
                 }
@@ -153,6 +156,7 @@ ContentPage {
                     value: monitorConfig.monitors[monitorCanvas.selectedIndex]?.x ?? 0
                     from: 0; to: 7680; stepSize: 1
                     onValueChanged: {
+                        if (value === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.x ?? 0)) return
                         monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { x: value })
                         monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
                     }
@@ -164,6 +168,7 @@ ContentPage {
                     value: monitorConfig.monitors[monitorCanvas.selectedIndex]?.y ?? 0
                     from: 0; to: 4320; stepSize: 1
                     onValueChanged: {
+                        if (value === (monitorConfig.monitors[monitorCanvas.selectedIndex]?.y ?? 0)) return
                         monitorConfig.updateMonitor(monitorCanvas.selectedIndex, { y: value })
                         monitorConfig.applyAndSave(monitorCanvas.selectedIndex)
                     }
@@ -226,6 +231,7 @@ ContentPage {
                     text: Translation.tr("Numlock by default")
                     checked: Config.options.hyprland.input.numlock
                     onCheckedChanged: {
+                        if (checked === Config.options.hyprland.input.numlock) return
                         Config.options.hyprland.input.numlock = checked
                         HyprlandConfig.set("input:numlock_by_default", checked ? 1 : 0)
                     }
@@ -237,6 +243,7 @@ ContentPage {
                     value: Config.options.hyprland.input.repeatDelay
                     from: 100; to: 1000; stepSize: 10
                     onValueChanged: {
+                        if (value === Config.options.hyprland.input.repeatDelay) return
                         Config.options.hyprland.input.repeatDelay = value
                         HyprlandConfig.set("input:repeat_delay", value)
                     }
@@ -248,6 +255,7 @@ ContentPage {
                     value: Config.options.hyprland.input.repeatRate
                     from: 10; to: 100; stepSize: 1
                     onValueChanged: {
+                        if (value === Config.options.hyprland.input.repeatRate) return
                         Config.options.hyprland.input.repeatRate = value
                         HyprlandConfig.set("input:repeat_rate", value)
                     }
@@ -276,6 +284,7 @@ ContentPage {
                     text: Translation.tr("Natural scroll")
                     checked: Config.options.hyprland.input.touchpad.naturalScroll
                     onCheckedChanged: {
+                        if (checked === Config.options.hyprland.input.touchpad.naturalScroll) return
                         Config.options.hyprland.input.touchpad.naturalScroll = checked
                         HyprlandConfig.set("input:touchpad:natural_scroll", checked ? 1 : 0)
                     }
@@ -286,6 +295,7 @@ ContentPage {
                     text: Translation.tr("Disable while typing")
                     checked: Config.options.hyprland.input.touchpad.disableWhileTyping
                     onCheckedChanged: {
+                        if (checked === Config.options.hyprland.input.touchpad.disableWhileTyping) return
                         Config.options.hyprland.input.touchpad.disableWhileTyping = checked
                         HyprlandConfig.set("input:touchpad:disable_while_typing", checked ? 1 : 0)
                     }
@@ -296,6 +306,7 @@ ContentPage {
                     text: Translation.tr("Clickfinger behavior")
                     checked: Config.options.hyprland.input.touchpad.clickfingerBehavior
                     onCheckedChanged: {
+                        if (checked === Config.options.hyprland.input.touchpad.clickfingerBehavior) return
                         Config.options.hyprland.input.touchpad.clickfingerBehavior = checked
                         HyprlandConfig.set("input:touchpad:clickfinger_behavior", checked ? 1 : 0)
                     }
@@ -307,8 +318,10 @@ ContentPage {
                     value: Math.round(Config.options.hyprland.input.touchpad.scrollFactor * 10)
                     from: 1; to: 30; stepSize: 1
                     onValueChanged: {
-                        Config.options.hyprland.input.touchpad.scrollFactor = value / 10.0
-                        HyprlandConfig.set("input:touchpad:scroll_factor", value / 10.0)
+                        const newVal = value / 10.0
+                        if (newVal === Config.options.hyprland.input.touchpad.scrollFactor) return
+                        Config.options.hyprland.input.touchpad.scrollFactor = newVal
+                        HyprlandConfig.set("input:touchpad:scroll_factor", newVal)
                     }
                 }
             }
@@ -326,6 +339,7 @@ ContentPage {
                 value: Config.options.hyprland.decoration.rounding
                 from: 0; to: 30; stepSize: 1
                 onValueChanged: {
+                    if (value === Config.options.hyprland.decoration.rounding) return
                     Config.options.hyprland.decoration.rounding = value
                     HyprlandConfig.set("decoration:rounding", value)
                 }
@@ -336,6 +350,7 @@ ContentPage {
                 text: Translation.tr("Blur")
                 checked: Config.options.hyprland.decoration.blur.enabled
                 onCheckedChanged: {
+                    if (checked === Config.options.hyprland.decoration.blur.enabled) return
                     Config.options.hyprland.decoration.blur.enabled = checked
                     HyprlandConfig.set("decoration:blur:enabled", checked ? 1 : 0)
                 }
@@ -347,6 +362,7 @@ ContentPage {
                 value: Config.options.hyprland.decoration.blur.size
                 from: 1; to: 20; stepSize: 1
                 onValueChanged: {
+                    if (value === Config.options.hyprland.decoration.blur.size) return
                     Config.options.hyprland.decoration.blur.size = value
                     HyprlandConfig.set("decoration:blur:size", value)
                 }
@@ -358,6 +374,7 @@ ContentPage {
                 value: Config.options.hyprland.decoration.blur.passes
                 from: 1; to: 6; stepSize: 1
                 onValueChanged: {
+                    if (value === Config.options.hyprland.decoration.blur.passes) return
                     Config.options.hyprland.decoration.blur.passes = value
                     HyprlandConfig.set("decoration:blur:passes", value)
                 }
@@ -369,6 +386,7 @@ ContentPage {
                 value: Config.options.hyprland.general.borderSize
                 from: 0; to: 10; stepSize: 1
                 onValueChanged: {
+                    if (value === Config.options.hyprland.general.borderSize) return
                     Config.options.hyprland.general.borderSize = value
                     HyprlandConfig.set("general:border_size", value)
                 }
@@ -380,6 +398,7 @@ ContentPage {
                 value: Config.options.hyprland.general.gapsIn
                 from: 0; to: 40; stepSize: 1
                 onValueChanged: {
+                    if (value === Config.options.hyprland.general.gapsIn) return
                     Config.options.hyprland.general.gapsIn = value
                     HyprlandConfig.set("general:gaps_in", value)
                 }
@@ -391,6 +410,7 @@ ContentPage {
                 value: Config.options.hyprland.general.gapsOut
                 from: 0; to: 60; stepSize: 1
                 onValueChanged: {
+                    if (value === Config.options.hyprland.general.gapsOut) return
                     Config.options.hyprland.general.gapsOut = value
                     HyprlandConfig.set("general:gaps_out", value)
                 }
@@ -402,8 +422,10 @@ ContentPage {
                 value: Math.round(Config.options.hyprland.decoration.activeOpacity * 100)
                 from: 10; to: 100; stepSize: 5
                 onValueChanged: {
-                    Config.options.hyprland.decoration.activeOpacity = value / 100.0
-                    HyprlandConfig.set("decoration:active_opacity", value / 100.0)
+                    const newVal = value / 100.0
+                    if (newVal === Config.options.hyprland.decoration.activeOpacity) return
+                    Config.options.hyprland.decoration.activeOpacity = newVal
+                    HyprlandConfig.set("decoration:active_opacity", newVal)
                 }
             }
 
@@ -413,8 +435,10 @@ ContentPage {
                 value: Math.round(Config.options.hyprland.decoration.inactiveOpacity * 100)
                 from: 10; to: 100; stepSize: 5
                 onValueChanged: {
-                    Config.options.hyprland.decoration.inactiveOpacity = value / 100.0
-                    HyprlandConfig.set("decoration:inactive_opacity", value / 100.0)
+                    const newVal = value / 100.0
+                    if (newVal === Config.options.hyprland.decoration.inactiveOpacity) return
+                    Config.options.hyprland.decoration.inactiveOpacity = newVal
+                    HyprlandConfig.set("decoration:inactive_opacity", newVal)
                 }
             }
         }
@@ -440,6 +464,7 @@ ContentPage {
                 text: Translation.tr("Enable Animations")
                 checked: Config.options.hyprland.animations.enable
                 onCheckedChanged: {
+                    if (checked === Config.options.hyprland.animations.enable) return
                     Config.options.hyprland.animations.enable = checked
                     HyprlandConfig.set("animations:enabled", checked ? 1 : 0)
                 }

@@ -28,8 +28,8 @@ Rectangle {
     property int snappedY: 0
     property real snapThreshold: 12
 
-    property int logW: monitorConfig.logicalWidth(monitor)
-    property int logH: monitorConfig.logicalHeight(monitor)
+    property int logW: monitorConfig?.logicalWidth(monitor) ?? 0
+    property int logH: monitorConfig?.logicalHeight(monitor) ?? 0
 
     x: isDragging ? dragX : (previewPositions[monitor.name]?.x ?? monitor.x) * scaleFactor + canvasOffset.x
     y: isDragging ? dragY : (previewPositions[monitor.name]?.y ?? monitor.y) * scaleFactor + canvasOffset.y
@@ -85,7 +85,7 @@ Rectangle {
 
         StyledText {
             anchors.horizontalCenter: parent.horizontalCenter
-            text: monitor.name
+            text: monitor?.name ?? ""
             font.pixelSize: Math.max(9, Math.min(13, root.width * 0.1))
             font.weight: Font.Medium
             color: monitor.disabled ? Appearance.colors.colSubtext

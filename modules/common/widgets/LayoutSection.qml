@@ -149,9 +149,8 @@ ContentSubsection {
 
         ToolbarPairedFab {
             Layout.alignment: Qt.AlignVCenter
-            Layout.topMargin: -15
-            iconText: dropdown.visible ? "keyboard_arrow_up" : "add"
-            onClicked: dropdown.visible = !dropdown.visible
+            iconText: dropdown.dropdownOpen ? "keyboard_arrow_up" : "add"
+            onClicked: dropdown.dropdownOpen = !dropdown.dropdownOpen
         }
     }
 
@@ -159,9 +158,19 @@ ContentSubsection {
         id: dropdown
         Layout.fillWidth: true
         Layout.topMargin: 5
-        visible: false
-        implicitHeight: visible ? dropdownRect.height + 8 : 0
-        Behavior on opacity { NumberAnimation { duration: 200 } }
+        visible: implicitHeight > 0
+        implicitHeight: dropdownOpen ? dropdownRect.implicitHeight + 8 : 0
+        opacity: dropdownOpen ? 1 : 0
+        clip: true
+
+        property bool dropdownOpen: false
+
+        Behavior on implicitHeight {
+            animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
+        }
+        Behavior on opacity {
+            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+        }
 
         Rectangle {
             id: dropdownRect
