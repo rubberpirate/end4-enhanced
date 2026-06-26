@@ -61,7 +61,7 @@ Item {
                 Rectangle {
                     Layout.alignment: Qt.AlignHCenter
                     color: Appearance.colors.colPrimary
-                    radius: Appearance.rounding.small
+                    radius: Appearance.rounding.full
                     implicitWidth: 36
                     implicitHeight: 30
                     StyledText {
@@ -84,7 +84,7 @@ Item {
                 Rectangle {
                     Layout.alignment: Qt.AlignHCenter
                     color: Appearance.colors.colSecondaryContainer
-                    radius: Appearance.rounding.small
+                    radius: Appearance.rounding.full
                     implicitWidth: 36
                     implicitHeight: 30
                     StyledText {

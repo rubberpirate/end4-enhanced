@@ -210,14 +210,14 @@ Item {
                 visible: root.isMaterial
                 anchors.centerIn: parent
                 implicitWidth: bottomMaterialCol.implicitWidth
-                implicitHeight: bottomMaterialCol.implicitHeight + 10
+                implicitHeight: bottomMaterialCol.implicitHeight
                 radius: Appearance.rounding.full
                 color: Appearance.colors.colLayer0
 
                 ColumnLayout {
                     id: bottomMaterialCol
                     anchors.centerIn: parent
-                    spacing: 1
+                    spacing: -6
 
                     Repeater {
                         model: Config.options.bar.layouts.rightLayout
