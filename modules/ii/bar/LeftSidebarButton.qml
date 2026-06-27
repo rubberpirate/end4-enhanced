@@ -107,8 +107,8 @@ Item {
             CustomIcon {
                 id: distroIcon
                 anchors.centerIn: parent
-                width: 19.5
-                height: 19.5
+                width: 22
+                height: 22
                 source: Config.options.custom.distroIcon
                 colorize: Config.options.custom.colorizeIcon
                 color: Appearance.colors.colPrimary
