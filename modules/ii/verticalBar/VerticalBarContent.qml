@@ -56,7 +56,7 @@ Item {
         visible: root.centerOnly && Config.options.bar.showBackground && Config.options.bar.cornerStyle !== 2
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
-        height: middleCol.implicitHeight + 10
+        height: middleCol.implicitHeight + 7
         width: parent.width - (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut * 2 : 0)
         color: Appearance.colors.colLayer0
         radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
