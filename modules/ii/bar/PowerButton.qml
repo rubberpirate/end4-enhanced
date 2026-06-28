@@ -7,6 +7,7 @@ import qs.modules.common.widgets
 Item {
     id: root
     property bool isMaterial: Config.options.bar.cornerStyle === 3
+    property bool vertical: Config.options.bar.vertical
 
     implicitWidth: loader.implicitWidth
     implicitHeight: loader.implicitHeight
@@ -41,8 +42,8 @@ Item {
     Component {
         id: materialStyle
         RippleButton {
-            implicitWidth: 30
-            implicitHeight: 30
+            implicitWidth: root.vertical ? 36 : 32
+            implicitHeight: root.vertical ? 36 : 32
             buttonRadius: Appearance.rounding.full
             colBackground: Appearance.colors.colPrimary
             colBackgroundHover: Appearance.colors.colPrimaryHover
