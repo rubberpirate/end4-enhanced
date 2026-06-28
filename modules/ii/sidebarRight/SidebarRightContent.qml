@@ -48,7 +48,7 @@ Item {
 
     Process {
         id: fileChooser
-        command: ["kdialog", "--getopenfilename", Quickshell.env("HOME"), "image/png image/jpg image/jpeg image/webp"]
+        command: ["kdialog", "--getopenfilename", Quickshell.env("HOME") + "/Pictures", "image/png image/jpg image/jpeg image/webp"]
         
         stdout: StdioCollector {
             id: fileChooserOutput
@@ -156,6 +156,7 @@ Item {
                                     onClicked: (event) => {
                                         if (event.button === Qt.LeftButton) {
                                             fileChooser.running = true
+                                            GlobalStates.sidebarRightOpen = false
                                         } else if (event.button === Qt.RightButton) {
                                             Config.options.sidebar.bannerImage = ""
                                         }
