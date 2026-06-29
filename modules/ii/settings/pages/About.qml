@@ -63,7 +63,7 @@ ContentPage {
         Quickshell.execDetached([
             "kitty", "--hold",
             "bash", "-c",
-            "cd ~/.config/quickshell/ && rm -rf end4-pC && git clone https://github.com/pctrade/end4-pC.git && killall qs; nohup qs -c end4-pC > /tmp/qs.log 2>&1 &"
+            "killall qs; sleep 0.5; cd ~/.config/quickshell/ && rm -rf end4-pC && git clone https://github.com/pctrade/end4-pC.git && nohup qs -c end4-pC > /tmp/qs.log 2>&1 &"
         ])
     }
 
