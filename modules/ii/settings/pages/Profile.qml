@@ -18,12 +18,67 @@ ContentPage {
         if (Config.options.profile.descriptionText === "::uptime::") return "uptime"
         return "distro"
     }
+    property string presetNameInput: ""
 
     FolderListModel {
         id: avatarFolderModel
         folder: Config.options.profile.avatarPath !== "" ? Qt.resolvedUrl(Config.options.profile.avatarPath) : ""
         showDirs: false
         nameFilters: ["*.png", "*.svg", "*.jpg", "*.jpeg", "*.webp"]
+    }
+
+    FolderListModel {
+        id: presetsFolderModel
+        folder: Qt.resolvedUrl(Directories.userPresetsPath)
+        showDirs: false
+        nameFilters: ["*.json"]
+    }
+
+    Process {
+        id: saveProc
+        onExited: refreshPresetsFolder()
+    }
+
+    Process {
+        id: deleteProc
+        onExited: refreshPresetsFolder()
+    }
+
+    function refreshPresetsFolder() {
+        const current = presetsFolderModel.folder
+        presetsFolderModel.folder = ""
+        presetsFolderModel.folder = current
+    }
+
+    function savePreset() {
+        const raw = page.presetNameInput.trim()
+        if (raw.length === 0) return
+
+        const commaIndex = raw.indexOf(",")
+        let name = raw
+        let description = ""
+
+        if (commaIndex !== -1) {
+            name = raw.substring(0, commaIndex).trim()
+            description = raw.substring(commaIndex + 1).trim()
+        }
+
+        name = name.replace(/\s/g, "_")
+        if (name.length === 0) return
+
+        saveProc.command = ["bash", Directories.presetsScriptPath, "--save", name, description]
+        saveProc.running = true
+        page.presetNameInput = ""
+    }
+
+    function applyPreset(name) {
+        GlobalStates.settingsOpen = false // sorry I can't stay open while changing the preset =(
+        Quickshell.execDetached(["bash", Directories.presetsScriptPath, "--apply", name])
+    }
+
+    function deletePreset(name) {
+        deleteProc.command = ["bash", Directories.presetsScriptPath, "--remove", name]
+        deleteProc.running = true
     }
 
     ColumnLayout {
@@ -152,7 +207,86 @@ ContentPage {
         ContentSection {
             icon: "wall_art"
             shape: MaterialShape.Shape.Pentagon
-            title: Translation.tr("Presets (Soon)")
+            title: Translation.tr("Presets")
+
+            ConfigRow {
+                MaterialTextArea {
+                    id: presetNameField
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Preset name eg >> pC, this is a description")
+                    wrapMode: TextEdit.NoWrap
+                    Timer {
+                        id: presetNameDebounceTimer
+                        interval: 1000
+                        running: false
+                        onTriggered: {
+                            page.presetNameInput = parent.text
+                        }
+                    }
+                    onTextChanged: {
+                        presetNameDebounceTimer.restart()
+                    }
+                }
+
+                ToolbarPairedFab {
+                    visible: page.presetNameInput.trim() !== ""
+                    iconText: "save"
+                    onClicked: {
+                        page.savePreset()
+                        presetNameField.text = ""
+                    }
+                }
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                Layout.topMargin: 40
+                visible: presetsFolderModel.count === 0
+                horizontalAlignment: Text.AlignHCenter
+                text: Translation.tr("No presets yet")
+                color: Appearance.colors.colSubtext
+                font.pixelSize: Appearance.font.pixelSize.normal
+            }
+
+            Flow {
+                Layout.topMargin: 10
+                Layout.fillWidth: true
+                width: parent.width
+                spacing: 12
+                visible: presetsFolderModel.count > 0
+
+                Repeater {
+                    model: presetsFolderModel
+                    delegate: PresetsCard {
+                        id: presetDelegate
+                        required property string fileName
+                        required property string filePath
+
+                        property string presetName: fileName.replace(".json", "")
+                        property string presetWallpaper: ""
+                        property string presetDescription: ""
+
+                        FileView {
+                            path: presetDelegate.filePath
+                            onLoaded: {
+                                try {
+                                    const data = JSON.parse(text())
+                                    presetDelegate.presetWallpaper = data?.background?.wallpaperPath ?? ""
+                                    presetDelegate.presetDescription = data?._presetMeta?.description ?? ""
+                                } catch (e) {
+                                    console.log("Failed to parse preset:", e)
+                                }
+                            }
+                        }
+
+                        imageSource: presetDelegate.presetWallpaper
+                        title: presetDelegate.presetName
+                        description: presetDelegate.presetDescription !== "" ? presetDelegate.presetDescription : Translation.tr("Saved preset")
+                        onApply: () => page.applyPreset(presetDelegate.presetName)
+                        onRemove: () => page.deletePreset(presetDelegate.presetName)
+                    }
+                }
+            }
         }
     }
 }
