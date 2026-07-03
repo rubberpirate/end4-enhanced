@@ -7,6 +7,7 @@ Item {
     default property list<Item> items
     property real bigRadius: Appearance.rounding.normal
     property real smallRadius: Appearance.rounding.unsharpenmore
+    property color bgcolor: Appearance.colors.colLayer1 
     Layout.fillWidth: true
     implicitHeight: col.implicitHeight
 
@@ -23,7 +24,7 @@ Item {
                 readonly property bool isLast: index === root.items.length - 1
                 Layout.fillWidth: true
                 implicitHeight: (root.items[index]?.implicitHeight ?? 0) + 16
-                color: Appearance.colors.colLayer1
+                color: root.bgcolor
                 topLeftRadius:     isFirst ? root.bigRadius : root.smallRadius
                 topRightRadius:    isFirst ? root.bigRadius : root.smallRadius
                 bottomLeftRadius:  isLast  ? root.bigRadius : root.smallRadius
