@@ -26,7 +26,6 @@ Singleton {
     property string disk: ""
     property string shell: ""
     property string packages: ""
-    property string updates: ""
     property string installAge: ""
     property string kernelVersion: ""
 
@@ -37,7 +36,6 @@ Singleton {
         getDisk.running = false;      getDisk.running = true
         getShell.running = false;     getShell.running = true
         getPackages.running = false;  getPackages.running = true
-        getUpdates.running = false;   getUpdates.running = true
         getInstallAge.running = false; getInstallAge.running = true
         getKernel.running = false; getKernel.running = true
     }
@@ -96,11 +94,6 @@ Singleton {
             if (logo.trim().length === 0)
                 logo = distroIcon
         }
-    }
-    
-    function refreshUpdates() {
-        getUpdates.running = false
-        getUpdates.running = true
     }
 
     Process {
@@ -175,13 +168,6 @@ Singleton {
         running: false
         command: ["bash", "-c", "pacman_count=$(pacman -Q | wc -l); flatpak_count=$(flatpak list 2>/dev/null | wc -l || echo 0); if [ \"$flatpak_count\" -gt 0 ]; then echo \"$pacman_count pacman, $flatpak_count fp\"; else echo \"$pacman_count pacman\"; fi"]
         stdout: SplitParser { onRead: data => root.packages = data.trim() }
-    }
-
-    Process {
-        id: getUpdates
-        running: false
-        command: ["bash", "-c", "pacman_updates=$(checkupdates 2>/dev/null | wc -l); aur_updates=$(yay -Qua 2>/dev/null | wc -l || echo 0); total=$((pacman_updates + aur_updates)); if [ $total -eq 0 ]; then echo 'Up to date'; else echo \"$pacman_updates official, $aur_updates AUR\"; fi"]
-        stdout: SplitParser { onRead: data => root.updates = data.trim() }
     }
 
     Process {
