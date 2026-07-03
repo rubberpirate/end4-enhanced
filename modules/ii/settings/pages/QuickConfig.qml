@@ -216,7 +216,7 @@ ContentPage {
 
         ContentSection {
             icon: "screenshot_monitor"
-            title: Translation.tr("Bar & screen")
+            title: Translation.tr("Bar & Screen")
             shape: MaterialShape.Shape.ClamShell
             Layout.fillWidth: true
 
