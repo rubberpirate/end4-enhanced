@@ -88,7 +88,7 @@ ContentPage {
                 Rectangle {
                     Layout.preferredWidth: 420
                     Layout.preferredHeight: 280
-                    radius: Appearance.rounding.large
+                    radius: Appearance.rounding.large - 3
                     color: Appearance.colors.colLayer2
                     clip: true
 
@@ -103,7 +103,7 @@ ContentPage {
                         layer.effect: OpacityMask {
                             maskSource: Rectangle {
                                 width: 420; height: 280
-                                radius: Appearance.rounding.large
+                                radius: Appearance.rounding.large - 3
                             }
                         }
                     }
