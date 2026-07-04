@@ -125,6 +125,7 @@ AbstractBackgroundWidget {
 
             RowLayout {
                 Layout.fillWidth: false
+                Layout.alignment: Qt.AlignHCenter
                 spacing: 4
                 Repeater {
                     model: ["Mo","Tu","We","Th","Fr","Sa","Su"]
