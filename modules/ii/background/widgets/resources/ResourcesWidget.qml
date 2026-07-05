@@ -44,7 +44,7 @@ AbstractBackgroundWidget {
                 fill: parent
                 margins: 14
             }
-            spacing: 2
+            spacing: -4
 
             MaterialShapeWrappedMaterialSymbol {
                 Layout.alignment: Qt.AlignRight
@@ -77,7 +77,7 @@ AbstractBackgroundWidget {
         }
     }
 
-        RowLayout {
+    RowLayout {
         id: row
         spacing: root.cardSpacing
 
