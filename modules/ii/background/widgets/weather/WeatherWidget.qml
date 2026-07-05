@@ -52,16 +52,30 @@ AbstractBackgroundWidget {
                     implicitWidth: root.shapeSize
                     implicitHeight: root.shapeSize
                 }
+                ColumnLayout {
+                    Layout.topMargin: -3
+                    Layout.alignment: Qt.AlignVCenter
+                    spacing: 2
+                    Layout.rightMargin: 8
 
-                StyledText {
-                    Layout.topMargin: -5
-                    text: Weather.data?.temp ?? "--°"
-                    font {
-                        pixelSize: 32
-                        family: Appearance.font.family.expressive
-                        weight: Font.Medium
+                    StyledText {
+                        text: Weather.data?.temp ?? "--°"
+                        font {
+                            pixelSize: 32
+                            family: Appearance.font.family.expressive
+                            weight: Font.Medium
+                        }
+                        color: Appearance.colors.colPrimary
                     }
-                    color: Appearance.colors.colPrimary
+                    StyledText {
+                        Layout.topMargin: -5
+                        Layout.leftMargin: 2
+                        text: Weather.data?.city ?? "--"
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        font.weight: Font.DemiBold
+                        color: Appearance.colors.colOnPrimaryContainer
+                        elide: Text.ElideRight
+                    }
                 }
             }
 
@@ -69,24 +83,15 @@ AbstractBackgroundWidget {
 
             ColumnLayout {
                 Layout.alignment: Qt.AlignVCenter
-                spacing: 2
+                spacing: 3
                 Layout.rightMargin: 8
 
                 StyledText {
                     Layout.alignment: Qt.AlignRight
-                    text: Weather.data?.city ?? "--"
+                    text: Weather.data?.description ?? ""
                     font.pixelSize: Appearance.font.pixelSize.normal
                     font.weight: Font.DemiBold
                     color: Appearance.colors.colOnPrimaryContainer
-                    elide: Text.ElideRight
-                }
-
-                StyledText {
-                    Layout.alignment: Qt.AlignRight
-                    text: Weather.data?.description ?? ""
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colOnPrimaryContainer
-                    opacity: 0.6
                     elide: Text.ElideRight
                 }
 
