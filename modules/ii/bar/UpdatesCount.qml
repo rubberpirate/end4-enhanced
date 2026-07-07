@@ -8,9 +8,14 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 
-BarWidgetSwitcherArea {
+MouseArea {
     id: root
+    property bool vertical: Config.options.bar.vertical
+    property bool isMaterial: Config.options.bar.cornerStyle === 3
     property bool borderless: Config.options.bar.borderless
+
+    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (contentLoader.item?.implicitWidth ?? 0) 
+    implicitHeight: vertical ? (contentLoader.item?.implicitHeight ?? 0) : Appearance.sizes.barHeight
 
     cursorShape: Qt.PointingHandCursor
     acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -95,10 +100,20 @@ BarWidgetSwitcherArea {
         }
     }
 
-    rowDefault: Component {
+    Loader {
+        id: contentLoader
+        anchors.centerIn: parent
+        sourceComponent: root.vertical ? colContent : rowContent
+    }
+
+    Component {
+        id: rowContent
         RowLayout {
             spacing: 4
+
+            // Default: ícono plano
             MaterialSymbol {
+                visible: !root.isMaterial
                 Layout.alignment: Qt.AlignVCenter
                 text: "deployed_code_update"
                 iconSize: Appearance.font.pixelSize.normal
@@ -106,19 +121,10 @@ BarWidgetSwitcherArea {
                     : Updates.updateAdvised ? Appearance.colors.colTertiary
                     : Appearance.colors.colOnLayer1
             }
-            Loader {
-                Layout.alignment: Qt.AlignVCenter
-                sourceComponent: Updates.checking ? spinnerComp : textComp
-            }
-        }
-    }
 
-    rowMaterial: Component {
-        MaterialPill {
-            vertical: false
-            mainAxisPadding: 8
-
+            // Material: ícono dentro de círculo colPrimary
             Rectangle {
+                visible: root.isMaterial
                 width: 24
                 height: 24
                 radius: Appearance.rounding.full
@@ -141,10 +147,13 @@ BarWidgetSwitcherArea {
         }
     }
 
-    colDefault: Component {
+    Component {
+        id: colContent
         ColumnLayout {
             spacing: 4
+
             MaterialSymbol {
+                visible: !root.isMaterial
                 Layout.alignment: Qt.AlignHCenter
                 text: "deployed_code_update"
                 iconSize: Appearance.font.pixelSize.normal
@@ -152,19 +161,9 @@ BarWidgetSwitcherArea {
                     : Updates.updateAdvised ? Appearance.colors.colTertiary
                     : Appearance.colors.colOnLayer1
             }
-            Loader {
-                Layout.alignment: Qt.AlignHCenter
-                sourceComponent: Updates.checking ? spinnerComp : textComp
-            }
-        }
-    }
-
-    colMaterial: Component {
-        MaterialPill {
-            vertical: true
-            mainAxisPadding: 8
 
             Rectangle {
+                visible: root.isMaterial
                 width: 24
                 height: 24
                 radius: Appearance.rounding.full
@@ -183,7 +182,6 @@ BarWidgetSwitcherArea {
 
             Loader {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: 3
                 sourceComponent: Updates.checking ? spinnerComp : textComp
             }
         }

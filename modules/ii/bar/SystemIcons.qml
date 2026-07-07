@@ -15,24 +15,14 @@ Item {
     property bool vertical: Config.options.bar.vertical
     property bool isMaterial: Config.options.bar.cornerStyle === 3
 
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? pill.implicitWidth : flow.implicitWidth + 10)
-    implicitHeight: vertical ? flow.implicitHeight + 6 : Appearance.sizes.barHeight
+    implicitWidth: root.vertical ? 32 : flow.implicitWidth + 4
+    implicitHeight: root.vertical ? flow.implicitHeight + 6 : 32
 
     MouseArea {
         anchors.fill: parent
         onPressed: {
             GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
         }
-    }
-
-    Rectangle {
-        id: pill
-        visible: root.isMaterial
-        anchors.centerIn: parent
-        color: Appearance.colors.colPrimary
-        radius: Appearance.rounding.full
-        implicitWidth: root.vertical ? 32 : flow.implicitWidth + 16
-        implicitHeight: root.vertical ? flow.implicitHeight + 6 : 32
     }
 
     Flow {

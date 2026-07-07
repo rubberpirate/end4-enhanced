@@ -10,7 +10,7 @@ RippleButton {
     property bool vertical: Config.options.bar.vertical
     property real buttonPadding: 5
 
-    implicitWidth: isMaterial ? 32 : (Config.options.bar.cornerStyle === 2 ? 27 : 27 + buttonPadding)
+    implicitWidth: root.vertical && root.isMaterial ? 34 :32
     implicitHeight: implicitWidth
 
     buttonRadius: Appearance.rounding.full

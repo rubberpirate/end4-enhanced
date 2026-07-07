@@ -76,7 +76,7 @@ Item {
 
     Layout.fillHeight: true
     implicitWidth:  vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? materialRow.implicitWidth : Math.min(rowLayout.implicitWidth + 8, 280))
-    implicitHeight: vertical ? (isMaterial ? 32 : mediaCircProg.implicitHeight + 6) : Appearance.sizes.barHeight
+    implicitHeight: vertical ? (isMaterial ? 36 : mediaCircProg.implicitHeight + 6) : Appearance.sizes.barHeight
 
     Timer {
         running: activePlayer?.playbackState == MprisPlaybackState.Playing
@@ -130,8 +130,8 @@ Item {
         anchors.centerIn: parent
         color: Appearance.colors.colSecondaryContainer
         radius: Appearance.rounding.full
-        implicitWidth: 32
-        implicitHeight: 32
+        implicitWidth: 36
+        implicitHeight: 36
         
         MaterialSymbol {
             anchors.centerIn: parent
@@ -190,227 +190,219 @@ Item {
         active: !root.vertical && root.isMaterial
         visible: active
         anchors.centerIn: parent
-        sourceComponent: Rectangle {
-            id: card
-            color: Appearance.colors.colSecondaryContainer
-            radius: Appearance.rounding.full
-            implicitHeight: 32
-            implicitWidth: innerRow.implicitWidth + 8
+        sourceComponent: RowLayout {
+            id: innerRow
+            anchors.centerIn: parent
+            spacing: 6
 
-            RowLayout {
-                id: innerRow
-                anchors.centerIn: parent
-                spacing: 6
+            // No platyer 
+            Loader {
+                active: !root.hasTrack
+                visible: active
+                Layout.alignment: Qt.AlignVCenter
+                sourceComponent: RowLayout {
+                    spacing: 6
 
-                // No platyer 
-                Loader {
-                    active: !root.hasTrack
-                    visible: active
-                    Layout.alignment: Qt.AlignVCenter
-                    sourceComponent: RowLayout {
-                        spacing: 6
+                    // Avatar
+                    Rectangle {
+                        id: avatarRect
+                        implicitWidth: 26
+                        implicitHeight: 26
+                        radius: Appearance.rounding.full
+                        color: Appearance.colors.colPrimaryContainer
+                        Layout.alignment: Qt.AlignVCenter
 
-                        // Avatar
-                        Rectangle {
-                            id: avatarRect
-                            implicitWidth: 26
-                            implicitHeight: 26
-                            radius: Appearance.rounding.full
-                            color: Appearance.colors.colPrimaryContainer
-                            Layout.alignment: Qt.AlignVCenter
-
-                            layer.enabled: true
-                            layer.effect: OpacityMask {
-                                maskSource: Rectangle {
-                                    width: avatarRect.width
-                                    height: avatarRect.height
-                                    radius: avatarRect.radius
-                                }
-                            }
-
-                            Image {
-                                id: avatarImage
-                                anchors.fill: parent
-                                source: Config.options.profile.avatarPath !== "" 
-                                    ? "file://" + Config.options.profile.avatarPicture 
-                                    : "file:///home/" + (Quickshell.env("USER") ?? "user") + "/.face"
-                                sourceSize.width: avatarRect.width * 2
-                                sourceSize.height: avatarRect.height * 2
-                                fillMode: Image.PreserveAspectCrop
-                                onStatusChanged: {
-                                    if (status === Image.Error)
-                                        visible = false
-                                }
-                            }
-
-                            MaterialSymbol {
-                                anchors.centerIn: parent
-                                text: "account_circle"
-                                iconSize: Appearance.font.pixelSize.normal
-                                color: Appearance.colors.colOnPrimaryContainer
-                                visible: avatarImage.status === Image.Error || avatarImage.status === Image.Null
+                        layer.enabled: true
+                        layer.effect: OpacityMask {
+                            maskSource: Rectangle {
+                                width: avatarRect.width
+                                height: avatarRect.height
+                                radius: avatarRect.radius
                             }
                         }
 
-                        ColumnLayout {
-                            spacing: -3
-                            Layout.alignment: Qt.AlignVCenter
-                            Layout.topMargin: 2
-
-                            StyledText {
-                                text: Quickshell.env("USER") ?? Quickshell.env("LOGNAME") ?? "user"
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                color: Appearance.colors.colOnSecondaryContainer
-                                elide: Text.ElideRight
-                                Layout.maximumWidth: 120
+                        Image {
+                            id: avatarImage
+                            anchors.fill: parent
+                            source: Config.options.profile.avatarPath !== "" 
+                                ? "file://" + Config.options.profile.avatarPicture 
+                                : "file:///home/" + (Quickshell.env("USER") ?? "user") + "/.face"
+                            sourceSize.width: avatarRect.width * 2
+                            sourceSize.height: avatarRect.height * 2
+                            fillMode: Image.PreserveAspectCrop
+                            onStatusChanged: {
+                                if (status === Image.Error)
+                                    visible = false
                             }
+                        }
 
-                            StyledText {
-                                id: distroLabel
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                color: Appearance.colors.colOnSecondaryContainer
-                                opacity: 0.7
-                                elide: Text.ElideRight
-                                Layout.rightMargin: 8
-                                Layout.maximumWidth: 120
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            text: "account_circle"
+                            iconSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnPrimaryContainer
+                            visible: avatarImage.status === Image.Error || avatarImage.status === Image.Null
+                        }
+                    }
 
-                                Process {
-                                    id: distroProc
-                                    command: ["bash", "-c", "source /etc/os-release && echo $PRETTY_NAME"]
-                                    running: true
-                                    stdout: SplitParser {
-                                        onRead: data => distroLabel.text = data.trim()
-                                    }
+                    ColumnLayout {
+                        spacing: -3
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.topMargin: 2
+
+                        StyledText {
+                            text: Quickshell.env("USER") ?? Quickshell.env("LOGNAME") ?? "user"
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colOnSecondaryContainer
+                            elide: Text.ElideRight
+                            Layout.maximumWidth: 120
+                        }
+
+                        StyledText {
+                            id: distroLabel
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colOnSecondaryContainer
+                            opacity: 0.7
+                            elide: Text.ElideRight
+                            Layout.rightMargin: 8
+                            Layout.maximumWidth: 120
+
+                            Process {
+                                id: distroProc
+                                command: ["bash", "-c", "source /etc/os-release && echo $PRETTY_NAME"]
+                                running: true
+                                stdout: SplitParser {
+                                    onRead: data => distroLabel.text = data.trim()
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                // Player
-                Loader {
-                    active: root.hasTrack
-                    visible: active
-                    Layout.alignment: Qt.AlignVCenter
-                    sourceComponent: RowLayout {
-                        spacing: 6
+            // Player
+            Loader {
+                active: root.hasTrack
+                visible: active
+                Layout.alignment: Qt.AlignVCenter
+                sourceComponent: RowLayout {
+                    spacing: 6
 
-                        // Art
-                        Rectangle {
-                            id: artRect
-                            implicitWidth: 26
-                            implicitHeight: 26
-                            radius: Appearance.rounding.full
-                            color: Appearance.colors.colSecondaryContainer
-                            Layout.alignment: Qt.AlignVCenter
+                    // Art
+                    Rectangle {
+                        id: artRect
+                        implicitWidth: 26
+                        implicitHeight: 26
+                        radius: Appearance.rounding.full
+                        color: Appearance.colors.colSecondaryContainer
+                        Layout.alignment: Qt.AlignVCenter
 
-                            layer.enabled: true
-                            layer.effect: OpacityMask {
-                                maskSource: Rectangle {
-                                    width: artRect.width
-                                    height: artRect.height
-                                    radius: artRect.radius
-                                }
-                            }
-
-                            StyledImage {
-                                anchors.fill: parent
-                                source: root.displayedArtFilePath
-                                fillMode: Image.PreserveAspectCrop
-                                cache: false
-                                antialiasing: true
-                                sourceSize.width: artRect.width
-                                sourceSize.height: artRect.height
-                                visible: root.displayedArtFilePath !== ""
-                            }
-
-                            MaterialSymbol {
-                                anchors.centerIn: parent
-                                fill: 1
-                                text: "music_note"
-                                iconSize: Appearance.font.pixelSize.normal
-                                color: Appearance.colors.colOnSecondaryContainer
-                                visible: root.displayedArtFilePath === ""
+                        layer.enabled: true
+                        layer.effect: OpacityMask {
+                            maskSource: Rectangle {
+                                width: artRect.width
+                                height: artRect.height
+                                radius: artRect.radius
                             }
                         }
 
-                        // Title + Artist
-                        ColumnLayout {
-                            spacing: -4
-                            Layout.alignment: Qt.AlignVCenter
-                            Layout.topMargin: 2
+                        StyledImage {
+                            anchors.fill: parent
+                            source: root.displayedArtFilePath
+                            fillMode: Image.PreserveAspectCrop
+                            cache: false
+                            antialiasing: true
+                            sourceSize.width: artRect.width
+                            sourceSize.height: artRect.height
+                            visible: root.displayedArtFilePath !== ""
+                        }
 
-                            StyledText {
-                                id: artistText
-                                text: root.trackArtist
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                color: Appearance.colors.colOnSecondaryContainer
-                                elide: Text.ElideRight
-                                Layout.maximumWidth: 120
-                                Behavior on text {
-                                    SequentialAnimation {
-                                        NumberAnimation { target: artistText; property: "x"; to: -artistText.width; duration: 150; easing.type: Easing.InQuad }
-                                        PropertyAction { target: artistText; property: "text" }
-                                        NumberAnimation { target: artistText; property: "x"; from: artistText.width; to: 0; duration: 150; easing.type: Easing.OutQuad }
-                                    }
-                                }
-                            }
-                            StyledText {
-                                id: titleText
-                                Layout.topMargin: (!root.activePlayer || root.trackArtist.length === 0) ? -13 : 0
-                                text: StringUtils.cleanMusicTitle(root.trackTitle) || Translation.tr("No media")
-                                font.pixelSize: Appearance.font.pixelSize.smallie
-                                color: Appearance.colors.colOnSecondaryContainer
-                                elide: Text.ElideRight
-                                opacity: 0.7
-                                Layout.maximumWidth: 120
-                                Behavior on text {
-                                    SequentialAnimation {
-                                        NumberAnimation { target: titleText; property: "x"; to: -artistText.width; duration: 150; easing.type: Easing.InQuad }
-                                        PropertyAction { target: titleText; property: "text" }
-                                        NumberAnimation { target: titleText; property: "x"; from: artistText.width; to: 0; duration: 150; easing.type: Easing.OutQuad }
-                                    }
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            fill: 1
+                            text: "music_note"
+                            iconSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnSecondaryContainer
+                            visible: root.displayedArtFilePath === ""
+                        }
+                    }
+
+                    // Title + Artist
+                    ColumnLayout {
+                        spacing: -4
+                        Layout.alignment: Qt.AlignVCenter
+                        Layout.topMargin: 2
+
+                        StyledText {
+                            id: artistText
+                            text: root.trackArtist
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colOnSecondaryContainer
+                            elide: Text.ElideRight
+                            Layout.maximumWidth: 120
+                            Behavior on text {
+                                SequentialAnimation {
+                                    NumberAnimation { target: artistText; property: "x"; to: -artistText.width; duration: 150; easing.type: Easing.InQuad }
+                                    PropertyAction { target: artistText; property: "text" }
+                                    NumberAnimation { target: artistText; property: "x"; from: artistText.width; to: 0; duration: 150; easing.type: Easing.OutQuad }
                                 }
                             }
                         }
-
-                        // Play/Pause
-                        RippleButton {
-                            implicitWidth: 40
-                            implicitHeight: 23
-                            buttonRadius: root.isPlaying ? Appearance.rounding.normal : 13
-                            colBackground: root.isPlaying ? Appearance.colors.colPrimary : ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
-                            colBackgroundHover: root.isPlaying ? Appearance.colors.colPrimaryHover : Appearance.colors.colPrimaryContainerHover
-                            colRipple: root.isPlaying ? Appearance.colors.colPrimaryActive : Appearance.colors.colPrimaryContainerActive
-                            downAction: () => root.activePlayer?.togglePlaying()
-                            contentItem: MaterialSymbol {
-                                anchors.centerIn: parent
-                                horizontalAlignment: Text.AlignHCenter
-                                text: root.isPlaying ? "pause" : "play_arrow"
-                                iconSize: Appearance.font.pixelSize.large
-                                fill: 1
-                                color: root.isPlaying ? Appearance.colors.colOnPrimary : Appearance.colors.colOnPrimaryContainer
+                        StyledText {
+                            id: titleText
+                            Layout.topMargin: (!root.activePlayer || root.trackArtist.length === 0) ? -13 : 0
+                            text: StringUtils.cleanMusicTitle(root.trackTitle) || Translation.tr("No media")
+                            font.pixelSize: Appearance.font.pixelSize.smallie
+                            color: Appearance.colors.colOnSecondaryContainer
+                            elide: Text.ElideRight
+                            opacity: 0.7
+                            Layout.maximumWidth: 120
+                            Behavior on text {
+                                SequentialAnimation {
+                                    NumberAnimation { target: titleText; property: "x"; to: -artistText.width; duration: 150; easing.type: Easing.InQuad }
+                                    PropertyAction { target: titleText; property: "text" }
+                                    NumberAnimation { target: titleText; property: "x"; from: artistText.width; to: 0; duration: 150; easing.type: Easing.OutQuad }
+                                }
                             }
                         }
+                    }
 
-                        // Next
-                        RippleButton {
-                            implicitWidth: 26
-                            implicitHeight: 26
-                            Layout.leftMargin: -4
-                            buttonRadius: 13
-                            colBackground: "transparent"
-                            colBackgroundHover: Appearance.colors.colPrimaryContainerHover
-                            colRipple: Appearance.colors.colPrimaryContainerActive
-                            downAction: () => root.activePlayer?.next()
-                            contentItem: MaterialSymbol {
-                                anchors.centerIn: parent
-                                horizontalAlignment: Text.AlignHCenter
-                                text: "skip_next"
-                                iconSize: Appearance.font.pixelSize.large
-                                fill: 1
-                                color: Appearance.colors.colOnSecondaryContainer
-                            }
+                    // Play/Pause
+                    RippleButton {
+                        implicitWidth: 40
+                        implicitHeight: 23
+                        buttonRadius: root.isPlaying ? Appearance.rounding.normal : 13
+                        colBackground: root.isPlaying ? Appearance.colors.colPrimary : ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        colBackgroundHover: root.isPlaying ? Appearance.colors.colPrimaryHover : Appearance.colors.colPrimaryContainerHover
+                        colRipple: root.isPlaying ? Appearance.colors.colPrimaryActive : Appearance.colors.colPrimaryContainerActive
+                        downAction: () => root.activePlayer?.togglePlaying()
+                        contentItem: MaterialSymbol {
+                            anchors.centerIn: parent
+                            horizontalAlignment: Text.AlignHCenter
+                            text: root.isPlaying ? "pause" : "play_arrow"
+                            iconSize: Appearance.font.pixelSize.large
+                            fill: 1
+                            color: root.isPlaying ? Appearance.colors.colOnPrimary : Appearance.colors.colOnPrimaryContainer
+                        }
+                    }
+
+                    // Next
+                    RippleButton {
+                        implicitWidth: 26
+                        implicitHeight: 26
+                        Layout.leftMargin: -4
+                        buttonRadius: 13
+                        colBackground: "transparent"
+                        colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                        colRipple: Appearance.colors.colPrimaryContainerActive
+                        downAction: () => root.activePlayer?.next()
+                        contentItem: MaterialSymbol {
+                            anchors.centerIn: parent
+                            horizontalAlignment: Text.AlignHCenter
+                            text: "skip_next"
+                            iconSize: Appearance.font.pixelSize.large
+                            fill: 1
+                            color: Appearance.colors.colOnSecondaryContainer
                         }
                     }
                 }

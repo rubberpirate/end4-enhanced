@@ -24,6 +24,29 @@ Item {
     readonly property real centerPillY: centerPill.y
     readonly property real centerPillHeight: centerPill.height
 
+    function shouldPaintMaterialPill(name) {
+        if (Config.options.bar.cornerStyle !== 3) return false;
+        const blacklist = ["workspaces", "powerButton", "media", "docktoPanel", "leftSidebarButton"];
+        if (blacklist.includes(name)) {
+            return false;
+        }
+        return true;
+    }
+
+    function getMaterialPillColor(name) {
+        if (Config.options.bar.cornerStyle !== 3) return Appearance.colors.colPrimaryContainer;
+        switch(name) {
+            case "media":
+                return Appearance.colors.colSecondaryContainer;
+            case "resources":
+                return Appearance.colors.colTertiaryContainer;
+            case "systemIcons":
+                return Appearance.colors.colPrimary; 
+            default:
+                return Appearance.colors.colPrimaryContainer;
+        }
+    }
+
     function getWidgetUrl(name) {
         if (!name) return "";
         let formattedName = name.charAt(0).toUpperCase() + name.slice(1);
@@ -86,15 +109,15 @@ Item {
                 id: topMaterialPill
                 visible: root.isMaterial
                 anchors.centerIn: parent
-                implicitWidth: topMaterialCol.implicitWidth - 4
-                implicitHeight: topMaterialCol.implicitHeight
+                implicitWidth: topMaterialCol.implicitWidth
+                implicitHeight: topMaterialCol.implicitHeight + 10
                 radius: Appearance.rounding.full
                 color: Appearance.colors.colLayer0
 
                 ColumnLayout {
                     id: topMaterialCol
                     anchors.centerIn: parent
-                    spacing: -6
+                    spacing: 3
 
                     Repeater {
                         model: Config.options.bar.layouts.leftLayout
@@ -108,6 +131,8 @@ Item {
                             vertical: true
                             currentIndex: index
                             totalCount: Config.options.bar.layouts.leftLayout.length
+                            paintMaterialPill: root.shouldPaintMaterialPill(modelData)
+                            bgColor: root.getMaterialPillColor(modelData)
                             Loader {
                                 Layout.fillWidth: true
                                 source: root.getWidgetUrl(modelData)
@@ -161,14 +186,14 @@ Item {
                 visible: root.isMaterial
                 anchors.centerIn: parent
                 implicitWidth: centerMaterialCol.implicitWidth 
-                implicitHeight: centerMaterialCol.implicitHeight
+                implicitHeight: centerMaterialCol.implicitHeight + 10
                 radius: Appearance.rounding.full
                 color: Appearance.colors.colLayer0
 
                 ColumnLayout {
                     id: centerMaterialCol
                     anchors.centerIn: parent
-                    spacing: -6
+                    spacing: 3
 
                     Repeater {
                         model: Config.options.bar.layouts.middleLayout
@@ -182,6 +207,8 @@ Item {
                             vertical: true
                             currentIndex: index
                             totalCount: Config.options.bar.layouts.middleLayout.length
+                            paintMaterialPill: root.shouldPaintMaterialPill(modelData)
+                            bgColor: root.getMaterialPillColor(modelData)
                             Loader {
                                 Layout.fillWidth: true
                                 source: root.getWidgetUrl(modelData)
@@ -235,15 +262,15 @@ Item {
                 id: bottomMaterialPill
                 visible: root.isMaterial
                 anchors.centerIn: parent
-                implicitWidth: bottomMaterialCol.implicitWidth - 4
-                implicitHeight: bottomMaterialCol.implicitHeight
+                implicitWidth: bottomMaterialCol.implicitWidth
+                implicitHeight: bottomMaterialCol.implicitHeight + 10 
                 radius: Appearance.rounding.full
                 color: Appearance.colors.colLayer0
 
                 ColumnLayout {
                     id: bottomMaterialCol
                     anchors.centerIn: parent
-                    spacing: -6
+                    spacing: 3
 
                     Repeater {
                         model: Config.options.bar.layouts.rightLayout
@@ -257,6 +284,8 @@ Item {
                             vertical: true
                             currentIndex: index
                             totalCount: Config.options.bar.layouts.rightLayout.length
+                            paintMaterialPill: root.shouldPaintMaterialPill(modelData)
+                            bgColor: root.getMaterialPillColor(modelData)
                             Loader {
                                 Layout.fillWidth: true
                                 source: root.getWidgetUrl(modelData)

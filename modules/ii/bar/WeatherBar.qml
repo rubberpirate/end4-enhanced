@@ -6,9 +6,14 @@ import Quickshell
 import QtQuick
 import QtQuick.Layouts
 
-BarWidgetSwitcherArea {
+MouseArea {
     id: root
     property bool hovered: false
+    property bool vertical: Config.options.bar.vertical
+    property bool isMaterial: Config.options.bar.cornerStyle === 3
+
+    implicitWidth: vertical ? 32 : (contentLoader.item?.implicitWidth ?? 0) 
+    implicitHeight: vertical ? (contentLoader.item?.implicitHeight ?? 0) : Appearance.sizes.barHeight
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
@@ -25,30 +30,36 @@ BarWidgetSwitcherArea {
         }
     }
 
-    rowDefault: Component {
+    Loader {
+        id: contentLoader
+        anchors.centerIn: parent
+        sourceComponent: root.vertical ? colContent : rowContent
+    }
+
+    Component {
+        id: rowContent
         RowLayout {
+            spacing: 6
+
             MaterialSymbol {
+                visible: !root.isMaterial
                 fill: 0
                 text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
                 iconSize: Appearance.font.pixelSize.large
                 color: Appearance.colors.colOnLayer1
                 Layout.alignment: Qt.AlignVCenter
             }
+
             StyledText {
+                visible: !root.isMaterial
                 font.pixelSize: Appearance.font.pixelSize.small
                 color: Appearance.colors.colOnLayer1
                 text: Weather.data?.temp ?? "--°"
                 Layout.alignment: Qt.AlignVCenter
             }
-        }
-    }
-
-    rowMaterial: Component {
-        MaterialPill {
-            vertical: false
-            mainAxisPadding: 8
 
             StyledText {
+                visible: root.isMaterial
                 font.pixelSize: Appearance.font.pixelSize.small
                 color: Appearance.colors.colPrimary
                 text: Weather.data?.temp ?? "--°"
@@ -57,6 +68,7 @@ BarWidgetSwitcherArea {
             }
 
             Rectangle {
+                visible: root.isMaterial
                 width: 25
                 height: 25
                 radius: Appearance.rounding.full
@@ -73,30 +85,30 @@ BarWidgetSwitcherArea {
         }
     }
 
-    colDefault: Component {
+    Component {
+        id: colContent
         ColumnLayout {
-            spacing: 4
+            spacing: 0
+
             MaterialSymbol {
+                visible: !root.isMaterial
                 fill: 0
                 text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
                 iconSize: Appearance.font.pixelSize.large
                 color: Appearance.colors.colOnLayer1
                 Layout.alignment: Qt.AlignHCenter
             }
+
             StyledText {
+                visible: !root.isMaterial
                 font.pixelSize: Appearance.font.pixelSize.small
                 color: Appearance.colors.colOnLayer1
                 text: (Weather.data?.temp ?? "--°").replace(/[CF]$/, "")
                 Layout.alignment: Qt.AlignHCenter
             }
-        }
-    }
-
-    colMaterial: Component {
-        MaterialPill {
-            vertical: true
 
             StyledText {
+                visible: root.isMaterial
                 font.pixelSize: Appearance.font.pixelSize.small
                 color: Appearance.colors.colPrimary
                 text: (Weather.data?.temp ?? "--°").replace(/[CF]$/, "")
@@ -105,6 +117,7 @@ BarWidgetSwitcherArea {
             }
 
             Rectangle {
+                visible: root.isMaterial
                 width: 25
                 height: 25
                 radius: Appearance.rounding.full

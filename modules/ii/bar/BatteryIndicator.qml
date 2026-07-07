@@ -15,19 +15,10 @@ MouseArea {
     readonly property real percentage: Battery.percentage
     readonly property bool isLow: percentage <= Config.options.battery.low / 100
 
-    implicitWidth:  vertical ? Appearance.sizes.verticalBarWidth : batteryProgress.valueBarWidth + 20
-    implicitHeight: vertical ? batteryProgress.valueBarWidth + 20 : Appearance.sizes.barHeight
+    implicitWidth:  vertical ? Appearance.sizes.verticalBarWidth : batteryProgress.valueBarWidth + 8
+    implicitHeight: vertical ? batteryProgress.valueBarWidth + 8 : Appearance.sizes.barHeight
 
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
-
-    Rectangle {
-        visible: root.isMaterial
-        anchors.centerIn: parent
-        width: vertical ? 32 : batteryProgress.valueBarWidth + 20
-        height: vertical ? batteryProgress.valueBarHeight + 30 : 32
-        radius: Appearance.rounding.full
-        color: Appearance.colors.colPrimaryContainer
-    }
 
     ClippedProgressBar {
         id: batteryProgress

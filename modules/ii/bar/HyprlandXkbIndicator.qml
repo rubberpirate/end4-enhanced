@@ -15,7 +15,7 @@ Loader {
     property color color: Appearance.colors.colOnSurfaceVariante
 
     sourceComponent: Item {
-        implicitWidth: root.vertical ? null : rowLayout.implicitWidth + 10
+        implicitWidth: root.vertical ? null : rowLayout.implicitWidth + 8
         implicitHeight: root.vertical ? rowLayout.implicitHeight + 10 : null
 
         RowLayout {

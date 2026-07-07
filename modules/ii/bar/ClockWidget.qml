@@ -60,11 +60,14 @@ BarWidgetSwitcher {
     }
 
     colMaterial: Component {
-        MaterialPill {
-            vertical: true
+        ColumnLayout {
+            id: clockWidget
+            spacing: 2
+            Layout.alignment: Qt.AlignHCenter
 
             Column {
                 Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 2
                 spacing: -4
 
                 Repeater {
@@ -130,42 +133,37 @@ BarWidgetSwitcher {
     rowMaterial: Component {
         RowLayout {
             spacing: 4
+            id: pill
 
-            MaterialPill {
-                id: pill
-                vertical: false
-                mainAxisPadding: 8
+            property var timeParts: DateTime.time.split(/[: ]/)
+            property string hours: timeParts[0] ?? "00"
+            property string minutes: timeParts[1] ?? "00"
+            property string ampm: timeParts[2] ?? ""
 
-                property var timeParts: DateTime.time.split(/[: ]/)
-                property string hours: timeParts[0] ?? "00"
-                property string minutes: timeParts[1] ?? "00"
-                property string ampm: timeParts[2] ?? ""
+            StyledText {
+                visible: root.showDate
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: Appearance.colors.colOnPrimaryContainer
+                text: DateTime.longDate
+                Layout.alignment: Qt.AlignVCenter
+                leftPadding: 5
+            }
+
+            Rectangle {
+                implicitWidth: timeText.implicitWidth + 16
+                implicitHeight: 24
+                radius: Appearance.rounding.full
+                color: Appearance.colors.colPrimary
 
                 StyledText {
-                    visible: root.showDate
-                    font.pixelSize: Appearance.font.pixelSize.small
-                    color: Appearance.colors.colOnPrimaryContainer
-                    text: DateTime.longDate
-                    Layout.alignment: Qt.AlignVCenter
-                    leftPadding: 5
-                }
-
-                Rectangle {
-                    implicitWidth: timeText.implicitWidth + 16
-                    implicitHeight: 24
-                    radius: Appearance.rounding.full
-                    color: Appearance.colors.colPrimary
-
-                    StyledText {
-                        id: timeText
-                        anchors.centerIn: parent
-                        font.pixelSize: Appearance.font.pixelSize.smallie
-                        color: Appearance.colors.colOnPrimary
-                        font.weight: Font.Bold
-                        text: pill.ampm !== "" ? pill.hours.padStart(2, "0") + ":" + pill.minutes.padStart(2, "0") : DateTime.time
-                        font.features: { "tnum": 1 }
-                        font.letterSpacing: -0.4
-                    }
+                    id: timeText
+                    anchors.centerIn: parent
+                    font.pixelSize: Appearance.font.pixelSize.smallie
+                    color: Appearance.colors.colOnPrimary
+                    font.weight: Font.Bold
+                    text: pill.ampm !== "" ? pill.hours.padStart(2, "0") + ":" + pill.minutes.padStart(2, "0") : DateTime.time
+                    font.features: { "tnum": 1 }
+                    font.letterSpacing: -0.4
                 }
             }
 
