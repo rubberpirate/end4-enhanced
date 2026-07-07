@@ -20,7 +20,7 @@ Item {
 
     visible: SystemTray.items.values.length > 0
     implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? pill.implicitWidth - 4 : gridLayout.implicitWidth)
-    implicitHeight: vertical ? gridLayout.implicitHeight + 8 : Appearance.sizes.barHeight
+    implicitHeight: vertical ? gridLayout.implicitHeight + 6 : Appearance.sizes.barHeight
 
     property list<var> pinnedItems: TrayService.pinnedItems
     property list<var> unpinnedItems: TrayService.unpinnedItems

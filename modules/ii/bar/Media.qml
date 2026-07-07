@@ -130,8 +130,8 @@ Item {
         anchors.centerIn: parent
         color: Appearance.colors.colSecondaryContainer
         radius: Appearance.rounding.full
-        implicitWidth: 36
-        implicitHeight: 36
+        implicitWidth: 32
+        implicitHeight: 32
         
         MaterialSymbol {
             anchors.centerIn: parent

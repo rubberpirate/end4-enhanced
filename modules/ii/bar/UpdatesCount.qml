@@ -111,7 +111,7 @@ MouseArea {
         RowLayout {
             spacing: 4
 
-            // Default: ícono plano
+            // Default
             MaterialSymbol {
                 visible: !root.isMaterial
                 Layout.alignment: Qt.AlignVCenter
@@ -122,7 +122,7 @@ MouseArea {
                     : Appearance.colors.colOnLayer1
             }
 
-            // Material: ícono dentro de círculo colPrimary
+            // Material
             Rectangle {
                 visible: root.isMaterial
                 width: 24

@@ -88,7 +88,7 @@ MouseArea {
     Component {
         id: colContent
         ColumnLayout {
-            spacing: 0
+            spacing: root.isMaterial ? 2 : 0
 
             MaterialSymbol {
                 visible: !root.isMaterial
