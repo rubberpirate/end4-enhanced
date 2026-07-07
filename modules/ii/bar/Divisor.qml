@@ -4,7 +4,7 @@ import qs.modules.common
 Item {
     property bool vertical: false
     property real btnSize: 40
-    property real btnSpacing: -4
+    property real btnSpacing: 2
     property bool isMaterial: Config.options.bar.cornerStyle === 3
 
     width:  vertical ? btnSize : (1 + btnSpacing * 3)
