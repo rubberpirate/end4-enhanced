@@ -59,7 +59,7 @@ StyledPopup {
                 RowLayout {
                     anchors.left: parent.left
                     anchors.bottom: parent.bottom
-                    anchors.bottomMargin: -10
+                    anchors.bottomMargin: -8
                     spacing: 4
 
                     StyledText {
