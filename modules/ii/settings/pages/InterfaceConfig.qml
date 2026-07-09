@@ -251,6 +251,12 @@ ContentPage {
                     onCheckedChanged: { Config.options.lock.launchOnStartup = checked }
                 }
                 ConfigSwitch {
+                    buttonIcon: "widgets"
+                    text: Translation.tr("Show Widgets")
+                    checked: Config.options.lock.showWidgets
+                    onCheckedChanged: { Config.options.lock.showWidgets = checked }
+                }
+                ConfigSwitch {
                     buttonIcon: "music_note"
                     text: Translation.tr("Show media player info")
                     checked: Config.options.lock.showMedia

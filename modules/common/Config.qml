@@ -504,6 +504,7 @@ Singleton {
             property JsonObject lock: JsonObject {
                 property bool useHyprlock: false
                 property bool launchOnStartup: false
+                property bool showWidgets: false
                 property bool showMedia: true
                 property JsonObject blur: JsonObject {
                     property bool enable: true
