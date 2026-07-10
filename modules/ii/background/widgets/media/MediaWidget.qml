@@ -151,7 +151,7 @@ AbstractBackgroundWidget {
                     }
                 }
 
-                RowLayout {
+                ColumnLayout {
                     anchors {
                         left: artRect.right
                         right: parent.right
@@ -159,9 +159,8 @@ AbstractBackgroundWidget {
                         bottom: parent.bottom
                         leftMargin: 16
                         rightMargin: 14
-                        topMargin: 40
                     }
-                    spacing: 12
+                    spacing: -10
 
                     // Artist + Title
                     ColumnLayout {
@@ -191,7 +190,7 @@ AbstractBackgroundWidget {
                     // Controls 
                     Rectangle {
                         id: controlsPill
-                        Layout.alignment: Qt.AlignVCenter
+                        Layout.alignment: Qt.AlignRight
                         implicitWidth: controlsRow.implicitWidth + 10
                         implicitHeight: root.buttonSize + 8
                         radius: Appearance.rounding?.full ?? 999
@@ -201,7 +200,7 @@ AbstractBackgroundWidget {
                             id: controlsRow
                             anchors.centerIn: parent
                             spacing: 2
-
+                    
                             RippleButton {
                                 implicitWidth: root.buttonSize
                                 implicitHeight: root.buttonSize
