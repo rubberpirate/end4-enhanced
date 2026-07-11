@@ -40,7 +40,7 @@ killall qs 2>/dev/null; qs -c end4-pC > /dev/null 2>&1 & disown
 If you like it and want it to load by default instead of `ii`, edit:
 
 ```bash
-~/.config/hypr/hyprland/variables.conf
+~/.config/hypr/hyprland/variables.lua
 ```
 
 And change this line:
