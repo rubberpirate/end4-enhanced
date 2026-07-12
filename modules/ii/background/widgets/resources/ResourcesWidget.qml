@@ -127,7 +127,7 @@ AbstractBackgroundWidget {
             margins: -6
         }
         opacity: root.containsMouse || toggleArea.containsMouse ? 0.7 : 0
-        visible: opacity > 0
+        visible: opacity > 0 && !Config.options.background.widgetsLocked
 
         Behavior on opacity {
             NumberAnimation { duration: 150 }

@@ -14,8 +14,15 @@ MouseArea {
     property bool snapEnabled: true
     readonly property bool dragging: drag.active
 
+    acceptedButtons: Qt.LeftButton | Qt.RightButton
     drag.target: draggable ? dragProxy : undefined
     cursorShape: (draggable && containsPress) ? Qt.ClosedHandCursor : draggable ? Qt.OpenHandCursor : Qt.ArrowCursor
+
+    onClicked: (mouse) => {
+        if (mouse.button === Qt.RightButton) {
+            Config.options.background.widgetsLocked = !Config.options.background.widgetsLocked
+        }
+    }
 
     function center() {
         root.x = (root.parent.width - root.width) / 2

@@ -164,7 +164,7 @@ AbstractBackgroundWidget {
                 margins: 6
             }
             opacity: (root.containsMouse || resizeArea.containsMouse || resizeArea.pressed) ? 0.5 : 0
-            visible: opacity > 0
+            visible: opacity > 0 && !Config.options.background.widgetsLocked
             z: 1
 
             Behavior on opacity {

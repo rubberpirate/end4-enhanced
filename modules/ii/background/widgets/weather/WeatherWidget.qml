@@ -408,7 +408,7 @@ AbstractBackgroundWidget {
                 margins: 4
             }
             opacity: (root.containsMouse || resizeArea.containsMouse || resizeArea.pressed) ? 0.5 : 0
-            visible: opacity > 0
+            visible: opacity > 0 && !Config.options.background.widgetsLocked
 
             Behavior on opacity {
                 NumberAnimation { duration: 150 }

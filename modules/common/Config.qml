@@ -213,6 +213,7 @@ Singleton {
             }
 
             property JsonObject background: JsonObject {
+                property bool widgetsLocked: false
                 property JsonObject widgets: JsonObject {
                     property JsonObject clock: JsonObject {
                         property bool enable: true
