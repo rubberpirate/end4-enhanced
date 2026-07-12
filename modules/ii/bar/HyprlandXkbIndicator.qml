@@ -26,7 +26,7 @@ Loader {
             StyledText {
                 id: layoutCodeText
                 horizontalAlignment: Text.AlignHCenter
-                text: Config.options.hyprland.input.kbLayout
+                text: HyprlandXkb.currentLayoutCode
                 font.pixelSize: Appearance.font.pixelSize.small
                 color: Appearance.colors.colOnLayer0
                 animateChange: true
