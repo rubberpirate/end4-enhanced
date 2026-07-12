@@ -160,7 +160,7 @@ Singleton {
     Process {
         id: getMemory
         running: false
-        command: ["bash", "-c", "free -h | awk '/^Mem:/ {print $3 \" / \" $2}'"]
+        command: ["bash", "-c", "LC_ALL=C free -h | awk '/^Mem:/ {print $3 \" / \" $2}'"]
         stdout: SplitParser { onRead: data => root.memory = data.trim() }
     }
 
