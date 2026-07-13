@@ -121,7 +121,7 @@ ContentPage {
                         text: Translation.tr("Enable")
                         checked: Config.options.background.centeredWallpaper
                         onClicked: {
-                            Config.options.background.centeredWallpaper = !Config.options.background.centeredWallpaper
+                            Config.options.background.centeredWallpaper = !Config.options.background.centeredWallpaper;
                         }
                     }
                     ConfigSwitch {

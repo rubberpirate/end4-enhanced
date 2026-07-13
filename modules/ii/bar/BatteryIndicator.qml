@@ -65,7 +65,7 @@ MouseArea {
                 anchors.centerIn: parent
                 sourceComponent: ColumnLayout {
                     rotation: 90
-                    spacing: -4
+                    spacing: -7
                     MaterialSymbol {
                         Layout.alignment: Qt.AlignHCenter
                         fill: 1
