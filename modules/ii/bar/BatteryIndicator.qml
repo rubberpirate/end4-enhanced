@@ -76,9 +76,9 @@ MouseArea {
                     }
                     StyledText {
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: (root.isCharging && root.percentage < 1) ? 8 : 4
+                        Layout.topMargin: root.isCharging ? 2 : 4
                         font: batteryProgress.font
-                        text: root.displayText
+                        text: root.percentage
                         visible: root.percentage < 100
                     }
                 }
