@@ -1,9 +1,21 @@
+
+
+
+
 <div align="center">
 
 # 💠 end4-pC
 
 **A personal fork of [illogical-impulse](https://github.com/end-4/dots-hyprland) by [@end-4](https://github.com/end-4)**  
 Customized and maintained by **pctrade**
+
+</div>
+
+---
+
+## 🎬 Showcase
+
+https://github.com/user-attachments/assets/1711c779-94b5-415e-8c8a-36fdd14ff883
 
 </div>
 
