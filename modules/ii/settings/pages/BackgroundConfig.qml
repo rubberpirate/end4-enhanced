@@ -223,11 +223,9 @@ ContentPage {
                         Config.options.background.widgets.clock.showOnlyWhenLocked = checked;
                     }
                 }
-            }
-
-            ContentSubsection {
-                title: Translation.tr("Placement strategy")
                 ConfigSelectionArray {
+                    text: Translation.tr("Placement strategy")
+                    icon: "move"
                     Layout.fillWidth: false
                     currentValue: Config.options.background.widgets.clock.placementStrategy
                     onSelected: newValue => {
@@ -251,54 +249,45 @@ ContentPage {
                         },
                     ]
                 }
-            }
-
-            ConfigRow {
-                ContentSubsection {
-                    visible: !Config.options.background.widgets.clock.showOnlyWhenLocked
-                    title: Translation.tr("Clock style")
-                    Layout.fillWidth: true
-                    ConfigSelectionArray {
-                        currentValue: Config.options.background.widgets.clock.style
-                        onSelected: newValue => {
-                            Config.options.background.widgets.clock.style = newValue;
-                        }
-                        options: [
-                            {
-                                displayName: Translation.tr("Digital"),
-                                icon: "timer_10",
-                                value: "digital"
-                            },
-                            {
-                                displayName: Translation.tr("Cookie"),
-                                icon: "cookie",
-                                value: "cookie"
-                            }
-                        ]
+                ConfigSelectionArray {
+                    text: Translation.tr("Clock style")
+                    icon: "nest_clock_farsight_analog"
+                    currentValue: Config.options.background.widgets.clock.style
+                    onSelected: newValue => {
+                        Config.options.background.widgets.clock.style = newValue;
                     }
+                    options: [
+                        {
+                            displayName: Translation.tr("Digital"),
+                            icon: "timer_10",
+                            value: "digital"
+                        },
+                        {
+                            displayName: Translation.tr("Cookie"),
+                            icon: "cookie",
+                            value: "cookie"
+                        }
+                    ]
                 }
-
-                ContentSubsection {
-                    title: Translation.tr("Clock style (locked)")
-                    Layout.fillWidth: false
-                    ConfigSelectionArray {
-                        currentValue: Config.options.background.widgets.clock.styleLocked
-                        onSelected: newValue => {
-                            Config.options.background.widgets.clock.styleLocked = newValue;
-                        }
-                        options: [
-                            {
-                                displayName: Translation.tr("Digital"),
-                                icon: "timer_10",
-                                value: "digital"
-                            },
-                            {
-                                displayName: Translation.tr("Cookie"),
-                                icon: "cookie",
-                                value: "cookie"
-                            }
-                        ]
+                ConfigSelectionArray {
+                    text: Translation.tr("Clock style (locked)")
+                    icon: "shield_watch"
+                    currentValue: Config.options.background.widgets.clock.styleLocked
+                    onSelected: newValue => {
+                        Config.options.background.widgets.clock.styleLocked = newValue;
                     }
+                    options: [
+                        {
+                            displayName: Translation.tr("Digital"),
+                            icon: "timer_10",
+                            value: "digital"
+                        },
+                        {
+                            displayName: Translation.tr("Cookie"),
+                            icon: "cookie",
+                            value: "cookie"
+                        }
+                    ]
                 }
             }
 
@@ -440,7 +429,7 @@ ContentPage {
             ContentSubsection {
                 visible: settingsClock.cookiePresent
                 title: Translation.tr("Cookie clock settings")
-                GroupedList {    
+                GroupedList {   
                     ConfigSwitch {  
                         buttonIcon: "wand_stars"
                         text: Translation.tr("Auto styling with Gemini")
@@ -511,10 +500,12 @@ ContentPage {
                 }
             }
 
-            ContentSubsection {
+            GroupedList {
+                Layout.topMargin: 10
                 visible: settingsClock.cookiePresent
-                title: Translation.tr("Dial style")
                 ConfigSelectionArray {
+                    text: "Dial Style"
+                    icon: "graph_6"
                     currentValue: Config.options.background.widgets.clock.cookie.dialNumberStyle
                     onSelected: newValue => {
                         Config.options.background.widgets.clock.cookie.dialNumberStyle = newValue;
@@ -548,12 +539,9 @@ ContentPage {
                         }
                     ]
                 }
-            }
-
-            ContentSubsection {
-                visible: settingsClock.cookiePresent
-                title: Translation.tr("Hour hand")
                 ConfigSelectionArray {
+                    icon: "highlighter_size_2"
+                    text: Translation.tr("Hour hand")
                     currentValue: Config.options.background.widgets.clock.cookie.hourHandStyle
                     onSelected: newValue => {
                         Config.options.background.widgets.clock.cookie.hourHandStyle = newValue;
@@ -581,13 +569,9 @@ ContentPage {
                         },
                     ]
                 }
-            }
-
-            ContentSubsection {
-                visible: settingsClock.cookiePresent
-                title: Translation.tr("Minute hand")
-
                 ConfigSelectionArray {
+                    text: Translation.tr("Minute hand")
+                    icon: "eraser_size_1" 
                     currentValue: Config.options.background.widgets.clock.cookie.minuteHandStyle
                     onSelected: newValue => {
                         Config.options.background.widgets.clock.cookie.minuteHandStyle = newValue;
@@ -620,13 +604,9 @@ ContentPage {
                         },
                     ]
                 }
-            }
-
-            ContentSubsection {
-                visible: settingsClock.cookiePresent
-                title: Translation.tr("Second hand")
-
                 ConfigSelectionArray {
+                    text: Translation.tr("Second hand")
+                    icon: "pen_size_1"
                     currentValue: Config.options.background.widgets.clock.cookie.secondHandStyle
                     onSelected: newValue => {
                         Config.options.background.widgets.clock.cookie.secondHandStyle = newValue;
@@ -654,13 +634,9 @@ ContentPage {
                         },
                     ]
                 }
-            }
-
-            ContentSubsection {
-                visible: settingsClock.cookiePresent
-                title: Translation.tr("Date style")
-
                 ConfigSelectionArray {
+                    text: Translation.tr("Date style")
+                    icon: "date_range"
                     currentValue: Config.options.background.widgets.clock.cookie.dateStyle
                     onSelected: newValue => {
                         Config.options.background.widgets.clock.cookie.dateStyle = newValue;
@@ -703,7 +679,7 @@ ContentPage {
                     }
                     ConfigSwitch {
                         buttonIcon: "font_download"
-                        text: Translation.tr("Clock Font")
+                        text: Translation.tr("Follow Clock Font")
                         checked: Config.options.background.widgets.clock.quote.followClock
                         onCheckedChanged: {
                             Config.options.background.widgets.clock.quote.followClock = checked;

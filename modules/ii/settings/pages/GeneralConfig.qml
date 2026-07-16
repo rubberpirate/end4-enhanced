@@ -358,29 +358,28 @@ ContentPage {
 
             ContentSubsection {
                 title: Translation.tr("Quick toggles")
-
-                ConfigSelectionArray {
-                    Layout.fillWidth: false
-                    currentValue: Config.options.sidebar.quickToggles.style
-                    onSelected: newValue => {
-                        Config.options.sidebar.quickToggles.style = newValue;
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("Classic"),
-                            icon: "password_2",
-                            value: "classic"
-                        },
-                        {
-                            displayName: Translation.tr("Android"),
-                            icon: "action_key",
-                            value: "android"
-                        }
-                    ]
-                }
-
                 GroupedList {
-                    Layout.topMargin: 10
+                    ConfigSelectionArray {
+                        text: Translation.tr("Style")
+                        icon: "toggle_on"
+                        Layout.fillWidth: false
+                        currentValue: Config.options.sidebar.quickToggles.style
+                        onSelected: newValue => {
+                            Config.options.sidebar.quickToggles.style = newValue;
+                        }
+                        options: [
+                            {
+                                displayName: Translation.tr("Classic"),
+                                icon: "password_2",
+                                value: "classic"
+                            },
+                            {
+                                displayName: Translation.tr("Android"),
+                                icon: "action_key",
+                                value: "android"
+                            }
+                        ]
+                    }
                     ConfigSpinBox {
                         enabled: Config.options.sidebar.quickToggles.style === "android"
                         icon: "add_column_left"
