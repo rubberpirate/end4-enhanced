@@ -23,6 +23,7 @@ Item {
         { key: "worldClock",  icon: "public",             name: Translation.tr("World Clock") },
         { key: "userCard",    icon: "person",              name: Translation.tr("User Card") },
         { key: "github",      icon: "code",               name: Translation.tr("GitHub Heatmap") },
+        { key: "devices",     icon: "devices",            name: Translation.tr("Connected Devices") },
     ]
 
     Rectangle {
