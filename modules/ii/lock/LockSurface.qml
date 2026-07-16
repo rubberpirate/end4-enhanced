@@ -326,7 +326,7 @@ MouseArea {
                             text: "music_note"
                             iconSize: Appearance.font.pixelSize.normal
                             color: Appearance.colors.colOnSecondaryContainer
-                            visible: root.displayedArtFilePath === ""
+                            visible: root.artUrl === ""
                         }
                     }
                     
