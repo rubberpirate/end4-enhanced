@@ -22,6 +22,7 @@ Item {
         { key: "calendar",    icon: "calendar_month",     name: Translation.tr("Calendar") },
         { key: "worldClock",  icon: "public",             name: Translation.tr("World Clock") },
         { key: "userCard",    icon: "person",              name: Translation.tr("User Card") },
+        { key: "github",      icon: "code",               name: Translation.tr("GitHub Heatmap") },
     ]
 
     Rectangle {
