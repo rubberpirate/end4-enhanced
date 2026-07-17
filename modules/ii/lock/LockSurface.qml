@@ -19,6 +19,19 @@ MouseArea {
     property bool active: false
     property bool showInputField: active || context.currentText.length > 0
     readonly property bool requirePasswordToPower: Config.options.lock.security.requirePasswordToPower
+    readonly property MprisPlayer activePlayer: {
+        const preferred = Config.options.bar.media.preferredPlayer.trim().toLowerCase()
+        if (preferred.length === 0) return MprisController.activePlayer
+        const _ = MprisController.players.count
+        for (const p of MprisController.players) {
+            if ((p.identity ?? "").toLowerCase().includes(preferred) ||
+                (p.desktopEntry ?? "").toLowerCase().includes(preferred))
+                return p
+        }
+        return MprisController.activePlayer
+    }
+
+    property var    artUrl:      activePlayer?.trackArtUrl ?? ""
 
     // Force focus on entry
     function forceFieldFocus() {
@@ -276,24 +289,44 @@ MouseArea {
                     spacing: 8
                     anchors.centerIn: parent
                     
-                    Image {
+                    Rectangle {
+                        id: artRect
+                        implicitWidth: 40
+                        implicitHeight: 40
+                        radius: Appearance.rounding.full
+                        color: Appearance.colors.colPrimaryContainer
                         Layout.alignment: Qt.AlignVCenter
-                        source: activePlayer?.trackArtUrl && activePlayer.trackArtUrl !== "" ? 
-                                activePlayer.trackArtUrl : "../../assets/icons/cover.png"
-                        fillMode: Image.PreserveAspectCrop
-                        cache: false
-                        width: 40
-                        height: 40
-                        sourceSize.width: 40
-                        sourceSize.height: 40
+                        clip: true 
 
                         layer.enabled: true
                         layer.effect: OpacityMask {
                             maskSource: Rectangle {
-                                width: 40
-                                height: 40
-                                radius: Appearance.rounding.full
+                                width: artRect.width
+                                height: artRect.height
+                                radius: artRect.radius
                             }
+                        }
+
+                        StyledImage {
+                            anchors.centerIn: parent
+                            width: artRect.width
+                            height: artRect.height
+                            source: root.artUrl
+                            fillMode: Image.PreserveAspectCrop
+                            cache: false
+                            antialiasing: true
+                            sourceSize.width: artRect.width * 2
+                            sourceSize.height: artRect.height * 2
+                            visible: root.artUrl !== ""
+                        }
+
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            fill: 1
+                            text: "music_note"
+                            iconSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnSecondaryContainer
+                            visible: root.artUrl === ""
                         }
                     }
                     

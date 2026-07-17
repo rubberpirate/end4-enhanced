@@ -208,6 +208,7 @@ ContentPage {
                 }
                 ConfigSwitch {
                     buttonIcon: "autofps_select"
+                    enabled: Config.options.appearance.transparency.enable
                     text: Translation.tr("Automatic")
                     checked: Config.options.appearance.transparency.automatic
                     onCheckedChanged: { Config.options.appearance.transparency.automatic = checked; }

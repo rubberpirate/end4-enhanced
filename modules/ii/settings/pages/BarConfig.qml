@@ -154,26 +154,57 @@ ContentPage {
             icon: "pivot_table_chart"
             shape: MaterialShape.Shape.Gem
             title: Translation.tr("Positioning & Styles")
-            ConfigRow {
-                ContentSubsection {
-                    title: Translation.tr("Bar position"); Layout.fillWidth: true
-                    ConfigSelectionArray {
-                        currentValue: (Config.options.bar.bottom ? 1 : 0) | (Config.options.bar.vertical ? 2 : 0)
-                        onSelected: newValue => {
-                            Config.options.bar.bottom = (newValue & 1) !== 0;
-                            Config.options.bar.vertical = (newValue & 2) !== 0;
-                        }
-                        options: [
-                            { displayName: Translation.tr("Top"),    icon: "arrow_upward",   value: 0 },
-                            { displayName: Translation.tr("Left"),   icon: "arrow_back",     value: 2 },
-                            { displayName: Translation.tr("Bottom"), icon: "arrow_downward", value: 1 },
-                            { displayName: Translation.tr("Right"),  icon: "arrow_forward",  value: 3 }
-                        ]
+            GroupedList {
+                ConfigSelectionArray {
+                    text: Translation.tr("Bar position")
+                    icon: "swap_vert"
+                    currentValue: (Config.options.bar.bottom ? 1 : 0) | (Config.options.bar.vertical ? 2 : 0)
+                    onSelected: newValue => {
+                        Config.options.bar.bottom = (newValue & 1) !== 0;
+                        Config.options.bar.vertical = (newValue & 2) !== 0;
                     }
+                    options: [
+                        { displayName: Translation.tr("Top"),    icon: "arrow_upward",   value: 0 },
+                        { displayName: Translation.tr("Left"),   icon: "arrow_back",     value: 2 },
+                        { displayName: Translation.tr("Bottom"), icon: "arrow_downward", value: 1 },
+                        { displayName: Translation.tr("Right"),  icon: "arrow_forward",  value: 3 }
+                    ]
                 }
-                ContentSubsection {
-                    title: Translation.tr("Automatically hide"); Layout.fillWidth: false
+                ConfigSelectionArray {
+                    text: Translation.tr("Bar style")
+                    icon: "style"
+                    currentValue: Config.options.bar.cornerStyle
+                    onSelected: newValue => { Config.options.bar.cornerStyle = newValue; }
+                    options: [
+                        { displayName: Translation.tr("Hug"),     icon: "line_curve", value: 0 },
+                        { displayName: Translation.tr("Float"),   icon: "view_day",   value: 1 },
+                        { displayName: Translation.tr("Islands"), icon: "crop_3_2",   value: 2 },
+                        { displayName: Translation.tr("M3"), icon: "interests",   value: 3 }
+                    ]
+                }
+                ConfigSelectionArray {
+                    text: Translation.tr("Group style")
+                    icon: "tab_group"
+                    currentValue: Config.options.bar.borderless
+                    onSelected: newValue => { Config.options.bar.borderless = newValue; }
+                    options: [
+                        { displayName: Translation.tr(""),          icon: "block",          value: "transparent" },
+                        { displayName: Translation.tr("Pills"),     icon: "pill",           value: "pills" },
+                        { displayName: Translation.tr("Separated"), icon: "view_column_2",  value: "separated" }
+                    ]
+                }
+                ConfigRow{
+                    uniform: true
+                    ConfigSwitch {
+                        buttonIcon: "variable_insert"
+                        text: Translation.tr("Show Background")
+                        enabled: Config.options.bar.cornerStyle === 0 || Config.options.bar.cornerStyle === 1
+                        checked: Config.options.bar.showBackground
+                        onCheckedChanged: { Config.options.bar.showBackground = checked; }
+                    }
                     ConfigSelectionArray {
+                        text: Translation.tr("Autohide")
+                        icon: "preview_off"
                         currentValue: Config.options.bar.autoHide.enable
                         onSelected: newValue => { Config.options.bar.autoHide.enable = newValue; }
                         options: [
@@ -181,42 +212,6 @@ ContentPage {
                             { displayName: Translation.tr("Yes"), icon: "check", value: true }
                         ]
                     }
-                }
-            }
-            ConfigRow {
-                ContentSubsection {
-                    title: Translation.tr("Bar style"); Layout.fillWidth: true
-                    ConfigSelectionArray {
-                        currentValue: Config.options.bar.cornerStyle
-                        onSelected: newValue => { Config.options.bar.cornerStyle = newValue; }
-                        options: [
-                            { displayName: Translation.tr("Hug"),     icon: "line_curve", value: 0 },
-                            { displayName: Translation.tr("Float"),   icon: "view_day",   value: 1 },
-                            { displayName: Translation.tr("Islands"), icon: "crop_3_2",   value: 2 },
-                            { displayName: Translation.tr("M3"), icon: "interests",   value: 3 }
-                        ]
-                    }
-                }
-                ContentSubsection {
-                    title: Translation.tr("Group style"); Layout.fillWidth: false
-                    ConfigSelectionArray {
-                        currentValue: Config.options.bar.borderless
-                        onSelected: newValue => { Config.options.bar.borderless = newValue; }
-                        options: [
-                            { displayName: Translation.tr(""),          icon: "block",          value: "transparent" },
-                            { displayName: Translation.tr("Pills"),     icon: "pill",           value: "pills" },
-                            { displayName: Translation.tr("Separated"), icon: "view_column_2",  value: "separated" }
-                        ]
-                    }
-                }
-            }
-            GroupedList {
-                Layout.topMargin: 10
-                ConfigSwitch {
-                    buttonIcon: "variable_insert"
-                    text: Translation.tr("Show Background")
-                    checked: Config.options.bar.showBackground
-                    onCheckedChanged: { Config.options.bar.showBackground = checked; }
                 }
             }
         }
@@ -338,6 +333,19 @@ ContentPage {
                     checked: Config.options.bar.workspaces.alwaysShowNumbers
                     onCheckedChanged: { Config.options.bar.workspaces.alwaysShowNumbers = checked; }
                 }
+                ConfigSelectionArray {
+                    text: Translation.tr("Numbers style")
+                    icon: "looks_3"
+                    currentValue: JSON.stringify(Config.options.bar.workspaces.numberMap)
+                    onSelected: newValue => {
+                        Config.options.bar.workspaces.numberMap = JSON.parse(newValue)
+                    }
+                    options: [
+                        { displayName: Translation.tr("Normal"),    icon: "timer_10",        value: '[]' },
+                        { displayName: Translation.tr("Han chars"), icon: "glyphs",          value: '["一","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十"]' },
+                        { displayName: Translation.tr("Roman"),     icon: "account_balance", value: '["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"]' }
+                    ]
+                }
                 ConfigSwitch {
                     buttonIcon: "award_star"; text: Translation.tr("Show app icons")
                     checked: Config.options.bar.workspaces.showAppIcons
@@ -349,29 +357,9 @@ ContentPage {
                     from: 1; to: 30
                     onValueChanged: { Config.options.bar.workspaces.shown = value; }
                 }
-            }
-        }
-        
-        ConfigRow {
-
-            ContentSubsection {
-                title: Translation.tr("Number style")
                 ConfigSelectionArray {
-                    currentValue: JSON.stringify(Config.options.bar.workspaces.numberMap)
-                    onSelected: newValue => {
-                        Config.options.bar.workspaces.numberMap = JSON.parse(newValue)
-                    }
-                    options: [
-                        { displayName: Translation.tr("Normal"),    icon: "timer_10",        value: '[]' },
-                        { displayName: Translation.tr("Han chars"), icon: "glyphs",          value: '["一","二","三","四","五","六","七","八","九","十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十"]' },
-                        { displayName: Translation.tr("Roman"),     icon: "account_balance", value: '["I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV","XVI","XVII","XVIII","XIX","XX"]' }
-                    ]
-                }
-            }
-
-            ContentSubsection {
-                title: Translation.tr("Indicator style")
-                ConfigSelectionArray {
+                    text: Translation.tr("Indicator style")
+                    icon: "page_control"
                     currentValue: Config.options.bar.workspaces.indicatorStyle ?? "icon"
                     onSelected: newValue => {
                         Config.options.bar.workspaces.indicatorStyle = newValue
@@ -428,9 +416,11 @@ ContentPage {
                     }
                 }
             }
-            ContentSubsection {
-                title: Translation.tr("Style"); Layout.fillWidth: false
+            GroupedList {
+                Layout.topMargin: 10
                 ConfigSelectionArray {
+                    text: Translation.tr("Style")
+                    icon: "style"
                     currentValue: Config.options.bar.resources.style
                     onSelected: newValue => { Config.options.bar.resources.style = newValue; }
                     options: [
@@ -438,9 +428,6 @@ ContentPage {
                         { displayName: Translation.tr("Outline"),   icon: "circles",            value: "outline" }
                     ]
                 }
-            }
-            GroupedList {
-                Layout.topMargin: 10
                 ConfigSwitch {
                     buttonIcon: "decimal_increase"; text: Translation.tr("Show Percentage")
                     checked: Config.options.bar.resources.showValue
@@ -458,6 +445,7 @@ ContentPage {
                     }
                 }
             }
+    
         }
 
         ContentSection {
