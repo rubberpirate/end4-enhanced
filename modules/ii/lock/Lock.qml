@@ -42,6 +42,12 @@ LockScreen {
         target: GlobalStates
         function onScreenLockedChanged() {
             if (GlobalStates.screenLocked) {
+                if (Config.options.background.lockWall !== "") {
+                    Quickshell.execDetached(["bash", "-c",
+                        `${Directories.wallpaperSwitchScriptPath} --mode ${Appearance.m3colors.darkmode ? "dark" : "light"} --noswitch --image '${Config.options.background.lockWall}'`
+                    ]);
+                }
+
                 // Lock: save workspace per monitor and move all to temp workspace in one batch
                 var next = {}
                 var batch = "keyword animation workspaces,1,7,menu_decel,slidevert; "
@@ -58,6 +64,11 @@ LockScreen {
                 root.savedWorkspaces = next
                 Quickshell.execDetached(["bash", "-c", batch])
             } else {
+                if (Config.options.background.lockWall !== "") {
+                    Quickshell.execDetached(["bash", "-c",
+                        `${Directories.wallpaperSwitchScriptPath} --mode ${Appearance.m3colors.darkmode ? "dark" : "light"} --noswitch`
+                    ]);
+                }
                 restoreTimer.start()
             }
         }
