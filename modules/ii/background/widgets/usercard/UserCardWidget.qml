@@ -60,14 +60,56 @@ AbstractBackgroundWidget {
         implicitWidth: root.cardWidth 
         implicitHeight: 252
 
-        Image {
+        Item {
             id: bgImage
             anchors.fill: parent
-            source: "file://" + Config.options.background.wallpaperPath
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
-            cache: false
             visible: false
+
+            property string effectiveSource: "file://" + (GlobalStates.screenLocked && Config.options.background.lockWall !== ""
+                ? Config.options.background.lockWall
+                : Config.options.background.wallpaperPath)
+
+            Image {
+                id: bgImageA
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                cache: false
+                opacity: 1
+                Behavior on opacity {
+                    NumberAnimation { duration: 400; easing.type: Easing.InOutCubic }
+                }
+            }
+            Image {
+                id: bgImageB
+                anchors.fill: parent
+                fillMode: Image.PreserveAspectCrop
+                asynchronous: true
+                cache: false
+                opacity: 0
+                Behavior on opacity {
+                    NumberAnimation { duration: 400; easing.type: Easing.InOutCubic }
+                }
+            }
+
+            property bool usingA: true
+
+            onEffectiveSourceChanged: {
+                if (usingA) {
+                    bgImageB.source = effectiveSource
+                    bgImageB.opacity = 1
+                    bgImageA.opacity = 0
+                } else {
+                    bgImageA.source = effectiveSource
+                    bgImageA.opacity = 1
+                    bgImageB.opacity = 0
+                }
+                usingA = !usingA
+            }
+
+            Component.onCompleted: {
+                bgImageA.source = effectiveSource
+            }
         }
 
         FastBlur {

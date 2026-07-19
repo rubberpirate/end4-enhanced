@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import qs
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 
 Rectangle {
     id: root
@@ -10,46 +11,70 @@ Rectangle {
     property string icon: ""
     property string label: ""
     property string value: ""
-    property int iconShape: MaterialShape.Shape.Circle
-    property color iconColor: Appearance.colors.colPrimary
+    property color cardBgColor: Appearance.colors.colLayer1 
+    property color labelColor: Appearance.colors.colOnSurfaceVariant
+    property color valueColor: Appearance.colors.colOnSurface
+    property color iconContainerColor: Appearance.colors.colSecondaryContainer
+    property color iconColor: Appearance.colors.colOnSecondaryContainer
+    property var iconShape: MaterialShape.Shape.Clover4Leaf
 
-    implicitWidth: 100
-    implicitHeight: cardCol.implicitHeight + 24
-    radius: Appearance.rounding.normal
-    color: Appearance.colors.colLayer1
-    border.width: 1
-    border.color: Appearance.colors.colLayer0Border
+    property var clickAction: null
+    property bool pointingHandCursor: true
 
-    ColumnLayout {
-        id: cardCol
-        anchors { fill: parent; margins: 12 }
-        spacing: 4
+    implicitWidth: 260
+    implicitHeight: 80
+    radius: Appearance.rounding.large 
+    color: root.cardBgColor
+    border.width: 0
+
+    RowLayout {
+        id: cardRow
+        anchors.fill: parent
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        spacing: 16 
 
         MaterialShapeWrappedMaterialSymbol {
-            Layout.alignment: Qt.AlignRight
-            shape: root.iconShape
+            Layout.alignment: Qt.AlignVCenter
+            wrappedShape: root.iconShape
             text: root.icon
-            iconSize: Appearance.font.pixelSize.large
-            implicitSize: 32
-            color: Qt.alpha(root.iconColor, 0.2)
+            iconSize: Appearance.font.pixelSize.larger + 1
             colSymbol: root.iconColor
+            color: root.iconContainerColor
         }
 
-        Item { Layout.fillHeight: true }
-
-        StyledText {
+        ColumnLayout {
             Layout.fillWidth: true
-            text: root.value
-            font.pixelSize: Appearance.font.pixelSize.normal
-            font.weight: Font.Medium
-            color: Appearance.colors.colOnLayer1
-            elide: Text.ElideRight
-        }
+            Layout.alignment: Qt.AlignVCenter
+            spacing: 4 
 
-        StyledText {
-            text: root.label
-            font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colSubtext
+            StyledText {
+                Layout.fillWidth: true
+                text: root.label
+                font.pixelSize: Appearance.font.pixelSize.small
+                font.weight: Font.Medium
+                color: root.labelColor
+                elide: Text.ElideRight
+                opacity: 0.6
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: root.value
+                font.pixelSize: Appearance.font.pixelSize.normal
+                font.weight: Font.DemiBold
+                color: root.valueColor
+                elide: Text.ElideRight
+            }
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        enabled: root.clickAction !== null
+        cursorShape: root.clickAction !== null ? Qt.PointingHandCursor : Qt.ArrowCursor
+        onClicked: {
+            if (root.clickAction) root.clickAction();
         }
     }
 }

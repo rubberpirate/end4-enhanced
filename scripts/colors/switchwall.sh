@@ -167,10 +167,11 @@ switch() {
     type_flag="$3"
     color_flag="$4"
     color="$5"
+    colors_only_flag="$6"
 
     # Start Gemini auto-categorization if enabled
     aiStylingEnabled=$(jq -r '.background.widgets.clock.cookie.aiStyling' "$SHELL_CONFIG_FILE")
-    if [[ "$aiStylingEnabled" == "true" ]]; then
+    if [[ "$aiStylingEnabled" == "true" && -z "$colors_only_flag" ]]; then
         categorize_wallpaper "$imgpath" &
     fi
 
@@ -193,7 +194,10 @@ switch() {
         fi
 
         check_and_prompt_upscale "$imgpath" &
-        kill_existing_mpvpaper
+
+        if [[ -z "$colors_only_flag" ]]; then
+            kill_existing_mpvpaper
+        fi
 
         if is_video "$imgpath"; then
             mkdir -p "$THUMBNAIL_DIR"
@@ -223,39 +227,49 @@ switch() {
                 exit 0
             fi
 
-            # Set wallpaper path
-            set_wallpaper_path "$imgpath"
+            if [[ -z "$colors_only_flag" ]]; then
+                # Set wallpaper path
+                set_wallpaper_path "$imgpath"
 
-            # Set video wallpaper
-            local video_path="$imgpath"
-            monitors=$(hyprctl monitors -j | jq -r '.[] | .name')
-            for monitor in $monitors; do
-                mpvpaper -o "$VIDEO_OPTS" "$monitor" "$video_path" &
-                sleep 0.1
-            done
+                # Set video wallpaper
+                local video_path="$imgpath"
+                monitors=$(hyprctl monitors -j | jq -r '.[] | .name')
+                for monitor in $monitors; do
+                    mpvpaper -o "$VIDEO_OPTS" "$monitor" "$video_path" &
+                    sleep 0.1
+                done
+            fi
 
             # Extract first frame for color generation
             thumbnail="$THUMBNAIL_DIR/$(basename "$imgpath").jpg"
             ffmpeg -y -i "$imgpath" -vframes 1 "$thumbnail" 2>/dev/null
 
-            # Set thumbnail path
-            set_thumbnail_path "$thumbnail"
+            if [[ -z "$colors_only_flag" ]]; then
+                # Set thumbnail path
+                set_thumbnail_path "$thumbnail"
+            fi
 
             if [ -f "$thumbnail" ]; then
                 matugen_args+=(image "$thumbnail")
                 generate_colors_material_args=(--path "$thumbnail")
-                create_restore_script "$video_path"
+                if [[ -z "$colors_only_flag" ]]; then
+                    create_restore_script "$video_path"
+                fi
             else
                 echo "Cannot create image to colorgen"
-                remove_restore
+                if [[ -z "$colors_only_flag" ]]; then
+                    remove_restore
+                fi
                 exit 1
             fi
         else
             matugen_args+=(image "$imgpath")
             generate_colors_material_args=(--path "$imgpath")
-            # Update wallpaper path in config
-            set_wallpaper_path "$imgpath"
-            remove_restore
+            if [[ -z "$colors_only_flag" ]]; then
+                # Update wallpaper path in config
+                set_wallpaper_path "$imgpath"
+                remove_restore
+            fi
         fi
     fi
 
@@ -323,6 +337,8 @@ main() {
     color_flag=""
     color=""
     noswitch_flag=""
+    colors_only_flag=""
+    explicit_image=""
 
     get_type_from_config() {
         jq -r '.appearance.palette.type' "$SHELL_CONFIG_FILE" 2>/dev/null || echo "auto"
@@ -366,11 +382,14 @@ main() {
                 ;;
             --image)
                 imgpath="$2"
+                explicit_image="1"
                 shift 2
                 ;;
             --noswitch)
                 noswitch_flag="1"
-                imgpath=$(jq -r '.background.wallpaperPath' "$SHELL_CONFIG_FILE" 2>/dev/null || echo "")
+                if [[ -z "$imgpath" ]]; then
+                    imgpath=$(jq -r '.background.wallpaperPath' "$SHELL_CONFIG_FILE" 2>/dev/null || echo "")
+                fi
                 shift
                 ;;
             *)
@@ -381,6 +400,10 @@ main() {
                 ;;
         esac
     done
+
+    if [[ -n "$noswitch_flag" && -n "$explicit_image" ]]; then
+        colors_only_flag="1"
+    fi
 
     # If accentColor is set in config, use it
     config_color="$(get_accent_color_from_config)"
@@ -468,7 +491,7 @@ main() {
         fi
     fi
 
-    switch "$imgpath" "$mode_flag" "$type_flag" "$color_flag" "$color"
+    switch "$imgpath" "$mode_flag" "$type_flag" "$color_flag" "$color" "$colors_only_flag"
 }
 
 main "$@"
