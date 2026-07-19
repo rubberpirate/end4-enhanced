@@ -1,8 +1,0 @@
-{
-  "applied": [
-    "014-malloc-arena-optimization",
-    "019-config-dir-rename-compat",
-    "024-steam-millennium"
-  ],
-  "skipped": []
-}
