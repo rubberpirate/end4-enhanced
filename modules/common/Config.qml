@@ -392,7 +392,6 @@ Singleton {
                         property real y: 100
                         property bool vertical: false
                     }
-                    }
 
                     property JsonObject media: JsonObject {
                         property bool enable: false
