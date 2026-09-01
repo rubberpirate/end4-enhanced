@@ -226,6 +226,42 @@ ContentPage {
                     }
                 }
 
+                ConfigSwitch {
+                    buttonIcon: "blur_on"
+                    text: Translation.tr("Blur wall")
+                    checked: Config.options.background.showBlur
+                    onCheckedChanged: {
+                        Config.options.background.showBlur = checked;
+                    }
+                }
+
+                ConfigSelectionArray {
+                    text: Translation.tr("Split blur amount")
+                    icon: "split_scene"
+                    currentValue: Config.options.background.splitRatio
+                    options: [
+                        { "displayName": "25%",  "icon": "thumbnail_bar",              "value": "25" },
+                        { "displayName": "50%",  "icon": "side_navigation",              "value": "50" },
+                        { "displayName": "100%", "icon": "fullscreen",    "value": "100" },
+                    ]
+                    onSelected: newValue => {
+                        Config.options.background.splitRatio = newValue
+                    }
+                }
+
+                ConfigSelectionArray {
+                    text: Translation.tr("Split blur side")
+                    icon: "align_horizontal_left"
+                    currentValue: Config.options.background.splitSide
+                    options: [
+                        { "displayName": Translation.tr("Left"),  "icon": "align_horizontal_left",  "value": "left" },
+                        { "displayName": Translation.tr("Right"), "icon": "align_horizontal_right", "value": "right" },
+                    ]
+                    onSelected: newValue => {
+                        Config.options.background.splitSide = newValue
+                    }
+                }
+
                 ConfigSpinBox {
                     icon: "timer"
                     text: Translation.tr("Wallpaper change interval (min)")
@@ -253,6 +289,11 @@ ContentPage {
                         { displayName: Translation.tr("Fade"), icon: "gradient", value: "transition" },
                         { displayName: Translation.tr("Pixelate"), icon: "grain", value: "pixelate" },
                         { displayName: Translation.tr("Stripes"), icon: "texture_minus", value: "stripes" },
+                        { displayName: Translation.tr("CRT"), icon: "tv", value: "crt" },
+                        { displayName: Translation.tr("Dissolve"), icon: "blur_on", value: "dissolve" },
+                        { displayName: Translation.tr("Glitch"), icon: "bug_report", value: "glitch" },
+                        { displayName: Translation.tr("Ripple"), icon: "water", value: "ripple" },
+                        { displayName: Translation.tr("Shatter"), icon: "broken_image", value: "shatter" },
                         { displayName: Translation.tr("Random"), icon: "shuffle", value: "random" },
                     ]
                     currentValue: Config.options.background.wallpaperAnimation
@@ -1018,7 +1059,19 @@ ContentPage {
                             icon: "code",
                             name: Translation.tr("GitHub Heatmap"),
                             enabled: Config.options.background.widgets.github.enable
+                        },
+                        {
+                            icon: "add_task",
+                            name: Translation.tr("To-Do"),
+                            enabled: Config.options.background.widgets.todo.enable
+                        },
+                        {
+                            icon: "timer",
+                            name: Translation.tr("Timers"),
+                            enabled: Config.options.background.widgets.timers.enable
                         }
+                        }
+                        
                     ]
                     delegate: Rectangle {
                         Layout.fillWidth: true
@@ -1071,6 +1124,10 @@ ContentPage {
                                             Config.options.background.widgets.screentime.enable = checked
                                         else if (modelData.icon === "code")
                                             Config.options.background.widgets.github.enable = checked
+                                        else if (modelData.icon === "add_task")
+                                            Config.options.background.widgets.todo.enable = checked
+                                        else if (modelData.icon === "timer")
+                                            Config.options.background.widgets.timers.enable = checked
                                     }
                                 }
                             }

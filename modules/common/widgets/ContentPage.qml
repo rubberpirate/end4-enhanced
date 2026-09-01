@@ -7,7 +7,7 @@ StyledFlickable {
     id: root
     property real baseWidth: 600
     property bool forceWidth: false
-    property real bottomContentPadding: 90
+    property real bottomContentPadding: Config.options.settings.style === "minimal" ? 40 : 90
 
     default property alias data: contentColumn.data
 

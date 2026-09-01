@@ -12,6 +12,7 @@ import qs.modules.common.functions
 ContentPage {
     forceWidth: true
     bottomContentPadding: 35
+    property bool isMinimal: Config.options.settings.style === "minimal"
 
     function runSystemUpdate() {
         Quickshell.execDetached([
@@ -23,20 +24,39 @@ ContentPage {
     }
 
     function runUpdateDots() {
-        Quickshell.execDetached([
-            "kitty", "--hold",
-            "bash", "-c",
-            "killall qs; sleep 0.5; cd ~/.config/quickshell/ && rm -rf end4-pC && git clone https://github.com/pctrade/end4-pC.git && nohup qs -c end4-pC > /tmp/qs.log 2>&1 &"
-        ])
+        const updateScript = `
+            set -e
+            DIR="$HOME/.config/quickshell"
+
+            # Download to temp first
+            rm -rf "$DIR/end4-pC-tmp"
+            git clone https://github.com/pctrade/end4-pC.git "$DIR/end4-pC-tmp"
+
+            # Apply update
+            rm -rf "$DIR/end4-pC-old"
+            [ -d "$DIR/end4-pC" ] && mv "$DIR/end4-pC" "$DIR/end4-pC-old"
+            mv "$DIR/end4-pC-tmp" "$DIR/end4-pC"
+
+            # Reload
+            killall qs 2>/dev/null || true
+            sleep 0.5
+            setsid qs -c end4-pC >/tmp/qs.log 2>&1 < /dev/null &
+            disown
+
+            # Cleanup
+            rm -rf "$DIR/end4-pC-old"
+        `
+
+        Quickshell.execDetached(["kitty", "--hold", "bash", "-c", updateScript])
         Qt.callLater(() => GlobalStates.settingsOpen = false)
     }
 
     Rectangle {
         Layout.fillWidth: true
         Layout.preferredHeight: 156 
-        Layout.topMargin: 35
-        Layout.leftMargin: 16
-        Layout.rightMargin: 16
+        Layout.topMargin: !isMinimal ? 35 : 4
+        Layout.leftMargin: !isMinimal ? 16 : 0
+        Layout.rightMargin: !isMinimal ? 16 : 0
 
         radius: 24
         color: Appearance.colors.colLayer1
@@ -138,6 +158,7 @@ ContentPage {
 
     ColumnLayout {
         Layout.fillWidth: true
+        Layout.topMargin: !isMinimal ? 0 : -8
         spacing: 8
 
         RowLayout { //This is not in the grid because I was planning to do something else.
@@ -183,6 +204,7 @@ ContentPage {
             }
 
             AboutCard {
+                visible: !isMinimal
                 icon: "terminal"
                 label: "Shell"
                 iconShape: MaterialShape.Shape.Gem
@@ -210,6 +232,7 @@ ContentPage {
             }
 
             AboutCard {
+                visible: !isMinimal
                 icon: "timelapse"
                 label: "Uptime"
                 iconShape: MaterialShape.Shape.Cookie12Sided

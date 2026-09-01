@@ -4,6 +4,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+;import qs.modules.common.functions
 import qs.modules.common.widgets.widgetCanvas
 import qs.modules.ii.background.widgets
 
@@ -18,15 +19,15 @@ AbstractBackgroundWidget {
 
     readonly property real snapWidth1: singleWidth            
     readonly property real snapWidth2: singleWidth * 2 + cardSpacing  
-    readonly property real snapWidth3: singleWidth * 2 + cardSpacing  
+    readonly property real snapWidth3: singleWidth * 3 + cardSpacing * 2
 
     property string sizeMode: root.configEntry.sizeMode ?? "2x2"
 
     property real widgetWidth: {
         switch (root.sizeMode) {
             case "1x1": return snapWidth1
-            case "1x2": return snapWidth2
-            default:    return snapWidth3
+            case "2x3": return snapWidth3
+            default:    return snapWidth2
         }
     }
 
@@ -34,6 +35,25 @@ AbstractBackgroundWidget {
         var mid1 = (snapWidth1 + snapWidth2) / 2
         if (value < mid1) return "1x1"
         return root.sizeMode === "1x2" ? "1x2" : "2x2"
+    }
+
+    readonly property real heightToggleFraction: 0.3
+    readonly property real heightToggleDelta: (root.cardHeight * 2 + root.cardSpacing - root.cardHeight) * root.heightToggleFraction
+
+    function modeForDrag(dx, dy, startWidth) {
+        var mid1 = (root.snapWidth1 + root.snapWidth2) / 2
+        var mid2 = (root.snapWidth2 + root.snapWidth3) / 2
+        var newWidth = startWidth + dx
+
+        if (newWidth < mid1) return "1x1"
+        if (newWidth >= mid2) return "2x3"
+
+        if (root.sizeMode === "1x1") {
+            return dy > root.heightToggleDelta ? "2x2" : "1x2"
+        }
+        if (dy > root.heightToggleDelta) return "2x2"
+        if (dy < -root.heightToggleDelta) return "1x2"
+        return root.sizeMode === "2x3" ? "2x2" : root.sizeMode
     }
 
     property int monthShift: 0
@@ -136,6 +156,7 @@ AbstractBackgroundWidget {
             sourceComponent: {
                 if (root.sizeMode === "1x1") return oneByOneContent
                 if (root.sizeMode === "1x2") return oneByTwoContent
+                if (root.sizeMode === "2x3") return twoByThreeContent
                 return twoByTwoContent
             }
         }
@@ -349,7 +370,7 @@ AbstractBackgroundWidget {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    color: Appearance.colors.colLayer1
+                    color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
                     radius: (Appearance.rounding?.verylarge ?? 30) - 8
 
                     ColumnLayout {
@@ -377,30 +398,106 @@ AbstractBackgroundWidget {
             }
         }
 
-        Rectangle {
-            id: toggleHandle
-            width: 16; height: 16; radius: 4
-            color: Appearance.colors.colOnPrimaryContainer
-            anchors { left: card.left; bottom: card.bottom; margins: 4 }
-            opacity: (root.containsMouse || toggleArea.containsMouse) && root.sizeMode !== "1x1" ? 0.5 : 0
-            visible: opacity > 0 && !Config.options.background.widgetsLocked
-            Behavior on opacity { NumberAnimation { duration: 150 } }
+        // 2x3
+        Component {
+            id: twoByThreeContent
+            RowLayout {
+                anchors { fill: parent; margins: 16 }
+                spacing: 16
 
-            MaterialSymbol {
-                anchors.centerIn: parent
-                text: root.sizeMode === "1x2" ? "calendar_view_month" : "calendar_view_week"
-                iconSize: 11
-                color: Appearance.colors.colPrimaryContainer
-            }
+                ColumnLayout {
+                    Layout.preferredWidth: 110
+                    Layout.fillHeight: true
+                    spacing: 2
 
-            MouseArea {
-                id: toggleArea
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.PointingHandCursor
-                onClicked: {
-                    root.sizeMode = root.sizeMode === "2x2" ? "1x2" : "2x2"
-                    root.configEntry.sizeMode = root.sizeMode
+                    MaterialShapeWrappedMaterialSymbol {
+                        shape: MaterialShape.Shape.Gem
+                        color: Appearance.colors.colPrimary
+                        colSymbol: Appearance.colors.colOnPrimary
+                        text: "calendar_month"
+                        iconSize: 22
+                        fill: 1
+                        padding: 6
+                        implicitWidth: 44
+                        implicitHeight: 44
+                    }
+
+                    Item { Layout.fillHeight: true }
+
+                    StyledText {
+                        text: root.today.toLocaleDateString(Qt.locale(), "MMMM").toUpperCase()
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        font.weight: Font.Bold
+                        color: Appearance.colors.colOnPrimaryContainer
+                        opacity: 0.6
+                    }
+                    StyledText {
+                        text: root.today.toLocaleDateString(Qt.locale(), "dddd")
+                        font.pixelSize: Appearance.font.pixelSize.larger
+                        font.weight: Font.DemiBold
+                        color: Appearance.colors.colOnPrimaryContainer
+                        opacity: 0.8
+                    }
+
+                    StyledText {
+                        text: root.today.getDate()
+                        font.pixelSize: 66
+                        font.weight: Font.Bold
+                        color: Appearance.colors.colPrimary
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                    radius: (Appearance.rounding?.verylarge ?? 30) - 8
+
+                    ColumnLayout {
+                        anchors { fill: parent; margins: 10 }
+                        spacing: 4
+
+                        RowLayout {
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.topMargin: 10
+                            spacing: 4
+                            Repeater {
+                                model: ["Mo","Tu","We","Th","Fr","Sa","Su"]
+                                delegate: StyledText {
+                                    Layout.preferredWidth: 24
+                                    horizontalAlignment: Text.AlignHCenter
+                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                    font.weight: Font.Bold
+                                    color: Appearance.colors.colOnPrimaryContainer
+                                    opacity: 0.6
+                                    text: modelData
+                                }
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillHeight: true
+                            Layout.alignment: Qt.AlignHCenter
+                            spacing: -3
+
+                            Repeater {
+                                model: root.getMonthMatrix(root.today)
+                                delegate: RowLayout {
+                                    required property var modelData
+                                    spacing: 4
+                                    Repeater {
+                                        model: parent.modelData
+                                        delegate: DayCell {
+                                            required property var modelData
+                                            day: modelData.day
+                                            currentMonth: modelData.currentMonth
+                                            isToday: modelData.currentMonth && modelData.day === root.today.getDate()
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -410,11 +507,8 @@ AbstractBackgroundWidget {
             hoverActive: root.containsMouse
             locked: Config.options.background.widgetsLocked
             currentWidth: root.widgetWidth
-            onResized: (newWidth) => {
-                var mid = (root.snapWidth1 + root.snapWidth2) / 2
-                if (newWidth < mid) root.sizeMode = "1x1"
-                else if (root.sizeMode === "1x1") root.sizeMode = "2x2"
-            }
+            resizeMode: "diagonal"
+            onResizedXY: (dx, dy, startWidth) => { root.sizeMode = root.modeForDrag(dx, dy, startWidth) }
             onResizeFinished: {
                 root.configEntry.sizeMode = root.sizeMode
             }

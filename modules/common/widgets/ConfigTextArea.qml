@@ -26,7 +26,6 @@ RowLayout {
     property color colLabel: Appearance.colors.colOnSecondaryContainer
     property real cornerRadius: rounded ? Appearance.rounding.large : Appearance.rounding.small
 
-    // Optional trailing confirm button
     property bool confirmButtonVisible: false
     property string confirmButtonIcon: "check"
     property color colConfirmBackground: Appearance.colors.colPrimaryContainer
@@ -111,6 +110,15 @@ RowLayout {
                 pixelSize: Appearance.font.pixelSize.small
                 hintingPreference: Font.PreferFullHinting
                 variableAxes: Appearance.font.variableAxes.main
+            }
+
+            Keys.onReturnPressed: function(event) {
+                event.accepted = true
+                root.confirmClicked()
+            }
+            Keys.onEnterPressed: function(event) {
+                event.accepted = true
+                root.confirmClicked()
             }
         }
     }

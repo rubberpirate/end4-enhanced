@@ -11,6 +11,7 @@ Canvas {
     property string resizeMode: "horizontal" 
 
     signal resized(real newValue)
+    signal resizedXY(real dx, real dy, real startWidth)
     signal resizeFinished()
 
     width: 62
@@ -64,10 +65,13 @@ Canvas {
         onPositionChanged: (mouse) => {
             if (!pressed) return
             var globalPos = mapToItem(null, mouse.x, mouse.y)
+            var dx = globalPos.x - startX
+            var dy = globalPos.y - startY
             var delta = root.resizeMode === "diagonal"
-                ? Math.max(globalPos.x - startX, globalPos.y - startY)
-                : (globalPos.x - startX)
+                ? Math.max(dx, dy)
+                : dx
             root.resized(startValue + delta)
+            root.resizedXY(dx, dy, startValue)
         }
         onReleased: {
             root.resizeFinished()

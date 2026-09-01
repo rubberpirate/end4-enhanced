@@ -4,6 +4,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 import qs.modules.common.widgets.widgetCanvas
 import qs.modules.ii.background.widgets
 
@@ -14,8 +15,20 @@ AbstractBackgroundWidget {
 
     property string sizeMode: root.configEntry.sizeMode ?? "2x2"
 
-    property real widgetWidth:  sizeMode === "2x2" ? 276 : 420
+    readonly property int clockCount: Math.min(Math.max(root.configEntry.clockCount ?? 4, 1), 4)
+    readonly property real fourByOneWidth: root.clockCount * 132 + (root.clockCount - 1) * 12
+
+    property real widgetWidth:  sizeMode === "2x2" ? 276 : root.fourByOneWidth
     property real widgetHeight: sizeMode === "2x2" ? 252 : 120
+
+    readonly property real widthToggleFraction: 0.3
+    readonly property real widthToggleDelta: (root.fourByOneWidth - 276) * root.widthToggleFraction
+
+    function modeForDrag(dx) {
+        if (root.sizeMode === "2x2" && dx > root.widthToggleDelta) return "4x1"
+        if (root.sizeMode === "4x1" && dx < -root.widthToggleDelta) return "2x2"
+        return root.sizeMode
+    }
 
     Behavior on widgetWidth  { animation: Appearance.animation.elementResize.numberAnimation.createObject(this) }
     Behavior on widgetHeight { animation: Appearance.animation.elementResize.numberAnimation.createObject(this) }
@@ -91,16 +104,18 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         spacing: -2
                         StyledText {
+                            Layout.fillWidth: true
                             font.pixelSize: Appearance.font.pixelSize.normal
                             font.weight: Font.Medium
                             color: Appearance.colors.colOnPrimaryContainer
                             text: root.localCityName
+                            elide: Text.ElideRight
                         }
                     }
                     Item { Layout.fillWidth: true }
                     Rectangle {
                         radius: Appearance.rounding.full
-                        color: Appearance.colors.colSurfaceContainerLow
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
                         implicitWidth: 28; implicitHeight: 28
                         MaterialSymbol {
                             anchors.centerIn: parent
@@ -151,7 +166,7 @@ AbstractBackgroundWidget {
                             radius: Appearance.rounding.normal
                             color: modelData.isDay
                                 ? Appearance.colors.colPrimary
-                                : Appearance.colors.colSurfaceContainerLow
+                                : ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
                             property color fg: modelData.isDay
                                 ? Appearance.colors.colOnPrimary
                                 : Appearance.colors.colOnLayer0
@@ -227,30 +242,58 @@ AbstractBackgroundWidget {
                         Item { Layout.fillWidth: true }
                     }
 
-                    StyledComboBoxSearch {
-                        model: WorldClock.comboModel
-                        colBackground: Appearance.colors.colSurfaceContainerLow
-                        textRole: "label"
-                        currentIndex: WorldClock.comboModel.findIndex(m => m.tz === WorldClock.timezones[0])
-                        onActivated: (idx) => WorldClock.setTimezone(0, WorldClock.comboModel[idx].tz)
-                    }
-                    StyledComboBoxSearch {
-                        model: WorldClock.comboModel; textRole: "label"
-                        colBackground: Appearance.colors.colSurfaceContainerLow
-                        currentIndex: WorldClock.comboModel.findIndex(m => m.tz === WorldClock.timezones[1])
-                        onActivated: (idx) => WorldClock.setTimezone(1, WorldClock.comboModel[idx].tz)
-                    }
-                    StyledComboBoxSearch {
-                        model: WorldClock.comboModel; textRole: "label"
-                        colBackground: Appearance.colors.colSurfaceContainerLow
-                        currentIndex: WorldClock.comboModel.findIndex(m => m.tz === WorldClock.timezones[2])
-                        onActivated: (idx) => WorldClock.setTimezone(2, WorldClock.comboModel[idx].tz)
-                    }
-                    StyledComboBoxSearch {
-                        model: WorldClock.comboModel; textRole: "label"
-                        colBackground: Appearance.colors.colSurfaceContainerLow
-                        currentIndex: WorldClock.comboModel.findIndex(m => m.tz === WorldClock.timezones[3])
-                        onActivated: (idx) => WorldClock.setTimezone(3, WorldClock.comboModel[idx].tz)
+                    Flickable {
+                        id: settingsFlick
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        clip: true
+                        contentWidth: width
+                        contentHeight: settingsColumn.implicitHeight
+                        boundsBehavior: Flickable.StopAtBounds
+
+                        ColumnLayout {
+                            id: settingsColumn
+                            width: settingsFlick.width
+                            spacing: 10
+
+                            ConfigSpinBox {
+                                icon: "numbers"
+                                text: Translation.tr("Clocks")
+                                value: Config.options.background.widgets.worldClock.clockCount
+                                from: 1
+                                to: 4
+                                stepSize: 1
+                                onValueChanged: {
+                                    Config.options.background.widgets.worldClock.clockCount = value;
+                                }
+                            }
+
+                            StyledComboBoxSearch {
+                                model: WorldClock.comboModel
+                                colBackground: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                                textRole: "label"
+                                currentIndex: WorldClock.comboModel.findIndex(m => m.tz === WorldClock.timezones[0])
+                                onActivated: (idx) => WorldClock.setTimezone(0, WorldClock.comboModel[idx].tz)
+                            }
+                            StyledComboBoxSearch {
+                                model: WorldClock.comboModel; textRole: "label"
+                                colBackground: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                                currentIndex: WorldClock.comboModel.findIndex(m => m.tz === WorldClock.timezones[1])
+                                onActivated: (idx) => WorldClock.setTimezone(1, WorldClock.comboModel[idx].tz)
+                            }
+                            StyledComboBoxSearch {
+                                model: WorldClock.comboModel; textRole: "label"
+                                colBackground: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                                currentIndex: WorldClock.comboModel.findIndex(m => m.tz === WorldClock.timezones[2])
+                                onActivated: (idx) => WorldClock.setTimezone(2, WorldClock.comboModel[idx].tz)
+                            }
+                            StyledComboBoxSearch {
+                                model: WorldClock.comboModel; textRole: "label"
+                                colBackground: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                                currentIndex: WorldClock.comboModel.findIndex(m => m.tz === WorldClock.timezones[3])
+                                onActivated: (idx) => WorldClock.setTimezone(3, WorldClock.comboModel[idx].tz)
+                            }
+                        }
                     }
                 }
             }
@@ -262,13 +305,14 @@ AbstractBackgroundWidget {
                 visible: sizeMode === "4x1"
 
                 Repeater {
-                    model: Math.min(root.worldCities.length, 4)
+                    model: Math.min(root.worldCities.length, root.clockCount)
                     delegate: AndroidClock {
                         required property int index
                         property var cityData: root.worldCities[index] ?? null
 
-                        Layout.fillHeight: true
-                        Layout.fillWidth:  true
+                        Layout.preferredWidth: 132
+                        Layout.preferredHeight: 120
+                        radius: Appearance.rounding?.verylarge ?? 30
 
                         backgroundColor: cityData?.isDay ?? true
                             ? Appearance.colors.colPrimary
@@ -301,34 +345,13 @@ AbstractBackgroundWidget {
                 }
             }
 
-            Rectangle {
-                id: toggleHandle
-                width: 16; height: 16; radius: 4
-                color: Appearance.colors.colOnPrimaryContainer
-                anchors { right: parent.right; bottom: parent.bottom; margins: 4 }
-                opacity: (root.containsMouse || toggleArea.containsMouse || toggleArea.pressed) ? 0.5 : 0
-                visible: opacity > 0 && !Config.options.background.widgetsLocked
-
-                Behavior on opacity { NumberAnimation { duration: 150 } }
-
-                MaterialSymbol {
-                    anchors.centerIn: parent
-                    text: root.sizeMode === "2x2" ? "calendar_view_month" : "calendar_view_week"
-                    iconSize: 11
-                    color: Appearance.colors.colPrimaryContainer
-                }
-
-                MouseArea {
-                    id: toggleArea
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        if (root.showingSettings) root.showingSettings = false
-                        root.sizeMode = root.sizeMode === "2x2" ? "4x1" : "2x2"
-                        root.configEntry.sizeMode = root.sizeMode
-                    }
-                }
+            ResizeHandler {
+                anchorItem: contentRect
+                hoverActive: root.containsMouse
+                locked: Config.options.background.widgetsLocked || root.showingSettings
+                currentWidth: root.widgetWidth
+                onResizedXY: (dx, dy, startWidth) => { root.sizeMode = root.modeForDrag(dx) }
+                onResizeFinished: { root.configEntry.sizeMode = root.sizeMode }
             }
         }
     }

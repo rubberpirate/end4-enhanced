@@ -12,8 +12,9 @@ import qs.modules.common.models
 
 ContentPage {
     id: page
+    property bool isMinimal: Config.options.settings.style === "minimal"
     forceWidth: true
-    baseWidth: 720
+    baseWidth: !isMinimal ? 720 : 600
     bottomContentPadding: 35
 
     function goTo(term) {
@@ -86,16 +87,16 @@ ContentPage {
                 spacing: 4
 
                 Rectangle {
-                    Layout.preferredWidth: 420
-                    Layout.preferredHeight: 280
+                    Layout.preferredWidth: isMinimal ? 600 : 420 
+                    Layout.preferredHeight: isMinimal ? 400 : 280 
                     radius: Appearance.rounding.large - 3
                     color: Appearance.colors.colLayer2
                     clip: true
 
                     StyledImage {
                         anchors.fill: parent
-                        sourceSize.width: 420
-                        sourceSize.height: 280
+                        sourceSize.width: isMinimal ? 600 : 420
+                        sourceSize.height: isMinimal ? 400 : 280
                         fillMode: Image.PreserveAspectCrop
                         source: /\.(mp4|webm|mkv|avi|mov)$/i.test(Config.options.background.wallpaperPath)
                             ? Config.options.background.thumbnailPath
@@ -104,7 +105,7 @@ ContentPage {
                         layer.enabled: true
                         layer.effect: OpacityMask {
                             maskSource: Rectangle {
-                                width: 420; height: 280
+                                width: isMinimal ? 600 : 420; height: isMinimal ? 400 : 280
                                 radius: Appearance.rounding.large - 3
                             }
                         }
@@ -125,6 +126,7 @@ ContentPage {
                 }
 
                 ColumnLayout {
+                    visible: !isMinimal
                     Layout.fillWidth: true
                     spacing: 4
 
@@ -203,7 +205,30 @@ ContentPage {
                 }
             }
 
+            ContentSubsection {
+                visible: isMinimal
+                Layout.topMargin: 20
+                title: Translation.tr("Transparency")     
+                GroupedList {
+                    visible: isMinimal
+                        ConfigSwitch {
+                            buttonIcon: "check"
+                            text: Translation.tr("Enable")
+                            checked: Config.options.appearance.transparency.enable
+                            onCheckedChanged: { Config.options.appearance.transparency.enable = checked; }
+                        }
+                        ConfigSwitch {
+                            buttonIcon: "autofps_select"
+                            enabled: Config.options.appearance.transparency.enable
+                            text: Translation.tr("Automatic")
+                            checked: Config.options.appearance.transparency.automatic
+                            onCheckedChanged: { Config.options.appearance.transparency.automatic = checked; }
+                        }
+                    }
+            }
+
             ConfigRow {
+                visible: !isMinimal
                 ConfigSwitch {
                     buttonIcon: "motion_mode"
                     text: Translation.tr("Transparency")
@@ -225,6 +250,70 @@ ContentPage {
             title: Translation.tr("Bar & Screen")
             shape: MaterialShape.Shape.ClamShell
             Layout.fillWidth: true
+            visible: isMinimal
+            GroupedList {
+                ConfigSelectionArray {
+                    Layout.fillWidth: true
+                    icon: "position_bottom_right"
+                    text: Translation.tr("Bar position")
+                    currentValue: (Config.options.bar.bottom ? 1 : 0) | (Config.options.bar.vertical ? 2 : 0)
+                    onSelected: newValue => {
+                        Config.options.bar.bottom = (newValue & 1) !== 0;
+                        Config.options.bar.vertical = (newValue & 2) !== 0;
+                    }
+                    options: [
+                        { displayName: Translation.tr("Top"), icon: "arrow_upward",   value: 0 },
+                        { displayName: Translation.tr("Left"), icon: "arrow_back",     value: 2 },
+                        { displayName: Translation.tr("Bottom"), icon: "arrow_downward", value: 1 },
+                        { displayName: Translation.tr("Right"), icon: "arrow_forward",  value: 3 }
+                    ]
+                }
+                ConfigSelectionArray {
+                    Layout.fillWidth: true
+                    icon: "settop_component"
+                    text: Translation.tr("Bar style")
+                    currentValue: Config.options.bar.cornerStyle
+                    onSelected: newValue => { Config.options.bar.cornerStyle = newValue; }
+                    options: [
+                        { displayName: Translation.tr("Hug"), icon: "line_curve", value: 0 },
+                        { displayName: Translation.tr("Float"), icon: "view_day",   value: 1 },
+                        { displayName: Translation.tr("Islands"), icon: "crop_3_2",   value: 2 },
+                        { displayName: Translation.tr("M3"), icon: "interests",  value: 3 }
+                    ]
+                }
+                ConfigSelectionArray {
+                    Layout.fillWidth: true
+                    icon: "tab_group"
+                    text: Translation.tr("Group style")
+                    currentValue: Config.options.bar.borderless
+                    onSelected: newValue => { Config.options.bar.borderless = newValue; }
+                    options: [
+                        { displayName: Translation.tr("No"),          icon: "close",         value: "transparent" },
+                        { displayName: Translation.tr("Pills"),     icon: "pill",          value: "pills" },
+                        { displayName: Translation.tr("Separated"), icon: "view_column_2", value: "separated" }
+                    ]
+                }
+                ConfigSelectionArray {
+                    Layout.fillWidth: true
+                    icon: "rounded_corner"
+                    text: Translation.tr("Screen round corner")
+                    currentValue: Config.options.appearance.fakeScreenRounding
+                    onSelected: newValue => { Config.options.appearance.fakeScreenRounding = newValue; }
+                    options: [
+                        { displayName: Translation.tr("No"),                  icon: "close",           value: 0 },
+                        { displayName: Translation.tr("Yes"),                 icon: "check",           value: 1 },
+                        { displayName: Translation.tr("When not fullscreen"), icon: "fullscreen_exit", value: 2 }
+                    ]
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "screenshot_monitor"
+            title: Translation.tr("Bar & Screen")
+            shape: MaterialShape.Shape.ClamShell
+            Layout.fillWidth: true
+            visible: !isMinimal
 
             GridLayout {
                 Layout.fillWidth: true

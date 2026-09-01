@@ -32,12 +32,24 @@ Item {
                 anchors.centerIn: parent
                 spacing: 12
 
-                MaterialLoadingIndicator {
+                Item {
                     Layout.alignment: Qt.AlignHCenter
-                    loading: LyricsService.status === "loading"
-                    colBg: root.indicatorColor
-                    colShape: root.indicatorShapeColor
-                    implicitSize: 48
+                    implicitWidth: 48
+                    implicitHeight: 48
+
+                    MaterialLoadingIndicator {
+                        anchors.fill: parent
+                        loading: LyricsService.status === "loading"
+                        colBg: root.indicatorColor
+                        colShape: root.indicatorShapeColor
+                        implicitSize: 48
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: LyricsService.restartLyrics()
+                    }
                 }
             }
         }

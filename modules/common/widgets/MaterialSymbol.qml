@@ -1,4 +1,5 @@
 import qs.modules.common
+import qs.services
 import QtQuick
 
 StyledText {
@@ -13,7 +14,7 @@ StyledText {
 
     font {
         hintingPreference: Font.PreferNoHinting
-        family: Appearance?.font.family.iconMaterial ?? "Material Symbols Rounded"
+        family: Fonts?.iconMaterialFamily ?? "Material Symbols Rounded"
         pixelSize: iconSize
         weight: resolvedFill > 0.5 ? Font.DemiBold : Font.Normal
         variableAxes: {

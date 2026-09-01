@@ -27,6 +27,8 @@ Item {
         { key: "devices",     icon: "devices",            name: Translation.tr("Connected Devices") },
         { key: "screentime",  icon: "schedule",           name: Translation.tr("Screen Time") },
         { key: "ducky",       icon: "pets",               name: Translation.tr("Buffer Ducky") },
+        { key: "timers",      icon: "timer",              name: Translation.tr("Timers") },
+        { key: "todo",        icon: "add_task",           name: Translation.tr("To-Do") },
     ]
 
     Rectangle {

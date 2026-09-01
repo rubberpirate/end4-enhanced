@@ -75,6 +75,20 @@ Scope {
 
         margins {
             top: {
+                if (Config.options.bar.bottom) return 0;
+                if (Config?.options.bar.autoHide.enable) return 0;
+                if (!centerOnly) return 0;
+                switch (Config.options.bar.cornerStyle) {
+                case 0: return -Appearance.sizes.barHeight;
+                case 1: return -Appearance.sizes.barHeight + Appearance.sizes.hyprlandGapsOut;
+                case 2: return -Appearance.sizes.barHeight + Appearance.sizes.hyprlandGapsOut;
+                case 3: return -Appearance.sizes.barHeight - Appearance.sizes.hyprlandGapsOut;
+                default: return 0;
+                }
+            }
+            bottom: {
+                if (!Config.options.bar.bottom) return 0;
+                if (Config?.options.bar.autoHide.enable) return 0;
                 if (!centerOnly) return 0;
                 switch (Config.options.bar.cornerStyle) {
                 case 0: return -Appearance.sizes.barHeight;

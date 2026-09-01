@@ -20,7 +20,7 @@ NestableObject {
 
     function _buildLuaLine(m) {
         if (m.disabled)
-            return `hl.monitor({ output = "${m.name}", mode = "disabled" })`
+            return `hl.monitor({ output = "${m.name}", disabled = true })`
 
         const pos = `${m.x}x${m.y}`
         let line = `hl.monitor({ output = "${m.name}", mode = "${m.currentMode}", position = "${pos}", scale = ${m.scale}`

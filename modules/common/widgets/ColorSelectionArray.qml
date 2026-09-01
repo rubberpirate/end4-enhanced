@@ -22,14 +22,13 @@ RowLayout {
         visible: root.showLabel
         text: root.icon
         iconSize: Appearance.font.pixelSize.normal + 5
-        color: Appearance.colors.colOnLayer1
+        color: Appearance.colors.colOnLayer0
     }
 
     StyledText {
         visible: root.showLabel
         text: root.text
-        font.pixelSize: Appearance.font.pixelSize.normal
-        color: Appearance.colors.colOnLayer1
+        color: Appearance.colors.colOnLayer0
     }
 
     Item {
@@ -79,7 +78,9 @@ RowLayout {
                     width: slot.isSelected ? parent.width - 8 : parent.width - 8
                     height: slot.isSelected ? parent.height - 8 : parent.height - 8
                     radius: slot.isSelected ? Appearance.rounding.normal - 4 : width / 2 
-                    color: Appearance.colors["col" + slot.modelData.charAt(0).toUpperCase() + slot.modelData.slice(1)]
+                    color: slot.modelData === "black"
+                        ? "black"
+                        : Appearance.colors["col" + slot.modelData.charAt(0).toUpperCase() + slot.modelData.slice(1)]
 
                     Behavior on radius {
                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)

@@ -407,7 +407,7 @@ MouseArea {
                         }
                     }
 
-                    Row {
+                    RowLayout {
                         id: extraOptions
                         anchors {
                             bottom: parent.bottom
@@ -443,21 +443,35 @@ MouseArea {
                                         Config.options.wallpaperSelector.useSystemFileDialog = true;
                                     }
                                     text: "open_in_new"
+                                    StyledToolTip {
+                                        text: Translation.tr("Use the system file picker instead\nRight-click to make this the default behavior")
+                                    }
                                 }
                                 IconToolbarButton {
                                     implicitWidth: height
                                     onClicked: Wallpapers.randomFromCurrentFolder()
                                     text: "ifl"
+                                    StyledToolTip {
+                                        text: Translation.tr("Random wallpaper from current folder")
+                                    }
                                 }
                                 IconToolbarButton {
                                     implicitWidth: height
                                     onClicked: root.useDarkMode = !root.useDarkMode
                                     text: root.useDarkMode ? "dark_mode" : "light_mode"
+                                    StyledToolTip {
+                                        text: root.useDarkMode
+                                            ? Translation.tr("Switch to light mode")
+                                            : Translation.tr("Switch to dark mode")
+                                    }
                                 }
                                 IconToolbarButton {
                                     implicitWidth: height
                                     onClicked: root.updateThumbnails()
                                     text: "reset_image"
+                                    StyledToolTip {
+                                        text: Translation.tr("Update thumbnails")
+                                    }
                                 }
                                 ToolbarTextField {
                                     id: filterField
