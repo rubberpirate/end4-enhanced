@@ -74,7 +74,15 @@ Scope {
                 property bool monitorHasFullscreen: HyprlandData.workspaceById[thisMonitorData?.activeWorkspace?.id]?.hasfullscreen ?? false
                 property bool monitorHasSpecialOpen: (thisMonitorData?.specialWorkspace?.name ?? "") !== ""
                 exclusionMode: ExclusionMode.Ignore
-                exclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows)) ? 0 : Appearance.sizes.baseBarHeight + (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0) + (Config.options.bar.cornerStyle === 2 ? -6 : 0)
+                property int normalExclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows))
+                    ? 0
+                    : Appearance.sizes.baseBarHeight
+                        + (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0)
+                        + (Config.options.bar.cornerStyle === 2 ? -6 : 0)
+
+                exclusiveZone: (barContent.centerOnly && Config.options.bar.centerOnlyReserveFrame)
+                    ? Config.options.bar.frameThickness
+                    : Config.options.bar.cornerStyle === 4 ? normalExclusiveZone + 4 : normalExclusiveZone
                 WlrLayershell.namespace: "quickshell:bar"
                 // Overlay layer only while special workspace sits on top of a fullscreen window on this monitor,
                 // else Top layer so fullscreen apps cover the bar as normal (Hyprland buries Top layer under fullscreen+special).
@@ -146,36 +154,6 @@ Scope {
                         }
                     }
 
-                    RoundCorner {
-                        id: leftPillCorner
-                        visible: barContent.centerOnly && showBarBackground && Config.options.bar.cornerStyle === 0 && barRoot.showCorners
-                        x: barContent.centerPillX - implicitSize
-                        implicitSize: Appearance.rounding.screenRounding
-                        color: Config.options.bar.followFrameColor
-                            ? Appearance.getColorFromName(Config.options.bar.frameColor)
-                            : Appearance.colors.colLayer0
-                        corner: RoundCorner.CornerEnum.TopRight
-
-                        states: State {
-                            name: "bottom"
-                            when: Config.options.bar.bottom
-                            AnchorChanges {
-                                target: leftPillCorner
-                                anchors.top: undefined
-                                anchors.bottom: barContent.bottom
-                            }
-                            PropertyChanges {
-                                target: leftPillCorner
-                                corner: RoundCorner.CornerEnum.BottomRight
-                            }
-                        }
-                        AnchorChanges {
-                            target: leftPillCorner
-                            anchors.top: barContent.top
-                            anchors.bottom: undefined
-                        }
-                    }
-
                     BarContent {
                         id: barContent
                         
@@ -213,36 +191,6 @@ Scope {
                                 anchors.topMargin: 0
                                 anchors.bottomMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.barHeight : 0
                             }
-                        }
-                    }
-
-                    RoundCorner {
-                        id: rightPillCorner
-                        visible: barContent.centerOnly && showBarBackground && Config.options.bar.cornerStyle === 0 && barRoot.showCorners
-                        x: barContent.centerPillX + barContent.centerPillWidth
-                        implicitSize: Appearance.rounding.screenRounding
-                        color: Config.options.bar.followFrameColor
-                            ? Appearance.getColorFromName(Config.options.bar.frameColor)
-                            : Appearance.colors.colLayer0
-                        corner: RoundCorner.CornerEnum.TopLeft
-
-                        states: State {
-                            name: "bottom"
-                            when: Config.options.bar.bottom
-                            AnchorChanges {
-                                target: rightPillCorner
-                                anchors.top: undefined
-                                anchors.bottom: barContent.bottom
-                            }
-                            PropertyChanges {
-                                target: rightPillCorner
-                                corner: RoundCorner.CornerEnum.BottomLeft
-                            }
-                        }
-                        AnchorChanges {
-                            target: rightPillCorner
-                            anchors.top: barContent.top
-                            anchors.bottom: undefined
                         }
                     }
                     

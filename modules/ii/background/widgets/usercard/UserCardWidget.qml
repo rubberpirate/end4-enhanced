@@ -171,6 +171,17 @@ AbstractBackgroundWidget {
                 radius: Appearance.rounding?.verylarge ?? 30
                 color: Appearance.colors.colPrimaryContainer
 
+                FastBlurred {
+                    anchors.fill: parent
+                    blurSource: root.wallpaperItem
+                    cardRadius: card.radius
+                    tint: Appearance.colors.colLayer1
+                    tintOpacity: 0.55
+                    trackX: root.x  
+                    trackY: root.y
+                    visible: Config.options.background.widgets.blurWidgets 
+                }
+
                 RowLayout {
                     anchors { fill: parent; margins: 10 }
                     spacing: 12
@@ -308,6 +319,7 @@ AbstractBackgroundWidget {
                 FastBlur {
                     id: blurredBg
                     anchors.fill: bgImage
+                    visible: !Config.options.background.widgets.blurWidgets 
                     source: bgImage
                     radius: 48
                     layer.enabled: true
@@ -318,6 +330,17 @@ AbstractBackgroundWidget {
                             radius: Appearance.rounding?.verylarge ?? 30
                         }
                     }
+                }
+
+                FastBlurred {
+                    anchors.fill: parent
+                    blurSource: root.wallpaperItem
+                    cardRadius: Appearance.rounding?.verylarge ?? 30
+                    tint: Appearance.colors.colLayer1
+                    tintOpacity: 0.55
+                    trackX: root.x  
+                    trackY: root.y
+                    visible: Config.options.background.widgets.blurWidgets 
                 }
 
                 Rectangle {
@@ -501,18 +524,23 @@ AbstractBackgroundWidget {
                     y: avatarRect.y + (avatarRect.height - implicitHeight) / 2 + 20
                     spacing: 0
                     z: 2
+                    width: outerRect.width - x - root.blurMargin
 
                     StyledText {
+                        Layout.fillWidth: true
                         text: root.userDisplay
                         font.pixelSize: Appearance.font.pixelSize.small
                         font.weight: Font.DemiBold
                         color: Appearance.colors.colOnLayer1
+                        elide: Text.ElideRight
                     }
                     StyledText {
+                        Layout.fillWidth: true
                         text: "Up • " + DateTime.uptime
                         font.pixelSize: Appearance.font.pixelSize.smaller
                         color: Appearance.colors.colOnLayer1
                         opacity: 0.6
+                        elide: Text.ElideRight
                     }
                 }
             }

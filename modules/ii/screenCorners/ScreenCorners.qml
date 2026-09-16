@@ -101,22 +101,16 @@ Scope {
                             return;
                         if (cornerWidget.isLeft)
                             Brightness.decreaseBrightness()
-                        else {
-                            const currentVolume = Audio.value;
-                            const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;
-                            Audio.sink.audio.volume -= step;
-                        }
+                        else
+                            Audio.decrementVolume();
                     }
                     onScrollUp: {
                         if (!Config.options.sidebar.cornerOpen.valueScroll)
                             return;
                         if (cornerWidget.isLeft)
                             Brightness.increaseBrightness()
-                        else {
-                            const currentVolume = Audio.value;
-                            const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;
-                            Audio.sink.audio.volume = Math.min(1, Audio.sink.audio.volume + step);
-                        }
+                        else
+                            Audio.incrementVolume();
                     }
                     onMovedAway: {
                         if (!Config.options.sidebar.cornerOpen.valueScroll)
