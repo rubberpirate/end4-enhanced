@@ -342,7 +342,34 @@ ContentPage {
             icon: "nest_wifi_pro"
             shape: MaterialShape.Shape.Cookie4Sided
             title: Translation.tr("Dynamic Island")
-            
+
+            GroupedList {
+                ConfigSelectionArray {
+                    text: Translation.tr("Left widget")
+                    icon: "right_panel_open"
+                    currentValue: Config.options.bar.dynamicIsland.leftWidget
+                    onSelected: newValue => { Config.options.bar.dynamicIsland.leftWidget = newValue; }
+                    options: [
+                        { displayName: Translation.tr(""),    icon: "block",        value: "none" },
+                        { displayName: Translation.tr("Clock"),   icon: "schedule",     value: "clockWidget" },
+                        { displayName: Translation.tr("Weather"), icon: "partly_cloudy_day", value: "weatherBar" },
+                        { displayName: Translation.tr("Updates"), icon: "update",       value: "updatesCount" }
+                    ]
+                }
+                ConfigSelectionArray {
+                    text: Translation.tr("Right widget")
+                    icon: "left_panel_open"
+                    currentValue: Config.options.bar.dynamicIsland.rightWidget
+                    onSelected: newValue => { Config.options.bar.dynamicIsland.rightWidget = newValue; }
+                    options: [
+                        { displayName: Translation.tr(""),         icon: "block",        value: "none" },
+                        { displayName: Translation.tr("System icons"), icon: "settings",     value: "systemIcons" },
+                        { displayName: Translation.tr("Tray"),  icon: "apps",         value: "sysTray" },
+                        { displayName: Translation.tr("Util buttons"), icon: "widgets",   value: "utilButtons" }
+                    ]
+                }
+            }
+
             ContentSubsection {
                 Layout.topMargin: 10
                 title: Translation.tr("Media")

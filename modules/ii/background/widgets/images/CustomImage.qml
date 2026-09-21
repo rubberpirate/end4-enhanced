@@ -86,6 +86,7 @@ AbstractBackgroundWidget {
         StyledDropShadow {
             target: shadowShape
             z: -1
+            visible: Config.options.background.widgets.shadow
         }
 
         MaterialShape {

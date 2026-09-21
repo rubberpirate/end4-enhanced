@@ -126,13 +126,42 @@ Item {
             }
         }
 
-        StyledText {
-            id: nowLabel
+        Loader {
             Layout.alignment: Qt.AlignVCenter
-            text: DateTime.time
-            font.pixelSize: di.isMaterial ? Appearance.font.pixelSize.normal : Appearance.font.pixelSize.small
-            font.features: { "tnum": 1 }
-            color: Appearance.colors.colOnLayer0
+            sourceComponent: Config.options.bar.dynamicIsland.leftWidget === "clockWidget" ? weatherComponent : clockComponent
+
+            Component {
+                id: clockComponent
+                StyledText {
+                    text: DateTime.time
+                    font.pixelSize: di.isMaterial ? Appearance.font.pixelSize.normal : Appearance.font.pixelSize.small
+                    font.features: { "tnum": 1 }
+                    color: Appearance.colors.colOnLayer0
+                }
+            }
+
+            Component {
+                id: weatherComponent
+                RowLayout {
+                    spacing: 4
+
+                    MaterialSymbol {
+                        fill: 0
+                        text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+                        iconSize: Appearance.font.pixelSize.normal
+                        color: Appearance.colors.colOnLayer0
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+
+                    StyledText {
+                        font.pixelSize: di.isMaterial ? Appearance.font.pixelSize.normal : Appearance.font.pixelSize.small
+                        font.features: { "tnum": 1 }
+                        color: Appearance.colors.colOnLayer0
+                        text: Weather.data?.temp ?? "--°"
+                        Layout.alignment: Qt.AlignVCenter
+                    }
+                }
+            }
         }
 
         readonly property real computedIdleWidth: avatarRect.width

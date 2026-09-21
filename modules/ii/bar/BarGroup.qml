@@ -21,7 +21,7 @@ Item {
 
     readonly property bool isSegmented: Config.options?.bar.borderless === "segmented"
     readonly property bool isPanel: Config.options.bar.cornerStyle === 4
-    readonly property real panelRadius: Appearance.rounding.unsharpenmore + 2
+    readonly property real panelRadius: Appearance.rounding.unsharpenmore + 4
 
     readonly property real fullRadius: root.isPanel ? root.panelRadius : height / 2
     readonly property real midRadius: root.isPanel

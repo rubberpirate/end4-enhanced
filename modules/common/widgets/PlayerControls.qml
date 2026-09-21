@@ -95,7 +95,7 @@ Item {
 
             MaterialSymbol {
                 anchors.centerIn: parent
-                iconSize: Appearance.font.pixelSize.headline
+                iconSize: Appearance.font.pixelSize.normal
                 color: root.blendedColors.colOnLayer0
                 text: (root.player?.volume ?? 0) === 0 ? "volume_off" : ((root.player?.volume ?? 0) < 0.5 ? "volume_down" : "volume_up")
                 opacity: artHover.hovered ? 1.0 : 0.0

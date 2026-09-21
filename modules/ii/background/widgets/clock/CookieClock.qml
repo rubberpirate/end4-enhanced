@@ -98,7 +98,7 @@ Item {
 
         StyledDropShadow {
             target: cookieShapes
-            visible: !root.blurWidgets
+            visible: !root.blurWidgets && Config.options.background.widgets.shadow
         }
 
         Item {

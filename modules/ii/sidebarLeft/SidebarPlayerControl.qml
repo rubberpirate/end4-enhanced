@@ -385,16 +385,17 @@ Item {
 
                             Loader {
                                 id: sliderLoader
+                                property var player: root.player
                                 anchors.fill: parent
-                                active: root.player?.canSeek ?? false
+                                active: sliderLoader.player?.canSeek ?? false
                                 sourceComponent: StyledSlider {
                                     configuration: StyledSlider.Configuration.Wavy
                                     highlightColor: blendedColors.colPrimary
                                     trackColor: blendedColors.colSecondaryContainer
                                     handleColor: blendedColors.colPrimary
-                                    value: (root.player?.position ?? 0) / (root.player?.length ?? 1)
+                                    value: (sliderLoader.player?.position ?? 0) / (sliderLoader.player?.length ?? 1)
                                     onMoved: {
-                                        root.player.position = value * root.player.length
+                                        sliderLoader.player.position = value * sliderLoader.player.length
                                         lyricsComp.restartLyrics()
                                     }
                                 }
@@ -402,17 +403,18 @@ Item {
 
                             Loader {
                                 id: progressBarLoader
+                                property var player: root.player
                                 anchors {
                                     verticalCenter: parent.verticalCenter
                                     left: parent.left
                                     right: parent.right
                                 }
-                                active: !(root.player?.canSeek ?? false)
+                                active: !(progressBarLoader.player?.canSeek ?? false)
                                 sourceComponent: StyledProgressBar {
-                                    wavy: root.player?.isPlaying ?? false
+                                    wavy: progressBarLoader.player?.isPlaying ?? false
                                     highlightColor: blendedColors.colPrimary
                                     trackColor: blendedColors.colSecondaryContainer
-                                    value: (root.player?.position ?? 0) / (root.player?.length ?? 1)
+                                    value: (progressBarLoader.player?.position ?? 0) / (progressBarLoader.player?.length ?? 1)
                                 }
                             }
                         }

@@ -74,7 +74,8 @@ AbstractBackgroundWidget {
 
         StyledDropShadow { 
             target: contentRect 
-            visible: sizeMode !== "4x1"
+            visible: sizeMode !== "4x1" && Config.options.background.widgets.shadow
+            z: -2
         }
 
         Rectangle {
@@ -328,6 +329,7 @@ AbstractBackgroundWidget {
                         StyledRectangularShadow {
                             target: androidClock
                             z: -2
+                            visible: Config.options.background.widgets.shadow
                         }
 
                         FastBlurred {

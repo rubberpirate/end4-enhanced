@@ -63,8 +63,9 @@ Item {
         color: Appearance.colors.colShadow
         radius: 8
         samples: 16
-        horizontalOffset: 4
-        verticalOffset: 4
+        horizontalOffset: 5
+        verticalOffset: 6
+        visible: Config.options.background.widgets.shadow
     }
 
     Item {

@@ -140,6 +140,12 @@ AbstractBackgroundWidget {
         converter.outputPath = valid[0].replace(/\.[^/.]+$/, "") + "_converted." + root.selectedFormat
         converter.running = true
     }
+    
+    StyledRectangularShadow {
+        target: contentItem
+        z: -2
+        visible: Config.options.background.widgets.shadow
+    }
 
     Rectangle {
         id: contentItem

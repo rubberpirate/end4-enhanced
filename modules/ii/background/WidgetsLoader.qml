@@ -19,6 +19,7 @@ import qs.modules.ii.background.widgets.usercard
 import qs.modules.ii.background.widgets.notes
 import qs.modules.ii.background.widgets.todo
 import qs.modules.ii.background.widgets.timers
+import qs.modules.ii.background.widgets.customtext
 import qs.modules.ii.background.widgets.github
 import qs.modules.ii.background.widgets.devices
 import qs.modules.ii.background.widgets.screentime
@@ -38,6 +39,7 @@ Item {
         model: [
             { key: "visualizer" },
             { key: "customImage" },
+            { key: "sticker" },
             { key: "calendar" },
             { key: "weather" },
             { key: "clock", alwaysOnLock: true },
@@ -49,6 +51,7 @@ Item {
             { key: "userCard" },
             { key: "todo" },
             { key: "timers" },
+            { key: "customText" },
             { key: "github" },
             { key: "devices" },
             { key: "screentime" },
@@ -71,6 +74,7 @@ Item {
                 switch (loaderDelegate.modelData.key) {
                     case "visualizer":  return visualizerComp
                     case "customImage": return customImageComp
+                    case "sticker":     return stickerComp
                     case "calendar":    return calendarComp
                     case "weather":     return weatherComp
                     case "clock":       return clockComp
@@ -86,6 +90,7 @@ Item {
                     case "ducky":       return duckyComp
                     case "todo":        return todoComp
                     case "timers":      return timersComp
+                    case "customText":  return customTextComp
                 }
                 return null
             }
@@ -122,6 +127,17 @@ Item {
     Component {
         id: customImageComp
         CustomImage {
+            screenWidth: root.screen.width
+            screenHeight: root.screen.height
+            scaledScreenWidth: root.screen.width
+            scaledScreenHeight: root.screen.height
+            wallpaperScale: 1
+            wallpaperItem: root.wallpaperItem
+        }
+    }
+    Component {
+        id: stickerComp
+        StickerWidget {
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width
@@ -244,6 +260,17 @@ Item {
     Component {
         id: timersComp
         TimerWidget {
+            screenWidth: root.screen.width
+            screenHeight: root.screen.height
+            scaledScreenWidth: root.screen.width
+            scaledScreenHeight: root.screen.height
+            wallpaperScale: 1
+            wallpaperItem: root.wallpaperItem
+        }
+    }
+    Component {
+        id: customTextComp
+        CustomTextWidget {
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width

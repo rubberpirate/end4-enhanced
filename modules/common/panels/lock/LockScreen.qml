@@ -90,6 +90,9 @@ Scope {
         id: lock
         locked: GlobalStates.screenLocked
         surface: root.sessionLockSurface
+        onSecureChanged: {
+            if (lock.secure) GlobalStates.startupLockPending = false;
+        }
     }
 
     function lock() {
@@ -136,6 +139,7 @@ Scope {
             root.lock();
         } else {
             KeyringStorage.fetchKeyringData();
+            GlobalStates.startupLockPending = false;
         }
     }
     Connections {

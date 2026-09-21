@@ -40,6 +40,7 @@ AbstractBackgroundWidget {
         StyledRectangularShadow {
             target: statCard
             z: -2
+            visible: Config.options.background.widgets.shadow
         }
 
         FastBlurred {

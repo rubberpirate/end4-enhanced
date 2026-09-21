@@ -48,6 +48,13 @@ Singleton {
     property string osdIndicatorType: "volume"
     property bool barCenterOnly: false
     property bool diSessionOpen: false
+    property bool startupLockPending: true
+
+    Timer {
+        interval: 3000
+        running: true
+        onTriggered: root.startupLockPending = false
+    }
 
     readonly property bool dynamicIslandEnabled: Config.options.bar.layouts.leftLayout.includes("dynamicIsland")
         || Config.options.bar.layouts.middleLayout.includes("dynamicIsland")
@@ -80,7 +87,8 @@ Singleton {
         { displayName: Translation.tr("ScreenShot Region"),        value: "regionSelectorOpen" },
         { displayName: Translation.tr("Screen Translator"),      value: "screenTranslatorOpen" },
         { displayName: Translation.tr("On-screen Keyboard"),     value: "oskOpen" },
-        { displayName: Translation.tr("Session Menu"),           value: "sessionOpen" }
+        { displayName: Translation.tr("Session Menu"),           value: "sessionOpen" },
+        { displayName: Translation.tr("Equalizer"),           value: "equalizerOpen" }
     ]
 
     function toggleState(name) {
