@@ -115,7 +115,7 @@ AbstractBackgroundWidget {
                 }
 
                 StyledText {
-                    text: "~ Shivangi"
+                  text: "~ :)"
                     font.pixelSize: 44
                     horizontalAlignment: Text.AlignHCenter
                 }
