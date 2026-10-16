@@ -15,11 +15,14 @@ ListView {
     property bool popin: true
     property bool animateAppearance: true
     property bool animateMovement: false
-    // Accumulated scroll destination so wheel deltas stack while animating
-    property real scrollTargetY: 0
 
-    property real touchpadScrollFactor: Config?.options.interactions.scrolling.touchpadScrollFactor ?? 100
-    property real mouseScrollFactor: Config?.options.interactions.scrolling.mouseScrollFactor ?? 50
+
+    // Legacy properties kept for backward compatibility:
+    // Anime.qml and AiChat.qml override these to get 1.4x faster scroll.
+    // They are passed into InertialScrollEngine via scrollEngine.touchpadSensitivity
+    // and scrollEngine.wheelScrollAmount bindings below.
+    property real touchpadScrollFactor: Config?.options.interactions.scrolling.touchpadScrollFactor ?? 1.0
+    property real mouseScrollFactor: Config?.options.interactions.scrolling.mouseScrollFactor ?? 1.0
     property real mouseScrollDeltaThreshold: Config?.options.interactions.scrolling.mouseScrollDeltaThreshold ?? 120
 
     function resetDrag() {
@@ -29,43 +32,56 @@ ListView {
 
     maximumFlickVelocity: 3500
     boundsBehavior: Flickable.DragOverBounds
+
     ScrollBar.vertical: StyledScrollBar {}
 
-    MouseArea {
-        visible: Config?.options.interactions.scrolling.fasterTouchpadScroll
-        anchors.fill: parent
-        acceptedButtons: Qt.NoButton
-        onWheel: function(wheelEvent) {
-            const delta = wheelEvent.angleDelta.y / root.mouseScrollDeltaThreshold;
-            // The angleDelta.y of a touchpad is usually small and continuous,
-            // while that of a mouse wheel is typically in multiples of ±120.
-            var scrollFactor = Math.abs(wheelEvent.angleDelta.y) >= root.mouseScrollDeltaThreshold ? root.mouseScrollFactor : root.touchpadScrollFactor;
+    // Physics engine (child of this ListView)
+    property var _engine: null
+    // WheelHandler dynamically installed on parent (ancestor of this ListView).
+    // Ancestor WheelHandlers fire BEFORE ListView's C++ wheelEvent in Qt 6.
+    property var _parentHandler: null
 
-            const maxY = Math.max(0, root.contentHeight - root.height);
-            const base = scrollAnim.running ? root.scrollTargetY : root.contentY;
-            var targetY = Math.max(0, Math.min(base - delta * scrollFactor, maxY));
-
-            root.scrollTargetY = targetY;
-            root.contentY = targetY;
-            wheelEvent.accepted = true;
+    Component {
+        id: _engineComp
+        InertialScrollEngine {
+            flickable: root
+            touchpadSensitivity: (Config?.options.interactions.scrolling.touchpadSensitivity ?? 3.5)
+                                 * root.touchpadScrollFactor
+            wheelScrollAmount: Math.round(
+                (Config?.options.interactions.scrolling.wheelScrollAmount ?? 100)
+                * root.mouseScrollFactor)
+            mouseScrollDeltaThreshold: root.mouseScrollDeltaThreshold
         }
     }
 
-    Behavior on contentY {
-        NumberAnimation {
-            id: scrollAnim
-            alwaysRunToEnd: true
-            duration: Appearance.animation.scroll.duration
-            easing.type: Appearance.animation.scroll.type
-            easing.bezierCurve: Appearance.animation.scroll.bezierCurve
-        }
+    Component.onCompleted: {
+        _engine = _engineComp.createObject(root)
+        if (parent) _attachHandler(parent)
     }
 
-    // Keep target synced when not animating (e.g., drag/flick or programmatic changes)
-    onContentYChanged: {
-        if (!scrollAnim.running) {
-            root.scrollTargetY = root.contentY;
-        }
+    onParentChanged: {
+        if (_parentHandler) { _parentHandler.destroy(); _parentHandler = null }
+        if (parent && _engine) _attachHandler(parent)
+    }
+
+    Component.onDestruction: {
+        if (_parentHandler) { _parentHandler.destroy(); _parentHandler = null }
+    }
+
+    function _attachHandler(parentItem) {
+        _parentHandler = Qt.createQmlObject(
+            'import QtQuick; WheelHandler { target: null; acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad }',
+            parentItem
+        )
+        var eng = _engine
+        var flick = root
+        _parentHandler.wheel.connect(function(event) {
+            if (event.x >= flick.x && event.x < flick.x + flick.width &&
+                event.y >= flick.y && event.y < flick.y + flick.height) {
+                console.log("[SLV] wheel over listview: " + event.angleDelta.y)
+                eng.handleWheel(event)
+            }
+        })
     }
 
     add: Transition {

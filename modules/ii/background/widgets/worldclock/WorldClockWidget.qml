@@ -18,16 +18,14 @@ AbstractBackgroundWidget {
     readonly property int clockCount: Math.min(Math.max(root.configEntry.clockCount ?? 4, 1), 4)
     readonly property real fourByOneWidth: root.clockCount * 132 + (root.clockCount - 1) * 12
 
-    property real widgetWidth:  sizeMode === "2x2" ? 276 : root.fourByOneWidth
-    property real widgetHeight: sizeMode === "2x2" ? 252 : 120
+    property bool isVertical: root.configEntry.vertical ?? false
+    readonly property real stackedHeight: root.clockCount * 120 + (root.clockCount - 1) * 12
 
-    readonly property real widthToggleFraction: 0.3
-    readonly property real widthToggleDelta: (root.fourByOneWidth - 276) * root.widthToggleFraction
+    property real widgetWidth:  sizeMode === "2x2" ? 276 : (root.isVertical ? 132 : root.fourByOneWidth)
+    property real widgetHeight: sizeMode === "2x2" ? 252 : (root.isVertical ? root.stackedHeight : 120)
 
-    function modeForDrag(dx) {
-        if (root.sizeMode === "2x2" && dx > root.widthToggleDelta) return "4x1"
-        if (root.sizeMode === "4x1" && dx < -root.widthToggleDelta) return "2x2"
-        return root.sizeMode
+    function modeForWidth(width) {
+        return Math.abs(width - root.fourByOneWidth) < Math.abs(width - 276) ? "4x1" : "2x2"
     }
 
     Behavior on widgetWidth  { animation: Appearance.animation.elementResize.numberAnimation.createObject(this) }
@@ -44,56 +42,20 @@ AbstractBackgroundWidget {
 
     onShowingSettingsChanged: GlobalStates.desktopWidgetKeyboardFocus = showingSettings
 
-    function toggleFlip() { flipAnim.start() }
+    function toggleFlip() { cardWrapper.flip() }
 
-    Item {
+    FlipCard {
         id: cardWrapper
         anchors.fill: parent
+        onFlipped: root.showingSettings = !root.showingSettings
 
-        transform: Scale {
-            id: flipScale
-            origin.x: cardWrapper.width  / 2
-            origin.y: cardWrapper.height / 2
-            xScale: 1
-        }
-
-        SequentialAnimation {
-            id: flipAnim
-            NumberAnimation {
-                target: flipScale; property: "xScale"
-                to: 0; duration: 150; easing.type: Easing.InQuad
-            }
-            ScriptAction {
-                script: root.showingSettings = !root.showingSettings
-            }
-            NumberAnimation {
-                target: flipScale; property: "xScale"
-                to: 1; duration: 150; easing.type: Easing.OutQuad
-            }
-        }
-
-        StyledDropShadow { 
-            target: contentRect 
-            visible: sizeMode !== "4x1" && Config.options.background.widgets.shadow
-            z: -2
-        }
-
-        Rectangle {
+        WidgetCard {
             id: contentRect
             anchors.fill: parent
+            widget: root
             color: sizeMode === "4x1" ? "transparent" : Appearance.colors.colPrimaryContainer
-            radius: Appearance.rounding?.verylarge ?? 30
-
-            FastBlurred {
-                anchors.fill: parent
-                blurSource: root.wallpaperItem
-                cardRadius: contentRect.radius
-                tint: Appearance.colors.colLayer1
-                tintOpacity: 0.55
-                trackX: root.x  
-                trackY: root.y
-                visible: Config.options.background.widgets.blurWidgets && sizeMode === "2x2"
-            }
+            shadowed: sizeMode !== "4x1" && Config.options.background.widgets.shadow
+            blurred: Config.options.background.widgets.blurWidgets && sizeMode === "2x2"
 
             // 2x2
             ColumnLayout {
@@ -311,9 +273,11 @@ AbstractBackgroundWidget {
             }
 
             // 4x1
-            RowLayout {
+            GridLayout {
                 anchors { fill: parent; margins: 0 }
-                spacing: 12
+                rowSpacing: 12
+                columnSpacing: 12
+                columns: root.isVertical ? 1 : Math.max(1, root.clockCount)
                 visible: sizeMode === "4x1"
 
                 Repeater {
@@ -384,12 +348,23 @@ AbstractBackgroundWidget {
                 }
             }
 
+            WidgetFlipHandle {
+                anchorItem: contentRect
+                corner: "topRight"
+                hoverActive: root.containsMouse
+                locked: Config.options.background.widgetsLocked || root.showingSettings || root.sizeMode !== "4x1" || root.clockCount < 2
+                onClicked: {
+                    root.isVertical = !root.isVertical
+                    root.configEntry.vertical = root.isVertical
+                }
+            }
+
             ResizeHandler {
                 anchorItem: contentRect
                 hoverActive: root.containsMouse
                 locked: Config.options.background.widgetsLocked || root.showingSettings
                 currentWidth: root.widgetWidth
-                onResizedXY: (dx, dy, startWidth) => { root.sizeMode = root.modeForDrag(dx) }
+                onResizedXY: (dx, dy, startWidth) => { root.sizeMode = root.modeForWidth(startWidth + dx) }
                 onResizeFinished: { root.configEntry.sizeMode = root.sizeMode }
             }
         }

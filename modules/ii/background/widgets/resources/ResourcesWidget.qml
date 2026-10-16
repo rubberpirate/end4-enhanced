@@ -9,6 +9,8 @@ import qs.modules.common.widgets.widgetCanvas
 import qs.modules.ii.background.widgets
 
 AbstractBackgroundWidget {
+    Component.onCompleted: ResourceUsage.consumers++
+    Component.onDestruction: ResourceUsage.consumers--
     id: root
     configEntryName: "resources"
     hoverEnabled: true
@@ -23,7 +25,7 @@ AbstractBackgroundWidget {
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
 
-    component StatCard: Rectangle {
+    component StatCard: WidgetCard {
         id: statCard
         property string icon: ""
         property string value: ""
@@ -34,25 +36,8 @@ AbstractBackgroundWidget {
 
         implicitWidth: root.cardWidth
         implicitHeight: root.cardHeight
-        radius: Appearance.rounding?.verylarge ?? 30
+        widget: root
         color: statCard.bgColor
-
-        StyledRectangularShadow {
-            target: statCard
-            z: -2
-            visible: Config.options.background.widgets.shadow
-        }
-
-        FastBlurred {
-            anchors.fill: parent
-            blurSource: root.wallpaperItem
-            cardRadius: statCard.radius
-            tint: Appearance.colors.colLayer1
-            tintOpacity: 0.55
-            trackX: statCard.x + root.x
-            trackY: statCard.y + root.y
-            visible: Config.options.background.widgets.blurWidgets 
-        }
 
         ColumnLayout {
             anchors {
@@ -127,48 +112,13 @@ AbstractBackgroundWidget {
             shapeColor: Appearance.colors.colTertiary
         }
     }
-    Rectangle {
-        id: toggleHandle
-        width: 16
-        height: 16
-        radius: 6
-        color: Appearance.colors.colOnPrimaryContainer
-        anchors {
-            left: parent.right
-            bottom: parent.bottom
-            margins: -6
-        }
-        opacity: root.containsMouse || toggleArea.containsMouse ? 0.7 : 0
-        visible: opacity > 0 && !Config.options.background.widgetsLocked
-
-        Behavior on opacity {
-            NumberAnimation { duration: 150 }
-        }
-
-        MaterialSymbol {
-            anchors.centerIn: parent
-            text: "rotate_right"
-            iconSize: 11
-            color: Appearance.colors.colPrimaryContainer
-
-            RotationAnimation on rotation {
-                running: toggleArea.containsMouse
-                from: 0
-                to: 360
-                duration: 1000
-                loops: Animation.Infinite
-            }
-        }
-
-        MouseArea {
-            id: toggleArea
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                root.isVertical = !root.isVertical
-                root.configEntry.vertical = root.isVertical
-            }
+    WidgetFlipHandle {
+        anchorItem: root
+        hoverActive: root.containsMouse
+        locked: Config.options.background.widgetsLocked
+        onClicked: {
+            root.isVertical = !root.isVertical
+            root.configEntry.vertical = root.isVertical
         }
     }
 }

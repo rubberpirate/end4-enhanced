@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.modules.common
+import qs
 
 /*
  * Widget to be placed on a WidgetCanvas
@@ -26,7 +27,11 @@ MouseArea {
     onPressed: (mouse) => {
         if (mouse.button !== Qt.LeftButton) return
         var canvas = findCanvas(root.parent)
-        if (canvas) canvas.bringToFront(root)
+        if (canvas) {
+            canvas.bringToFront(root)
+            GlobalStates.desktopWidgetKeyboardFocus = true
+            canvas.forceActiveFocus()
+        }
     }
 
     onClicked: (mouse) => {
@@ -71,6 +76,7 @@ MouseArea {
     }
 
     function commitPosition() {}
+    function requestDelete() {}
 
     Component.onCompleted: { var canvas = findCanvas(root.parent); if (canvas) canvas.registerWidget(root) }
 

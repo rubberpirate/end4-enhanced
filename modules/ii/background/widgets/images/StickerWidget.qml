@@ -24,6 +24,12 @@ AbstractBackgroundWidget {
         : "#ffffff"
     property real outlineWidth: Config.options.background.widgets.sticker.outlineWidth ?? 8
 
+    onDoubleClicked: (mouse) => {
+        if (mouse.button !== Qt.LeftButton) return
+        root.widgetRotation = 0
+        Config.options.background.widgets.sticker.rotation = 0
+    }
+
     implicitWidth: contentItem.implicitWidth
     implicitHeight: contentItem.implicitHeight
 
@@ -49,7 +55,7 @@ AbstractBackgroundWidget {
             antialiasing: true
             sourceSize.width: parent.width * 2
             sourceSize.height: parent.height * 2
-            visible: root.imagePath !== ""
+            visible: root.imagePath !== "" && status === Image.Ready
 
             layer.enabled: true
             layer.effect: DropShadow {
@@ -71,7 +77,7 @@ AbstractBackgroundWidget {
             color: root.dropHover
                 ? Appearance.colors.colPrimary
                 : Appearance.colors.colOnPrimaryContainer
-            visible: root.imagePath === ""
+            visible: root.imagePath === "" || stickerImage.status !== Image.Ready
             Behavior on color { animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this) }
         }
 

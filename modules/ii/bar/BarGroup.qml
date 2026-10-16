@@ -7,11 +7,100 @@ Item {
     property bool vertical: false
     property int currentIndex: 0
     property int totalCount: 0
-    property bool isMaterial: Config.options.bar.cornerStyle === 3
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     property bool paintMaterialPill: false
     property bool paintBackground: true
-    property real padding: (root.isMaterial && !root.paintMaterialPill) ? 0 : 5
     property color bgColor: Appearance.colors.colPrimaryContainer
+    property string widgetName: ""
+    property string morphEdge: ""
+    property bool morphStartFlat: false
+    property bool morphEndFlat: false
+    readonly property alias box: background
+    readonly property bool flatTL: (morphEdge === "top" || morphEdge === "left") && morphStartFlat
+    readonly property bool flatTR: (morphEdge === "top" && morphEndFlat) || (morphEdge === "right" && morphStartFlat)
+    readonly property bool flatBL: (morphEdge === "bottom" && morphStartFlat) || (morphEdge === "left" && morphEndFlat)
+    readonly property bool flatBR: (morphEdge === "bottom" || morphEdge === "right") && morphEndFlat
+
+    readonly property string borderlessMode: Config.options?.bar.borderless ?? "pills"
+    readonly property bool styleEditable: !root.isMaterial && root.paintBackground && root.widgetName !== ""
+    property var stylePreview: ({})
+    readonly property var style: {
+        if (root.isMaterial) return ({});
+        const entry = (Config.options.bar.widgetStyles ?? []).find(e => e.mode === root.borderlessMode && e.widget === root.widgetName);
+        return Object.assign({}, entry ?? {}, root.stylePreview);
+    }
+
+    function previewStyle(key, value) {
+        root.stylePreview = Object.assign({}, root.stylePreview, { [key]: value });
+    }
+
+    function commitPreview() {
+        const preview = root.stylePreview;
+        root.stylePreview = ({});
+        for (const key in preview) root.setStyle(key, preview[key]);
+    }
+
+    readonly property bool rightClickFree: !["updatesCount", "weatherBar", "bluetooth", "workspaces", "sysTray", "media", "docktoPanel"].includes(root.widgetName)
+
+    readonly property Item loadedWidget: gridLayout.children[0]?.item ?? null
+    readonly property bool hasContentOverride: !root.isMaterial && root.style.color !== undefined && root.style.color !== "transparent"
+    readonly property color contentColor: {
+        const name = root.style.color ?? "";
+        const special = { surfaceContainer: "onSurface", onError: "error", onLayer0: "layer0" };
+        const onName = special[name] ?? `on${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+        return root.resolveColorName(onName) ?? Appearance.colors.colOnLayer1;
+    }
+
+    Binding {
+        target: root.loadedWidget && "contentColor" in root.loadedWidget ? root.loadedWidget : null
+        property: "contentColor"
+        value: root.contentColor
+        when: root.hasContentOverride
+    }
+
+    Binding {
+        target: root.loadedWidget && "contentColorOverridden" in root.loadedWidget ? root.loadedWidget : null
+        property: "contentColorOverridden"
+        value: true
+        when: root.hasContentOverride
+    }
+
+    Connections {
+        target: root.loadedWidget
+        ignoreUnknownSignals: true
+        function onStyleEditorRequested() {
+            root.toggleStyleEditor();
+        }
+    }
+
+    function toggleStyleEditor() {
+        if (!root.styleEditable) return;
+        if (stylePopupLoader.item) stylePopupLoader.item.close();
+        else stylePopupLoader.active = true;
+    }
+
+    function resolveColorName(name) {
+        if (name === undefined) return undefined;
+        if (name === "transparent") return "transparent";
+        return Appearance.colors[`col${name.charAt(0).toUpperCase()}${name.slice(1)}`] ?? undefined;
+    }
+
+    function setStyle(key, value) {
+        const styles = (Config.options.bar.widgetStyles ?? []).map(e => Object.assign({}, e));
+        let entry = styles.find(e => e.mode === root.borderlessMode && e.widget === root.widgetName);
+        if (!entry) {
+            entry = { mode: root.borderlessMode, widget: root.widgetName };
+            styles.push(entry);
+        }
+        if (value === undefined) delete entry[key];
+        else entry[key] = value;
+        Config.options.bar.widgetStyles = styles.filter(e => Object.keys(e).length > 2);
+    }
+
+    function resetStyle() {
+        Config.options.bar.widgetStyles = (Config.options.bar.widgetStyles ?? [])
+            .filter(e => !(e.mode === root.borderlessMode && e.widget === root.widgetName));
+    }
 
     readonly property color resolvedGroupColor: {
         const name = Config.options.bar.groupColor
@@ -19,8 +108,13 @@ Item {
         return Appearance.colors[key] ?? Appearance.colors.colLayer1
     }
 
+    readonly property real currentRadius: background.topLeftRadius
+    readonly property real currentBorderWidth: background.border.width
+
+    property real padding: root.style.padding ?? ((root.isMaterial && !root.paintMaterialPill) ? 0 : 5)
+
     readonly property bool isSegmented: Config.options?.bar.borderless === "segmented"
-    readonly property bool isPanel: Config.options.bar.cornerStyle === 4
+    readonly property bool isPanel: Config.options.bar.cornerStyle === 5
     readonly property real panelRadius: Appearance.rounding.unsharpenmore + 4
 
     readonly property real fullRadius: root.isPanel ? root.panelRadius : height / 2
@@ -55,8 +149,12 @@ Item {
             leftMargin: root.vertical ? 4 : 0
             rightMargin: root.vertical ? 4 : 0
         }
-        color: !root.paintBackground
+        color: root.morphEdge !== ""
+            ? Appearance.colors.colUiPopupBackground
+            : !root.paintBackground
             ? "transparent"
+            : root.resolveColorName(root.style.color) !== undefined
+                ? root.resolveColorName(root.style.color)
             : (root.isMaterial && !root.paintMaterialPill)
                 ? "transparent"
                 : (root.isMaterial && root.paintMaterialPill)
@@ -64,18 +162,19 @@ Item {
                     : (Config.options?.bar.borderless === "transparent"
                         ? "transparent"
                         : Config.options.bar.cornerStyle === 2 || (Config.options?.bar.borderless === "segmented" && !Config.options.bar.showBackground)
-                            ? Appearance.colors.colLayer0
+                            ? Appearance.colors.colUiBackground
                             : root.resolvedGroupColor)
 
-        border.width: root.paintBackground && root.isSegmented && !root.isMaterial ? 1 : 0
-        border.color: Appearance.colors.colLayer0Border
+        border.width: root.morphEdge !== "" ? 0 : root.style.borderWidth ?? (root.paintBackground && root.isSegmented && !root.isMaterial ? 1 : 0)
+        border.color: root.resolveColorName(root.style.borderColor) ?? Appearance.colors.colLayer0Border
 
-        topLeftRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.startRadius)
-        bottomLeftRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.vertical ? root.endRadius : root.startRadius)
-        topRightRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.vertical ? root.startRadius : root.endRadius)
-        bottomRightRadius: (root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.endRadius)
+        topLeftRadius: root.flatTL ? 0 : root.style.radius ?? ((root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.startRadius))
+        bottomLeftRadius: root.flatBL ? 0 : root.style.radius ?? ((root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.vertical ? root.endRadius : root.startRadius))
+        topRightRadius: root.flatTR ? 0 : root.style.radius ?? ((root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.vertical ? root.startRadius : root.endRadius))
+        bottomRightRadius: root.flatBR ? 0 : root.style.radius ?? ((root.isMaterial && root.paintMaterialPill) ? root.fullRadius : (Config.options?.bar.borderless === "separated" ? root.fullRadius : root.endRadius))
 
         Behavior on color {
+            enabled: root.morphEdge === ""
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
     }
@@ -86,5 +185,26 @@ Item {
         anchors.centerIn: parent
         columnSpacing: 0
         rowSpacing: 0
+    }
+
+    Item {
+        anchors.fill: parent
+        z: 1
+        TapHandler {
+            enabled: root.styleEditable && root.rightClickFree
+            acceptedButtons: Qt.RightButton
+            gesturePolicy: TapHandler.ReleaseWithinBounds
+            onTapped: root.toggleStyleEditor()
+            onLongPressed: root.toggleStyleEditor()
+        }
+    }
+
+    Loader {
+        id: stylePopupLoader
+        active: false
+        sourceComponent: BarGroupStylePopup {
+            group: root
+            onDismissed: stylePopupLoader.active = false
+        }
     }
 }

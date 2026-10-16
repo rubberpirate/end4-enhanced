@@ -32,7 +32,7 @@ Item {
     readonly property real batteryWidth: 170
     readonly property real badgeSize: 32
     readonly property real badgeSpacing: 6
-    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3
+    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     property bool vertical: Config.options.bar.vertical
 
     property string manualFocusId: ""
@@ -259,7 +259,7 @@ Item {
         height: root.pillHeight
         color: root.isMaterial || (GlobalStates.barCenterOnly && Config.options.bar.cornerStyle === 0) ? "transparent" : Config.options.bar.followFrameColor
             ? Appearance.getColorFromName(Config.options.bar.frameColor)
-            : Appearance.colors.colLayer0
+            : Appearance.colors.colUiBackground
         radius: height / 2
         clip: true
         visible: !root.vertical

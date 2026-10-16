@@ -12,8 +12,12 @@ RippleButton {
     property bool aiChatEnabled: Config.options.policies.ai !== 0
     property bool translatorEnabled: Config.options.sidebar.translator.enable
     property bool animeEnabled: Config.options.policies.weeb !== 0
-    property bool isMaterial: Config.options.bar.cornerStyle === 3
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     property real buttonPadding: 5
+    readonly property color iconColor: {
+        const name = Config.options.custom.iconColor || "onLayer0"
+        return Appearance.colors[`col${name.charAt(0).toUpperCase()}${name.slice(1)}`] ?? Appearance.colors.colOnLayer0
+    }
 
     visible: aiChatEnabled || translatorEnabled || animeEnabled
 
@@ -59,9 +63,10 @@ RippleButton {
         anchors.centerIn: parent
         width: root.isMaterial ? (root.vertical ? 24 : 22) : 19.5
         height: root.isMaterial ? (root.vertical ? 24 : 22) : 19.5
-        source: Config.options.custom.distroIcon
+        source: Config.options.custom.distroIcon || SystemInfo.distroIcon
+        customFolder: Config.options.custom.iconsPath
         colorize: Config.options.custom.colorizeIcon
-        color: Appearance.colors.colPrimary
+        color: root.iconColor
 
         Rectangle {
             opacity: root.showPing ? 1 : 0

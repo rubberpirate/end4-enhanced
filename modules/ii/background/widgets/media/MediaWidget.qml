@@ -23,18 +23,8 @@ AbstractBackgroundWidget {
     hoverEnabled: true
 
     readonly property var playerList: MprisController.players
-    property MprisPlayer currentPlayer: {
-        const preferred = Config.options.bar.media.preferredPlayer.trim().toLowerCase()
-        if (preferred.length === 0) return MprisController.activePlayer
-        const _ = MprisController.players.count
-        for (const p of MprisController.players) {
-            if ((p.identity ?? "").toLowerCase().includes(preferred) ||
-                (p.desktopEntry ?? "").toLowerCase().includes(preferred))
-                return p
-        }
-        return MprisController.activePlayer
-    }
-    property var artUrl: currentPlayer?.trackArtUrl
+    property MprisPlayer currentPlayer: MprisController.activePlayer
+    property var artUrl: currentPlayer?.trackArtUrl ?? ""
     property string artDownloadLocation: Directories.coverArt
     property string artFileName: Qt.md5(artUrl)
     property string artFilePath: `${artDownloadLocation}/${artFileName}`
@@ -96,9 +86,12 @@ AbstractBackgroundWidget {
     property bool showLyrics: false
 
     property string displayedArtFilePath: {
+        if (!root.artUrl || root.artUrl.length === 0) return ""
+        if (root.artUrl.startsWith("data:")) return root.artUrl
+        if (root.artUrl.startsWith("file:/")) return root.artUrl
+        if (root.artUrl.startsWith("/")) return "file://" + root.artUrl
         if (!root.downloaded) return ""
-        if (root.artUrl && root.artUrl.startsWith("file://")) return root.artUrl
-        return root.downloaded ? Qt.resolvedUrl(artFilePath) : ""
+        return Qt.resolvedUrl(artFilePath)
     }
 
     implicitHeight: card.implicitHeight
@@ -111,19 +104,23 @@ AbstractBackgroundWidget {
             root.downloaded = false
             return
         }
-        if (root.artUrl.startsWith("file://")) {
+        if (root.artUrl.startsWith("data:") || root.artUrl.startsWith("file:/") || root.artUrl.startsWith("/")) {
             root.downloaded = true
             return
         }
-        coverArtDownloader.targetFile = root.artUrl
-        coverArtDownloader.artFilePath = root.artFilePath
-        root.downloaded = false
-        coverArtDownloader.running = true
+        if (root.artUrl.startsWith("http://") || root.artUrl.startsWith("https://")) {
+            coverArtDownloader.targetFile = root.artUrl
+            coverArtDownloader.artFilePath = root.artFilePath
+            root.downloaded = false
+            coverArtDownloader.running = true
+        } else {
+            root.downloaded = true
+        }
     }
 
     Process {
         id: coverArtDownloader
-        property string targetFile: root.artUrl
+        property string targetFile: root.artUrl ?? ""
         property string artFilePath: root.artFilePath
         command: ["bash", "-c", `[ -f ${artFilePath} ] || curl -sSL '${targetFile}' -o '${artFilePath}'`]
         onExited: { root.downloaded = true }
@@ -135,29 +132,18 @@ AbstractBackgroundWidget {
         visible: Config.options.background.widgets.shadow
     }
 
-    Rectangle {
+    WidgetCard {
         id: card
+        widget: root
+        shadowed: false
         implicitWidth: root.widgetWidth
         implicitHeight: (root.sizeMode === "2x3" || root.sizeMode === "2x2")
             ? root.doubleCardHeight
             : (root.cardHeight + (root.sizeMode === "1x3" && root.showLyrics ? 264 : 0))
-        radius: Appearance.rounding?.verylarge ?? 30
-        color: Appearance.colors.colPrimaryContainer
         clip: true
 
         Behavior on implicitHeight {
             NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
-        }
-
-        FastBlurred {
-            anchors.fill: parent
-            blurSource: root.wallpaperItem
-            cardRadius: card.radius
-            tint: Appearance.colors.colLayer1
-            tintOpacity: 0.55
-            trackX: root.x  
-            trackY: root.y
-            visible: Config.options.background.widgets.blurWidgets 
         }
 
         Loader {

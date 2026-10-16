@@ -20,6 +20,10 @@ Item {
     property var suggestionQuery: ""
     property var suggestionList: []
 
+    Component.onCompleted: {
+        Ai.refreshLocalModels();
+    }
+
     onFocusChanged: focus => {
         if (focus) {
             root.inputField.forceActiveFocus();
@@ -45,7 +49,7 @@ Item {
     property var allCommands: [
         {
             name: "attach",
-            description: Translation.tr("Attach a file. Only works with Gemini."),
+            description: Translation.tr("Attach an image / file"),
             execute: args => {
                 Ai.attachFile(args.join(" ").trim());
             }
@@ -124,6 +128,14 @@ Item {
             description: Translation.tr("Clear chat history"),
             execute: () => {
                 Ai.clearMessages();
+            }
+        },
+        {
+            name: "refresh",
+            description: Translation.tr("Refresh local models (Ollama, vLLM)"),
+            execute: () => {
+                Ai.refreshLocalModels();
+                Ai.addMessage(Translation.tr("Refreshing local models..."), Ai.interfaceRole);
             }
         },
         {

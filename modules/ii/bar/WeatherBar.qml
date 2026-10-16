@@ -8,9 +8,12 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
+    property color contentColor: Appearance.colors.colOnLayer1
+    property bool contentColorOverridden: false
+    signal styleEditorRequested()
     property bool hovered: false
     property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.cornerStyle === 3
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
 
     implicitWidth: vertical ? 32 : isMaterial ? (contentLoader.item?.implicitWidth ?? 0) : (contentLoader.item?.implicitWidth + 8 ?? 0)
     implicitHeight: vertical ? (contentLoader.item?.implicitHeight ?? 0) : Appearance.sizes.barHeight
@@ -18,7 +21,7 @@ MouseArea {
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
 
-    onPressed: {
+    onClicked: (mouse) => {
         if (mouse.button === Qt.RightButton) {
             Weather.getData();
             Quickshell.execDetached(["notify-send",
@@ -26,8 +29,11 @@ MouseArea {
                 Translation.tr("Refreshing (manually triggered)"),
                 "-a", "Shell"
             ])
-            mouse.accepted = false
         }
+    }
+
+    onPressAndHold: (mouse) => {
+        if (mouse.button === Qt.RightButton) root.styleEditorRequested()
     }
 
     Loader {
@@ -46,14 +52,14 @@ MouseArea {
                 fill: 0
                 text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
                 iconSize: Appearance.font.pixelSize.large
-                color: Appearance.colors.colOnLayer1
+                color: root.contentColor
                 Layout.alignment: Qt.AlignVCenter
             }
 
             StyledText {
                 visible: !root.isMaterial
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: Appearance.colors.colOnLayer1
+                color: root.contentColor
                 text: Weather.data?.temp ?? "--°"
                 Layout.alignment: Qt.AlignVCenter
             }
@@ -61,7 +67,7 @@ MouseArea {
             StyledText {
                 visible: root.isMaterial
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: Appearance.colors.colPrimary
+                color: Appearance.colors.colOnLayer0
                 text: Weather.data?.temp ?? "--°"
                 Layout.alignment: Qt.AlignVCenter
                 leftPadding: 5
@@ -95,14 +101,14 @@ MouseArea {
                 fill: 0
                 text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
                 iconSize: Appearance.font.pixelSize.large
-                color: Appearance.colors.colOnLayer1
+                color: root.contentColor
                 Layout.alignment: Qt.AlignHCenter
             }
 
             StyledText {
                 visible: !root.isMaterial
                 font.pixelSize: Appearance.font.pixelSize.small
-                color: Appearance.colors.colOnLayer1
+                color: root.contentColor
                 text: (Weather.data?.temp ?? "--°").replace(/[CF]$/, "")
                 Layout.alignment: Qt.AlignHCenter
             }

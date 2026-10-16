@@ -14,10 +14,18 @@ Item {
     implicitHeight: Appearance.sizes.barHeight
     width: parent.width
     readonly property real barPadding: 0
-    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3
+    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    readonly property bool isMaterialHug: Config.options.bar.cornerStyle === 4
+    readonly property bool isSplitHug: Config.options.bar.cornerStyle === 6
+    readonly property bool hasTabs: root.isMaterialHug || root.isSplitHug
+    readonly property bool useTabWrapper: root.isMaterial || root.isSplitHug
+    readonly property real splitGroupSpacing: Config.options.bar.borderless === "transparent" ? -7 : Config.options.bar.borderless === "segmented" ? -1 : 2
+    readonly property color materialPillBgColor: (Config.options.bar.followFrameColor && Config.options.bar.frameColor)
+        ? Appearance.getColorFromName(Config.options.bar.frameColor)
+        : Appearance.colors.colUiBackground
     readonly property real centerPillX: centerPill.x
     readonly property real centerPillWidth: centerPill.width
-    readonly property bool isPanel: Config.options.bar.cornerStyle === 4
+    readonly property bool isPanel: Config.options.bar.cornerStyle === 5
     readonly property var diLeftWidgets:  filterLayout(Config.options.bar.dynamicIsland.leftWidgets ?? [])
     readonly property var diRightWidgets: filterLayout(Config.options.bar.dynamicIsland.rightWidgets ?? [])
 
@@ -44,8 +52,8 @@ Item {
     }
 
     function shouldPaintMaterialPill(name) {
-        if (Config.options.bar.cornerStyle !== 3) return false;
-        const blacklist = ["workspaces", "divisor", "powerButton", "docktoPanel", "leftSidebarButton", "activeWindow", "dynamicIsland"];
+        if (!root.isMaterial) return false;
+        const blacklist = ["workspaces", "divisor", "powerButton", "docktoPanel", "leftSidebarButton", "activeWindow", "dynamicIsland", "avatar"];
         if (blacklist.includes(name)) {
             return false;
         }
@@ -53,7 +61,7 @@ Item {
     }
 
     function getMaterialPillColor(name) {
-        if (Config.options.bar.cornerStyle !== 3) return Appearance.colors.colPrimaryContainer;
+        if (!root.isMaterial) return Appearance.colors.colPrimaryContainer;
         switch(name) {
             case "media":
             case "sysTray":
@@ -75,10 +83,10 @@ Item {
         id: barBackground
         anchors.fill: parent
         anchors.margins: Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0
-        color: (!centerOnly && Config.options.bar.showBackground && Config.options.bar.cornerStyle !== 2 && !root.isMaterial)
+        color: (!centerOnly && Config.options.bar.showBackground && Config.options.bar.cornerStyle !== 2 && !root.useTabWrapper)
             ? (Config.options.bar.followFrameColor
                 ? Appearance.getColorFromName(Config.options.bar.frameColor)
-                : Appearance.colors.colLayer0)
+                : Appearance.colors.colUiBackground)
             : "transparent"
         radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
         border.width: (!centerOnly && Config.options.bar.cornerStyle === 1) ? 1 : 0
@@ -103,7 +111,7 @@ Item {
         implicitSize: Appearance.rounding.screenRounding
         color: Config.options.bar.followFrameColor
             ? Appearance.getColorFromName(Config.options.bar.frameColor)
-            : Appearance.colors.colLayer0
+            : Appearance.colors.colUiBackground
         corner: RoundCorner.CornerEnum.TopRight
 
         states: State {
@@ -135,10 +143,10 @@ Item {
             ? (Config.options.bar.cornerStyle === 1 ? middleRow.implicitWidth + 8 : middleRow.implicitWidth - 4)
             : middleRow.implicitWidth + 10
         height: GlobalStates.dynamicIslandEnabled ? parent.height : parent.height - (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut * 2 : 0)
-        color: root.isMaterial ? "transparent" : Config.options.bar.followFrameColor 
+        color: root.useTabWrapper ? "transparent" : Config.options.bar.followFrameColor 
             ? Appearance.getColorFromName(Config.options.bar.frameColor)
-            : Appearance.colors.colLayer0
-        radius: Config.options.bar.cornerStyle === 1 || root.isMaterial ? Appearance.rounding.windowRounding : 0
+            : Appearance.colors.colUiBackground
+        radius: Config.options.bar.cornerStyle === 1 || root.useTabWrapper ? Appearance.rounding.windowRounding : 0
         border.width: Config.options.bar.cornerStyle === 1 ? 1 : 0
         border.color: Appearance.colors.colLayer0Border
 
@@ -155,7 +163,7 @@ Item {
         implicitSize: Appearance.rounding.screenRounding
         color: Config.options.bar.followFrameColor
             ? Appearance.getColorFromName(Config.options.bar.frameColor)
-            : Appearance.colors.colLayer0
+            : Appearance.colors.colUiBackground
         corner: RoundCorner.CornerEnum.TopLeft
 
         states: State {
@@ -186,25 +194,33 @@ Item {
         // Left
         Item {
             anchors.left: parent.left
-            anchors.leftMargin: root.isMaterial ? (Config.options.hyprland.general.gapsOut || 5) : Config.options.bar.cornerStyle === 1 ? 4 : Config.options.bar.cornerStyle === 4 ? 4 : 8
+            anchors.leftMargin: root.hasTabs ? 0 : (root.useTabWrapper ? (Config.options.hyprland.general.gapsOut || 5) : (Config.options.bar.cornerStyle === 1 ? 4 : Config.options.bar.cornerStyle === 5 ? 4 : 8))
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: root.isMaterial ? leftMaterialPill.implicitWidth : leftRow.implicitWidth
+            width: root.useTabWrapper ? (leftMaterialPill.width + (root.hasTabs && root.effectiveLeftLayout.length > 0 ? leftRightOutwardCorner.implicitSize : 0)) : leftRow.implicitWidth
 
             // Material pill wrapper
             Rectangle {
                 id: leftMaterialPill
-                visible: root.isMaterial
-                anchors.centerIn: parent
-                implicitWidth: leftMaterialRow.implicitWidth + 10
-                implicitHeight: leftMaterialRow.implicitHeight
-                radius: Appearance.rounding.full
-                color: Appearance.colors.colLayer0
+                visible: root.useTabWrapper && root.effectiveLeftLayout.length > 0
+                anchors.left: root.hasTabs ? parent.left : undefined
+                anchors.top: (root.hasTabs && !Config.options.bar.bottom) ? parent.top : undefined
+                anchors.bottom: (root.hasTabs && Config.options.bar.bottom) ? parent.bottom : undefined
+                anchors.centerIn: root.hasTabs ? undefined : parent
+                width: leftMaterialRow.implicitWidth + (root.hasTabs ? 16 : 10)
+                height: root.hasTabs ? parent.height : leftMaterialRow.implicitHeight
+                radius: root.hasTabs ? 0 : Appearance.rounding.full
+                color: root.materialPillBgColor
+
+                topLeftRadius: root.hasTabs ? 0 : radius
+                bottomLeftRadius: root.hasTabs ? 0 : radius
+                topRightRadius: (root.hasTabs && Config.options.bar.bottom) ? Appearance.rounding.screenRounding : (root.hasTabs ? 0 : radius)
+                bottomRightRadius: (root.hasTabs && !Config.options.bar.bottom) ? Appearance.rounding.screenRounding : (root.hasTabs ? 0 : radius)
 
                 RowLayout {
                     id: leftMaterialRow
                     anchors.centerIn: parent
-                    spacing: 3
+                    spacing: root.isSplitHug ? root.splitGroupSpacing : 3
 
                     Repeater {
                         model: root.effectiveLeftLayout
@@ -216,6 +232,7 @@ Item {
                         BarGroup {
                             Layout.fillHeight: true
                             currentIndex: index
+                            widgetName: modelData
                             totalCount: root.effectiveLeftLayout.length
                             paintMaterialPill: root.shouldPaintMaterialPill(modelData)
                             bgColor: root.getMaterialPillColor(modelData)
@@ -232,10 +249,21 @@ Item {
                 }
             }
 
+            RoundCorner {
+                id: leftRightOutwardCorner
+                visible: root.hasTabs && root.effectiveLeftLayout.length > 0
+                anchors.left: leftMaterialPill.right
+                anchors.top: !Config.options.bar.bottom ? parent.top : undefined
+                anchors.bottom: Config.options.bar.bottom ? parent.bottom : undefined
+                implicitSize: Appearance.rounding.screenRounding
+                color: root.materialPillBgColor
+                corner: !Config.options.bar.bottom ? RoundCorner.CornerEnum.TopLeft : RoundCorner.CornerEnum.BottomLeft
+            }
+
             // Non-material layout
             RowLayout {
                 id: leftRow
-                visible: !root.isMaterial
+                visible: !root.useTabWrapper
                 anchors.fill: parent
                 spacing: Config.options.bar.borderless === "transparent" ? -7
                     : (Config.options?.bar.borderless === "segmented" && root.isPanel) ? 3
@@ -252,6 +280,7 @@ Item {
                     BarGroup {
                         Layout.fillHeight: true
                         currentIndex: index
+                        widgetName: modelData
                         totalCount: root.effectiveLeftLayout.length
                         Loader {
                             Layout.fillHeight: true
@@ -284,7 +313,7 @@ Item {
         Item {
             id: absoluteCenter
             anchors.centerIn: parent
-            width: root.isMaterial ? centerMaterialPill.implicitWidth : middleRow.implicitWidth
+            width: root.useTabWrapper ? (centerMaterialPill.width + (root.hasTabs && root.effectiveMiddleLayout.length > 0 ? (centerLeftOutwardCorner.implicitSize + centerRightOutwardCorner.implicitSize) : 0)) : middleRow.implicitWidth
             height: parent.height
 
             // Dynamic Island — left
@@ -307,20 +336,36 @@ Item {
                 source: active ? root.getWidgetUrl(Config.options.bar.dynamicIsland.rightWidget) : ""
             }
 
+            RoundCorner {
+                id: centerLeftOutwardCorner
+                visible: root.hasTabs && root.effectiveMiddleLayout.length > 0
+                anchors.right: centerMaterialPill.left
+                anchors.top: !Config.options.bar.bottom ? parent.top : undefined
+                anchors.bottom: Config.options.bar.bottom ? parent.bottom : undefined
+                implicitSize: Appearance.rounding.screenRounding
+                color: root.materialPillBgColor
+                corner: !Config.options.bar.bottom ? RoundCorner.CornerEnum.TopRight : RoundCorner.CornerEnum.BottomRight
+            }
+
             // Material pill wrapper
             Rectangle {
                 id: centerMaterialPill
-                visible: root.isMaterial
+                visible: root.useTabWrapper && root.effectiveMiddleLayout.length > 0
                 anchors.centerIn: parent
-                implicitWidth: centerMaterialRow.implicitWidth + 10
-                implicitHeight: centerMaterialRow.implicitHeight 
-                radius: Appearance.rounding.full
-                color: Appearance.colors.colLayer0
+                width: centerMaterialRow.implicitWidth + (root.hasTabs ? 16 : 10)
+                height: root.hasTabs ? parent.height : centerMaterialRow.implicitHeight 
+                radius: root.hasTabs ? 0 : Appearance.rounding.full
+                color: root.materialPillBgColor
+
+                topLeftRadius: (root.hasTabs && Config.options.bar.bottom) ? Appearance.rounding.screenRounding : (root.hasTabs ? 0 : radius)
+                topRightRadius: (root.hasTabs && Config.options.bar.bottom) ? Appearance.rounding.screenRounding : (root.hasTabs ? 0 : radius)
+                bottomLeftRadius: (root.hasTabs && !Config.options.bar.bottom) ? Appearance.rounding.screenRounding : (root.hasTabs ? 0 : radius)
+                bottomRightRadius: (root.hasTabs && !Config.options.bar.bottom) ? Appearance.rounding.screenRounding : (root.hasTabs ? 0 : radius)
 
                 RowLayout {
                     id: centerMaterialRow
                     anchors.centerIn: parent
-                    spacing: 3
+                    spacing: root.isSplitHug ? root.splitGroupSpacing : 3
 
                     Repeater {
                         model: root.effectiveMiddleLayout
@@ -332,6 +377,7 @@ Item {
                         BarGroup {
                             Layout.fillHeight: true
                             currentIndex: index
+                            widgetName: modelData
                             paintBackground: modelData !== "dynamicIsland"
                             totalCount: root.effectiveMiddleLayout.length
                             paintMaterialPill: root.shouldPaintMaterialPill(modelData)
@@ -349,10 +395,21 @@ Item {
                 }
             }
 
+            RoundCorner {
+                id: centerRightOutwardCorner
+                visible: root.hasTabs && root.effectiveMiddleLayout.length > 0
+                anchors.left: centerMaterialPill.right
+                anchors.top: !Config.options.bar.bottom ? parent.top : undefined
+                anchors.bottom: Config.options.bar.bottom ? parent.bottom : undefined
+                implicitSize: Appearance.rounding.screenRounding
+                color: root.materialPillBgColor
+                corner: !Config.options.bar.bottom ? RoundCorner.CornerEnum.TopLeft : RoundCorner.CornerEnum.BottomLeft
+            }
+
             // Non-material layout
             RowLayout {
                 id: middleRow
-                visible: !root.isMaterial
+                visible: !root.useTabWrapper
                 anchors.fill: parent
                 spacing: Config.options.bar.borderless === "transparent" ? -7
                     : (Config.options?.bar.borderless === "segmented" && root.isPanel) ? 3
@@ -369,6 +426,7 @@ Item {
                     BarGroup {
                         Layout.fillHeight: true
                         currentIndex: index
+                        widgetName: modelData
                         paintBackground: modelData !== "dynamicIsland"
                         totalCount: root.effectiveMiddleLayout.length
                         Loader {
@@ -400,25 +458,44 @@ Item {
         // Right
         Item {
             anchors.right: parent.right
-            anchors.rightMargin: root.isMaterial ? (Config.options.hyprland.general.gapsOut || 5) : Config.options.bar.cornerStyle === 1 ? 4 : Config.options.bar.cornerStyle === 4 ? 4 : 8
+            anchors.rightMargin: root.hasTabs ? 0 : (root.useTabWrapper ? (Config.options.hyprland.general.gapsOut || 5) : (Config.options.bar.cornerStyle === 1 ? 4 : Config.options.bar.cornerStyle === 5 ? 4 : 8))
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            width: root.isMaterial ? rightMaterialPill.implicitWidth : rightRow.implicitWidth
+            width: root.useTabWrapper ? (rightMaterialPill.width + (root.hasTabs && root.effectiveRightLayout.length > 0 ? rightLeftOutwardCorner.implicitSize : 0)) : rightRow.implicitWidth
+
+            RoundCorner {
+                id: rightLeftOutwardCorner
+                visible: root.hasTabs && root.effectiveRightLayout.length > 0
+                anchors.right: rightMaterialPill.left
+                anchors.top: !Config.options.bar.bottom ? parent.top : undefined
+                anchors.bottom: Config.options.bar.bottom ? parent.bottom : undefined
+                implicitSize: Appearance.rounding.screenRounding
+                color: root.materialPillBgColor
+                corner: !Config.options.bar.bottom ? RoundCorner.CornerEnum.TopRight : RoundCorner.CornerEnum.BottomRight
+            }
 
             // Material pill wrapper
             Rectangle {
                 id: rightMaterialPill
-                visible: root.isMaterial
-                anchors.centerIn: parent
-                implicitWidth: rightMaterialRow.implicitWidth + 10
-                implicitHeight: rightMaterialRow.implicitHeight 
-                radius: Appearance.rounding.full
-                color: Appearance.colors.colLayer0
+                visible: root.useTabWrapper && root.effectiveRightLayout.length > 0
+                anchors.right: root.hasTabs ? parent.right : undefined
+                anchors.top: (root.hasTabs && !Config.options.bar.bottom) ? parent.top : undefined
+                anchors.bottom: (root.hasTabs && Config.options.bar.bottom) ? parent.bottom : undefined
+                anchors.centerIn: root.hasTabs ? undefined : parent
+                width: rightMaterialRow.implicitWidth + (root.hasTabs ? 16 : 10)
+                height: root.hasTabs ? parent.height : rightMaterialRow.implicitHeight 
+                radius: root.hasTabs ? 0 : Appearance.rounding.full
+                color: root.materialPillBgColor
+
+                topRightRadius: root.hasTabs ? 0 : radius
+                bottomRightRadius: root.hasTabs ? 0 : radius
+                topLeftRadius: (root.hasTabs && Config.options.bar.bottom) ? Appearance.rounding.screenRounding : (root.hasTabs ? 0 : radius)
+                bottomLeftRadius: (root.hasTabs && !Config.options.bar.bottom) ? Appearance.rounding.screenRounding : (root.hasTabs ? 0 : radius)
 
                 RowLayout {
                     id: rightMaterialRow
                     anchors.centerIn: parent
-                    spacing: 3
+                    spacing: root.isSplitHug ? root.splitGroupSpacing : 3
 
                     Repeater {
                         model: root.effectiveRightLayout
@@ -430,6 +507,7 @@ Item {
                         BarGroup {
                             Layout.fillHeight: true
                             currentIndex: index
+                            widgetName: modelData
                             totalCount: root.effectiveRightLayout.length
                             paintMaterialPill: root.shouldPaintMaterialPill(modelData)
                             bgColor: root.getMaterialPillColor(modelData)
@@ -452,7 +530,7 @@ Item {
             // Non-material layout
             RowLayout {
                 id: rightRow
-                visible: !root.isMaterial
+                visible: !root.useTabWrapper
                 anchors.fill: parent
                 spacing: Config.options.bar.borderless === "transparent" ? -7
                     : (Config.options?.bar.borderless === "segmented" && root.isPanel) ? 3
@@ -469,6 +547,7 @@ Item {
                     BarGroup {
                         Layout.fillHeight: true
                         currentIndex: index
+                        widgetName: modelData
                         totalCount: root.effectiveRightLayout.length
                         Loader {
                             Layout.fillHeight: true

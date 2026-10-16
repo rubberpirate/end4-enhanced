@@ -6,6 +6,8 @@ import qs.modules.common.widgets
 
 MouseArea {
     id: root
+    property color contentColor: Appearance.colors.colOnLayer1
+    property bool contentColorOverridden: false
 
     property bool vertical: false
     property real downloadBytesPerSecond: 0
@@ -130,7 +132,7 @@ MouseArea {
             Layout.preferredWidth: root.vertical ? -1 : regularRateMetrics.width
             horizontalAlignment: Text.AlignRight
             text: speedLine.rateText
-            color: Appearance.colors.colOnLayer1
+            color: root.contentColor
             font.pixelSize: Appearance.font.pixelSize.smallest
             font.weight: Font.Medium
             font.features: { "tnum": 1 }

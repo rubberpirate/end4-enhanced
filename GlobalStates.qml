@@ -11,6 +11,7 @@ Singleton {
     id: root
     signal requestBluetoothDialog()
     property bool barOpen: true
+    property bool barStyleEditorOpen: false
     property bool crosshairOpen: false
     property bool equalizerOpen: false
     property bool sidebarLeftOpen: false
@@ -33,7 +34,14 @@ Singleton {
     property bool superReleaseMightTrigger: true
     property bool wallpaperSelectorOpen: false
     property bool workspaceShowNumbers: false
-    property string settingsPage: ""
+    property var settingsTarget: null
+
+    function openSettingsAt(pageId, label, section, subsection) {
+        root.settingsOpen = true;
+        Qt.callLater(() => {
+            root.settingsTarget = { page: pageId, label: label ?? "", section: section ?? "", subsection: subsection ?? "" };
+        });
+    }
     property Item currentPageInstance: null
     property list<real> visualizerPoints: []
     property bool desktopWidgetKeyboardFocus: false
@@ -47,6 +55,19 @@ Singleton {
     property real dropShelfY: 0
     property string osdIndicatorType: "volume"
     property bool barCenterOnly: false
+    property int dashboardPage: 0
+    property string dashboardGroup: ""
+    property var frameHover: ({})
+    function setFrameHover(screenName, side, hovered) {
+        const key = `${screenName}:${side}`;
+        if ((root.frameHover[key] ?? false) === hovered) return;
+        const next = Object.assign({}, root.frameHover);
+        next[key] = hovered;
+        root.frameHover = next;
+    }
+    function isFrameHovered(screenName, side) {
+        return root.frameHover[`${screenName}:${side}`] ?? false;
+    }
     property bool diSessionOpen: false
     property bool startupLockPending: true
 

@@ -66,29 +66,11 @@ AbstractBackgroundWidget {
         animation: Appearance.animation.elementResize.numberAnimation.createObject(this)
     }
 
-    Rectangle {
+    WidgetCard {
         id: card
         implicitWidth: root.widgetWidth
         implicitHeight: root.widgetHeight
-        radius: Appearance.rounding?.verylarge ?? 30
-        color: Appearance.colors.colPrimaryContainer
-
-        StyledRectangularShadow {
-            target: card
-            z: -2
-            visible: Config.options.background.widgets.shadow
-        }
-
-        FastBlurred {
-            anchors.fill: parent
-            blurSource: root.wallpaperItem
-            cardRadius: card.radius
-            tint: Appearance.colors.colLayer1
-            tintOpacity: 0.55
-            trackX: root.x  
-            trackY: root.y
-            visible: Config.options.background.widgets.blurWidgets 
-        }
+        widget: root
 
         Loader {
             anchors.fill: parent

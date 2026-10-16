@@ -8,10 +8,13 @@ Item {
     property var action
     property var selectionMode
 
-    property string description: switch (root.action) {
+    property string description: root.selectionMode === RegionSelection.SelectionMode.ScreenTarget ? Translation.tr("Click to use this screen") : root.actionDescription
+
+    property string actionDescription: switch (root.action) {
     case RegionSelection.SnipAction.Copy:
-    case RegionSelection.SnipAction.Edit:
         return Translation.tr("Copy region (LMB) or annotate (RMB)");
+    case RegionSelection.SnipAction.Edit:
+        return Translation.tr("Annotate region");
     case RegionSelection.SnipAction.Search:
         return Translation.tr("Search with Google Lens");
     case RegionSelection.SnipAction.CharRecognition:

@@ -6,7 +6,10 @@ import QtQuick.Layouts
 
 Item {
     id: root
+    property color contentColor: Appearance.colors.colOnSecondaryContainer
+    property bool contentColorOverridden: false
     required property string iconName
+    property string label: ""
     required property double percentage
     property bool vertical: false
     property int warningThreshold: 100
@@ -16,6 +19,24 @@ Item {
     implicitWidth:  vertical ? Appearance.sizes.verticalBarWidth : (resourceRowLayout.x < 0 ? 0 : resourceRowLayout.implicitWidth)
     implicitHeight: vertical ? resourceProgress.implicitHeight : Appearance.sizes.barHeight
     property bool warning: percentage * 100 >= warningThreshold
+    readonly property real usage: Math.max(0, Math.min(1, percentage))
+    property color usageColor: {
+        if (root.warning) return Appearance.colors.colError
+        if (root.contentColorOverridden) return root.contentColor
+        const blend = Math.max(0, Math.min(1, (root.usage - 0.5) / 0.3))
+        return ColorUtils.mix(Appearance.colors.colTertiary, Appearance.colors.colPrimary, blend)
+    }
+    readonly property Component styleComponent: {
+        switch (Config.options.bar.resources.style) {
+        case "filled": return filledStyle
+        case "text": return textStyle
+        default: return outlineStyle
+        }
+    }
+
+    Behavior on usageColor {
+        animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+    }
 
     Component {
         id: outlineStyle
@@ -23,7 +44,7 @@ Item {
             lineWidth: Appearance.rounding.unsharpen
             value: root.percentage
             implicitSize: vertical ? 20 : 20
-            colPrimary: root.warning ? Appearance.colors.colError : Appearance.colors.colOnSecondaryContainer
+            colPrimary: root.warning ? Appearance.colors.colError : root.contentColor
             enableAnimation: false
             Item {
                 anchors.centerIn: parent
@@ -35,7 +56,7 @@ Item {
                     fill: 1
                     text: root.iconName
                     iconSize: Appearance.font.pixelSize.normal
-                    color: Appearance.colors.colOnSecondaryContainer
+                    color: root.contentColor
                 }
             }
         }
@@ -47,7 +68,7 @@ Item {
             lineWidth: Appearance.rounding.unsharpen
             value: root.percentage
             implicitSize: 20
-            colPrimary: root.warning ? Appearance.colors.colError : Appearance.colors.colOnSecondaryContainer
+            colPrimary: root.warning ? Appearance.colors.colError : root.contentColor
             accountForLightBleeding: !root.warning
             enableAnimation: false
             Item {
@@ -60,8 +81,33 @@ Item {
                     fill: 1
                     text: root.iconName
                     iconSize: Appearance.font.pixelSize.normal
-                    color: Appearance.m3colors.m3onSecondaryContainer
+                    color: root.contentColor
                 }
+            }
+        }
+    }
+
+    Component {
+        id: textStyle
+        ColumnLayout {
+            spacing: 1
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: root.label !== "" ? root.label : root.iconName.slice(0, 3).toUpperCase()
+                font.pixelSize: Appearance.font.pixelSize.smallest
+                font.weight: Font.DemiBold
+                font.letterSpacing: 0.6
+                color: root.contentColor
+            }
+
+            StyledProgressBar {
+                Layout.alignment: Qt.AlignHCenter
+                valueBarWidth: root.vertical ? 24 : 30
+                valueBarHeight: 4
+                value: root.usage
+                highlightColor: root.usageColor
+                trackColor: ColorUtils.transparentize(root.contentColor, 0.8)
             }
         }
     }
@@ -72,7 +118,7 @@ Item {
         active: root.vertical
         visible: active
         anchors.centerIn: parent
-        sourceComponent: Config.options.bar.resources.style === "filled" ? filledStyle : outlineStyle
+        sourceComponent: root.styleComponent
     }
 
     // Horizontal
@@ -87,7 +133,7 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             active: !root.vertical
             visible: active
-            sourceComponent: Config.options.bar.resources.style === "filled" ? filledStyle : outlineStyle
+            sourceComponent: root.styleComponent
         }
 
         Item {
@@ -103,7 +149,7 @@ Item {
             StyledText {
                 id: percentageText
                 anchors.centerIn: parent
-                color: Appearance.colors.colOnLayer1
+                color: root.contentColorOverridden ? root.contentColor : Appearance.colors.colOnLayer1
                 font.pixelSize: Appearance.font.pixelSize.small
                 text: `${Math.round(root.percentage * 100).toString()}`
             }

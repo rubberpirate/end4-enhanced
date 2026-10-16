@@ -42,8 +42,14 @@ Singleton {
         command: ["which", "checkupdates"]
         onExited: (exitCode, exitStatus) => {
             root.available = (exitCode === 0);
-            root.refresh();
+            firstCheckTimer.start();
         }
+    }
+
+    Timer {
+        id: firstCheckTimer
+        interval: 60 * 1000
+        onTriggered: root.refresh()
     }
 
     Process {

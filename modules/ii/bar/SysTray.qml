@@ -9,6 +9,9 @@ import qs.modules.common.widgets
 
 Item {
     id: root
+    property color contentColor: Appearance.colors.colOnLayer2
+    property bool contentColorOverridden: false
+    signal styleEditorRequested()
     property bool vertical: false
     property bool invertSide: false
     property bool trayOverflowOpen: false
@@ -16,7 +19,7 @@ Item {
     property bool showOverflowMenu: true
     property var activeMenu: null
     readonly property bool isOnLeft: Config.options.bar.layouts.leftLayout.includes("sysTray")
-    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3
+    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
 
     visible: SystemTray.items.values.length > 0
     implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? pill.implicitWidth - 4 : gridLayout.implicitWidth)
@@ -94,7 +97,7 @@ Item {
                 iconSize: Appearance.font.pixelSize.larger
                 text: Config.options.bar.bottom ? "keyboard_control_key" : "expand_more"
                 horizontalAlignment: Text.AlignHCenter
-                color: root.trayOverflowOpen ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer2
+                color: root.trayOverflowOpen ? Appearance.colors.colOnSecondaryContainer : root.contentColor
                 rotation: (root.trayOverflowOpen ? 180 : 0) - (90 * root.vertical) + (180 * root.invertSide)
                 Behavior on rotation {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
@@ -122,6 +125,7 @@ Item {
                             Layout.fillWidth: root.vertical
                             onMenuClosed: root.releaseFocus()
                             onMenuOpened: (qsWindow) => root.setExtraWindowAndGrabFocus(qsWindow)
+                            onStyleEditorRequested: root.styleEditorRequested()
                         }
                     }
                 }
@@ -140,6 +144,7 @@ Item {
                 Layout.rightMargin: 6
                 onMenuClosed: root.releaseFocus()
                 onMenuOpened: (qsWindow) => root.setExtraWindowAndGrabFocus(qsWindow)
+                onStyleEditorRequested: root.styleEditorRequested()
             }
         }
     }

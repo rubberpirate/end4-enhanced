@@ -12,10 +12,45 @@ ColumnLayout {
     property string icon: ""
     property var bgColor: Appearance.colors.colSecondaryContainer
     property bool collapsible: true
+    property string hint: ""
+    property string hintIcon: "info"
     default property alias data: sectionContent.data
 
     readonly property string sectionId: root.title
     readonly property bool collapsed: root.collapsible && Config.options.settings.collapsedSections.includes(root.sectionId)
+
+    property real flashScan: 0
+    property real flashPop: 0
+    property real flashTint: 0
+
+    function flashTitle() {
+        titleFlash.restart()
+    }
+
+    ParallelAnimation {
+        id: titleFlash
+
+        SequentialAnimation {
+            NumberAnimation { target: root; property: "flashTint"; to: 1; duration: 150 }
+            PauseAnimation { duration: 1800 }
+            NumberAnimation { target: root; property: "flashTint"; to: 0; duration: 500 }
+        }
+
+        SequentialAnimation {
+            PropertyAction { target: root; property: "flashScan"; value: 0 }
+            SequentialAnimation {
+                loops: 2
+                NumberAnimation { target: root; property: "flashScan"; to: 1; duration: 450; easing.type: Easing.InOutSine }
+                NumberAnimation { target: root; property: "flashScan"; to: 0; duration: 450; easing.type: Easing.InOutSine }
+            }
+        }
+
+        SequentialAnimation {
+            loops: 3
+            NumberAnimation { target: root; property: "flashPop"; to: 1; duration: 200; easing.type: Easing.OutBack }
+            NumberAnimation { target: root; property: "flashPop"; to: 0; duration: 400; easing.type: Easing.OutCubic }
+        }
+    }
 
     function toggleCollapsed() {
         if (!root.collapsible) return
@@ -63,12 +98,49 @@ ColumnLayout {
                 iconSize: Appearance.font.pixelSize.large + 1
                 wrappedShape: root.shape
                 color: bgColor
+                scale: 1 + 0.3 * root.flashPop
             }
             StyledText {
                 text: root.title
                 font.pixelSize: Appearance.font.pixelSize.larger
                 font.weight: Font.Medium
-                color: Appearance.colors.colOnSecondaryContainer
+                color: Qt.tint(Appearance.colors.colOnSecondaryContainer, Qt.rgba(Appearance.colors.colPrimary.r, Appearance.colors.colPrimary.g, Appearance.colors.colPrimary.b, root.flashTint))
+
+                TitleScanLine {
+                    anchors.left: parent.left
+                    anchors.bottom: parent.bottom
+                    anchors.bottomMargin: -3
+                    width: parent.width
+                    position: root.flashScan
+                    opacity: root.flashTint
+                }
+            }
+
+            MaterialSymbol {
+                id: hintSymbol
+                visible: root.hint.length > 0
+                Layout.leftMargin: 2
+                text: root.hintIcon
+                iconSize: Appearance.font.pixelSize.larger
+                color: Appearance.colors.colSubtext
+                opacity: hintArea.containsMouse ? 1 : 0.55
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 150 }
+                }
+
+                MouseArea {
+                    id: hintArea
+                    anchors.fill: parent
+                    anchors.margins: -4
+                    hoverEnabled: true
+                    cursorShape: Qt.WhatsThisCursor
+                }
+
+                StyledToolTip {
+                    extraVisibleCondition: hintArea.containsMouse
+                    text: root.hint
+                }
             }
 
             Item { Layout.fillWidth: true }

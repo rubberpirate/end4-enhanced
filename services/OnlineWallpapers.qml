@@ -177,15 +177,38 @@ Singleton {
     }
 
     function _fetchBlapples() {
-        fetchProc.provider = "blapples";
-        fetchProc.command = ["curl", "-sL", root.blapplesJsonUrl];
-        fetchProc.running = true;
+        _startLocalStream("blapples", root.blapplesJsonUrl);
     }
 
     function _fetchNaive() {
-        fetchProc.provider = "naive";
-        fetchProc.command = ["curl", "-sL", root.naiveJsonUrl];
-        fetchProc.running = true;
+        _startLocalStream("naive", root.naiveJsonUrl);
+    }
+
+    function _startLocalStream(provider, url) {
+        streamProc.provider = provider;
+        streamProc.items = [];
+        if (provider === "naive") root._naiveFullResults = streamProc.items;
+        else root._blapplesFullResults = streamProc.items;
+        streamProc.command = ["python3", Quickshell.shellPath("scripts/wallpapers/stream-wallpapers.py"), url];
+        streamProc.running = true;
+    }
+
+    function _matchesLocalFilters(item) {
+        if (!item || !item.filename) return false;
+        const q = root.query.trim().toLowerCase();
+        const cg = root.colorGroup.trim().toLowerCase();
+        if (q.length > 0 && !String(item.filename).toLowerCase().includes(q)) return false;
+        if (cg.length > 0 && !(item.color_groups ?? []).map(g => String(g).toLowerCase()).includes(cg)) return false;
+        return true;
+    }
+
+    function _pushLocalItem(item) {
+        const items = streamProc.items;
+        items.push(item);
+        if (items.length > root.localPageSize) return;
+        root.appending = items.length > 1;
+        root.results = items.slice(0, root.localPageSize);
+        root.fetched();
     }
 
     function _parseWallhaven(jsonStr) {
@@ -273,93 +296,84 @@ Singleton {
         }
     }
 
-    function _parseBlapples(jsonStr) {
-        try {
-            const data = JSON.parse(jsonStr);
-            if (!Array.isArray(data)) throw new Error("Unexpected wallpapers.json response");
-
-            const q = root.query.trim().toLowerCase();
-            const cg = root.colorGroup.trim().toLowerCase();
-            const newItems = data
-                .filter(item => item && item.filename)
-                .filter(item => q.length === 0 || String(item.filename).toLowerCase().includes(q))
-                .filter(item => cg.length === 0 || ((item.color_groups ?? []).map(g => String(g).toLowerCase()).includes(cg)))
-                .map(item => {
-                    const filename = String(item.filename);
-                    const baseName = filename.replace(/\.[^.]+$/, "");
-                    const dims = String(item.resolution ?? "").split("x");
-                    const w = parseInt(dims[0], 10) || 0;
-                    const h = parseInt(dims[1], 10) || 0;
-                    return {
-                        id:               baseName,
-                        thumb:            root.blapplesPagesBase + String(item.thumbnail ?? item.preview ?? filename).split("/").map(encodeURIComponent).join("/"),
-                        full:             root.blapplesFullBase + filename.split("/").map(encodeURIComponent).join("/"),
-                        provider:         "blapples",
-                        title:            baseName.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-                        author:           "",
-                        authorUrl:        "",
-                        likes:            0,
-                        width:            w,
-                        height:           h,
-                        avgColor:         item.color ?? "",
-                        colorGroups:      (item.color_groups ?? []).map(g => String(g).toLowerCase()),
-                        downloadLocation: "",
-                    };
-                });
-
-            root._blapplesFullResults = newItems;
-            root.totalPages = Math.max(1, Math.ceil(newItems.length / root.localPageSize));
-            root.results = newItems.slice(0, root.localPageSize);
-            root.fetched();
-        } catch (e) {
-            root.fetchError("Blapples parse error: " + e);
-        }
+    function _mapBlapples(item) {
+        const filename = String(item.filename);
+        const baseName = filename.replace(/\.[^.]+$/, "");
+        const dims = String(item.resolution ?? "").split("x");
+        const w = parseInt(dims[0], 10) || 0;
+        const h = parseInt(dims[1], 10) || 0;
+        return {
+            id:               baseName,
+            thumb:            root.blapplesPagesBase + String(item.thumbnail ?? item.preview ?? filename).split("/").map(encodeURIComponent).join("/"),
+            full:             root.blapplesFullBase + filename.split("/").map(encodeURIComponent).join("/"),
+            provider:         "blapples",
+            title:            baseName.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+            author:           "",
+            authorUrl:        "",
+            likes:            0,
+            width:            w,
+            height:           h,
+            avgColor:         item.color ?? "",
+            colorGroups:      (item.color_groups ?? []).map(g => String(g).toLowerCase()),
+            downloadLocation: "",
+        };
     }
 
-    function _parseNaive(jsonStr) {
-        try {
-            const data = JSON.parse(jsonStr);
-            if (!Array.isArray(data)) throw new Error("Unexpected wallpapers.json response");
-
-            const q = root.query.trim().toLowerCase();
-            const cg = root.colorGroup.trim().toLowerCase();
-            const newItems = data
-                .filter(item => item && item.filename)
-                .filter(item => q.length === 0 || String(item.filename).toLowerCase().includes(q))
-                .filter(item => cg.length === 0 || ((item.color_groups ?? []).map(g => String(g).toLowerCase()).includes(cg)))
-                .map(item => {
-                    const filename = String(item.filename);
-                    const baseName = filename.replace(/\.[^.]+$/, "");
-                    const dims = String(item.resolution ?? "").split("x");
-                    const w = parseInt(dims[0], 10) || 0;
-                    const h = parseInt(dims[1], 10) || 0;
-                    return {
-                        id:               baseName,
-                        thumb:            root.naivePagesBase + String(item.thumbnail ?? item.preview ?? filename),
-                        full:             root.naiveFullBase + encodeURIComponent(filename),
-                        provider:         "naive",
-                        title:            baseName.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
-                        author:           "",
-                        authorUrl:        "",
-                        likes:            0,
-                        width:            w,
-                        height:           h,
-                        avgColor:         item.color ?? "",
-                        colorGroups:      item.color_groups ?? [],
-                        downloadLocation: "",
-                    };
-                });
-
-            root._naiveFullResults = newItems;
-            root.totalPages = Math.max(1, Math.ceil(newItems.length / root.localPageSize));
-            root.results = newItems.slice(0, root.localPageSize);
-            root.fetched();
-        } catch (e) {
-            root.fetchError("NA-ive parse error: " + e);
-        }
+    function _mapNaive(item) {
+        const filename = String(item.filename);
+        const baseName = filename.replace(/\.[^.]+$/, "");
+        const dims = String(item.resolution ?? "").split("x");
+        const w = parseInt(dims[0], 10) || 0;
+        const h = parseInt(dims[1], 10) || 0;
+        return {
+            id:               baseName,
+            thumb:            root.naivePagesBase + String(item.thumbnail ?? item.preview ?? filename),
+            full:             root.naiveFullBase + encodeURIComponent(filename),
+            provider:         "naive",
+            title:            baseName.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
+            author:           "",
+            authorUrl:        "",
+            likes:            0,
+            width:            w,
+            height:           h,
+            avgColor:         item.color ?? "",
+            colorGroups:      item.color_groups ?? [],
+            downloadLocation: "",
+        };
     }
 
     // ─── Process ───
+    Process {
+        id: streamProc
+        property string provider: ""
+        property var items: []
+
+        stdout: SplitParser {
+            onRead: line => {
+                try {
+                    const raw = JSON.parse(line);
+                    if (!root._matchesLocalFilters(raw)) return;
+                    root._pushLocalItem(streamProc.provider === "naive" ? root._mapNaive(raw) : root._mapBlapples(raw));
+                } catch (e) {}
+            }
+        }
+
+        onExited: (exitCode) => {
+            root.loading = false;
+            const count = streamProc.items.length;
+            root.totalPages = Math.max(1, Math.ceil(count / root.localPageSize));
+            if (count === 0) {
+                if (exitCode !== 0) {
+                    root.fetchError(`${streamProc.provider} stream exited with code ${exitCode}`);
+                    return;
+                }
+                root.appending = false;
+                root.results = [];
+                root.fetched();
+            }
+        }
+    }
+
     Process {
         id: fetchProc
         property string provider: ""
@@ -387,10 +401,6 @@ Singleton {
                 root._parseUnsplash(fetchProc.buffer);
             } else if (fetchProc.provider === "pexels") {
                 root._parsePexels(fetchProc.buffer);
-            } else if (fetchProc.provider === "blapples") {
-                root._parseBlapples(fetchProc.buffer);
-            } else if (fetchProc.provider === "naive") {
-                root._parseNaive(fetchProc.buffer);
             }
         }
     }

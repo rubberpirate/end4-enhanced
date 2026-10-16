@@ -6,7 +6,9 @@ import qs.modules.common.widgets
 
 RippleButton {
     id: root
-    property bool isMaterial: Config.options.bar.cornerStyle === 3
+    property color contentColor: Appearance.colors.colOnLayer0
+    property bool contentColorOverridden: false
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     property bool vertical: Config.options.bar.vertical
     property real buttonPadding: 5
 
@@ -27,7 +29,7 @@ RippleButton {
         visible: !root.isMaterial
         text: "power_settings_new"
         iconSize: 18
-        color: Appearance.colors.colOnLayer0
+        color: root.contentColor
     }
 
     MaterialShapeWrappedMaterialSymbol {

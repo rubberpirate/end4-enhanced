@@ -15,21 +15,14 @@ import Quickshell.Services.Mpris
 
 Item {
     id: root
+    property color contentColor: Appearance.colors.colOnSecondaryContainer
+    property bool contentColorOverridden: false
+    signal styleEditorRequested()
     
     property bool vertical: false
     property bool borderless: Config.options.bar.borderless
-    property bool isMaterial: Config.options.bar.cornerStyle === 3
-    readonly property MprisPlayer activePlayer: {
-        const preferred = Config.options.bar.media.preferredPlayer.trim().toLowerCase()
-        if (preferred.length === 0) return MprisController.activePlayer
-        const _ = MprisController.players.count
-        for (const p of MprisController.players) {
-            if ((p.identity ?? "").toLowerCase().includes(preferred) ||
-                (p.desktopEntry ?? "").toLowerCase().includes(preferred))
-                return p
-        }
-        return MprisController.activePlayer
-    }
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    readonly property MprisPlayer activePlayer: MprisController.activePlayer
 
     readonly property string cleanedTitle: StringUtils.cleanMusicTitle(activePlayer?.trackTitle) || Translation.tr("No media")
 
@@ -42,11 +35,14 @@ Item {
     property string artDownloadLocation: Directories.coverArt
     property string artFileName:         Qt.md5(artUrl)
     property string artFilePath:         `${artDownloadLocation}/${artFileName}`
-    property bool   artDownloaded:       false
+    property bool   artDownloaded:       Boolean(root.artUrl && (root.artUrl.startsWith("data:") || root.artUrl.startsWith("file:/") || root.artUrl.startsWith("/")))
 
     property string displayedArtFilePath: {
+        if (!root.artUrl || root.artUrl.length === 0) return ""
+        if (root.artUrl.startsWith("data:")) return root.artUrl
+        if (root.artUrl.startsWith("file:/")) return root.artUrl
+        if (root.artUrl.startsWith("/")) return "file://" + root.artUrl
         if (!root.artDownloaded) return ""
-        if (root.artUrl.startsWith("file://")) return root.artUrl
         return Qt.resolvedUrl(artFilePath)
     }
 
@@ -55,14 +51,18 @@ Item {
             root.artDownloaded = false
             return
         }
-        if (root.artUrl.startsWith("file://")) {
+        if (root.artUrl.startsWith("data:") || root.artUrl.startsWith("file:/") || root.artUrl.startsWith("/")) {
             root.artDownloaded = true
             return
         }
-        artDownloader.targetFile  = root.artUrl
-        artDownloader.artFilePath = root.artFilePath
-        root.artDownloaded = false
-        artDownloader.running = true
+        if (root.artUrl.startsWith("http://") || root.artUrl.startsWith("https://")) {
+            artDownloader.targetFile  = root.artUrl
+            artDownloader.artFilePath = root.artFilePath
+            root.artDownloaded = false
+            artDownloader.running = true
+        } else {
+            root.artDownloaded = true
+        }
     }
 
     Process {
@@ -99,8 +99,14 @@ Item {
         onPressed: (event) => {
             if (event.button === Qt.MiddleButton)      activePlayer?.togglePlaying()
             else if (event.button === Qt.BackButton)   activePlayer?.previous()
-            else if (event.button === Qt.ForwardButton || event.button === Qt.RightButton) activePlayer?.next()
+            else if (event.button === Qt.ForwardButton) activePlayer?.next()
             else if (event.button === Qt.LeftButton)   GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen
+        }
+        onClicked: (event) => {
+            if (event.button === Qt.RightButton) activePlayer?.next()
+        }
+        onPressAndHold: (event) => {
+            if (event.button === Qt.RightButton) root.styleEditorRequested()
         }
     }
 
@@ -114,7 +120,7 @@ Item {
             implicitSize: 20
             lineWidth: Appearance.rounding.unsharpen
             value: root.activePlayer?.position / root.activePlayer?.length
-            colPrimary: Appearance.colors.colOnSecondaryContainer
+            colPrimary: root.contentColor
             enableAnimation: false
             Item {
                 anchors.centerIn: parent
@@ -125,7 +131,7 @@ Item {
                     fill: 1
                     text: root.activePlayer?.isPlaying ? "pause" : "music_note"
                     iconSize: Appearance.font.pixelSize.normal
-                    color: Appearance.m3colors.m3onSecondaryContainer
+                    color: root.contentColor
                 }
             }
         }
@@ -145,7 +151,7 @@ Item {
             fill: 1
             text: root.activePlayer?.isPlaying ? "pause" : "music_note"
             iconSize: Appearance.font.pixelSize.normal
-            color: Appearance.colors.colOnSecondaryContainer
+            color: root.contentColor
         }
     }
 
@@ -163,7 +169,7 @@ Item {
                 implicitSize: 20
                 lineWidth: Appearance.rounding.unsharpen
                 value: root.activePlayer?.position / root.activePlayer?.length
-                colPrimary: Appearance.colors.colOnSecondaryContainer
+                colPrimary: root.contentColor
                 enableAnimation: false
                 Item {
                     anchors.centerIn: parent
@@ -174,7 +180,7 @@ Item {
                         fill: 1
                         text: root.activePlayer?.isPlaying ? "pause" : "music_note"
                         iconSize: Appearance.font.pixelSize.normal
-                        color: Appearance.m3colors.m3onSecondaryContainer
+                        color: root.contentColor
                     }
                 }
             }
@@ -185,7 +191,7 @@ Item {
                 Layout.rightMargin: 0
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
-                color: Appearance.colors.colOnLayer1
+                color: root.contentColorOverridden ? root.contentColor : Appearance.colors.colOnLayer1
                 text: Config.options.bar.media.onlyTitle ? root.cleanedTitle : `${root.cleanedTitle}${root.activePlayer?.trackArtist ? ' • ' + root.activePlayer.trackArtist : ''}`
             }
         }
@@ -211,45 +217,12 @@ Item {
                     spacing: 6
 
                     // Avatar
-                    Rectangle {
-                        id: avatarRect
+                    UserAvatar {
                         implicitWidth: 26
                         implicitHeight: 26
-                        radius: Appearance.rounding.full
-                        color: Appearance.colors.colPrimaryContainer
                         Layout.alignment: Qt.AlignVCenter
-
-                        layer.enabled: true
-                        layer.effect: OpacityMask {
-                            maskSource: Rectangle {
-                                width: avatarRect.width
-                                height: avatarRect.height
-                                radius: avatarRect.radius
-                            }
-                        }
-
-                        Image {
-                            id: avatarImage
-                            anchors.fill: parent
-                            source: Config.options.profile.avatarPath !== "" 
-                                ? "file://" + Config.options.profile.avatarPicture 
-                                : "file:///home/" + (Quickshell.env("USER") ?? "user") + "/.face"
-                            sourceSize.width: avatarRect.width * 2
-                            sourceSize.height: avatarRect.height * 2
-                            fillMode: Image.PreserveAspectCrop
-                            onStatusChanged: {
-                                if (status === Image.Error)
-                                    visible = false
-                            }
-                        }
-
-                        MaterialSymbol {
-                            anchors.centerIn: parent
-                            text: "account_circle"
-                            iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnPrimaryContainer
-                            visible: avatarImage.status === Image.Error || avatarImage.status === Image.Null
-                        }
+                        Layout.leftMargin: -2
+                        iconSize: Appearance.font.pixelSize.normal
                     }
 
                     ColumnLayout {
@@ -260,7 +233,7 @@ Item {
                         StyledText {
                             text: Config.options.profile.displayName === "" ? SystemInfo.username : Config.options.profile.displayName
                             font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.colors.colOnSecondaryContainer
+                            color: root.contentColor
                             elide: Text.ElideRight
                             Layout.maximumWidth: 120
                         }
@@ -268,7 +241,7 @@ Item {
                         StyledText {
                             id: distroLabel
                             font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.colors.colOnSecondaryContainer
+                            color: root.contentColor
                             opacity: 0.7
                             elide: Text.ElideRight
                             Layout.rightMargin: 8
@@ -295,6 +268,7 @@ Item {
                         radius: Appearance.rounding.full
                         color: Appearance.colors.colSecondaryContainer
                         Layout.alignment: Qt.AlignVCenter
+                        Layout.leftMargin: -2
 
                         layer.enabled: true
                         layer.effect: OpacityMask {
@@ -321,7 +295,7 @@ Item {
                             fill: 1
                             text: "music_note"
                             iconSize: Appearance.font.pixelSize.normal
-                            color: Appearance.colors.colOnSecondaryContainer
+                            color: root.contentColor
                             visible: root.displayedArtFilePath === ""
                         }
                     }
@@ -336,7 +310,7 @@ Item {
                             id: artistText
                             text: root.trackArtist
                             font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.colors.colOnSecondaryContainer
+                            color: root.contentColor
                             elide: Text.ElideRight
                             Layout.maximumWidth: 120
                             Behavior on text {
@@ -352,7 +326,7 @@ Item {
                             Layout.topMargin: (!root.activePlayer || root.trackArtist.length === 0) ? -13 : 0
                             text: StringUtils.cleanMusicTitle(root.trackTitle) || Translation.tr("No media")
                             font.pixelSize: Appearance.font.pixelSize.smallie
-                            color: Appearance.colors.colOnSecondaryContainer
+                            color: root.contentColor
                             elide: Text.ElideRight
                             opacity: 0.7
                             Layout.maximumWidth: 120
@@ -390,6 +364,7 @@ Item {
                         implicitWidth: 26
                         implicitHeight: 26
                         Layout.leftMargin: -4
+                        Layout.rightMargin: -2
                         buttonRadius: 13
                         colBackground: "transparent"
                         colBackgroundHover: Appearance.colors.colPrimaryContainerHover
@@ -402,7 +377,7 @@ Item {
                             text: "skip_next"
                             iconSize: Appearance.font.pixelSize.large
                             fill: 1
-                            color: Appearance.colors.colOnSecondaryContainer
+                            color: root.contentColor
                         }
                     }
                 }

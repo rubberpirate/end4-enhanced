@@ -8,163 +8,204 @@ import qs.modules.ii.bar
 StyledPopup {
     id: root
 
+    readonly property string description: {
+        const text = Weather.data?.description ?? "";
+        return text.length > 0 ? text.charAt(0).toUpperCase() + text.slice(1) : "";
+    }
+
     ColumnLayout {
         id: mainLayout
-        implicitWidth: 340 
-        spacing: 8
-
-        Layout.topMargin: -8
-        Layout.leftMargin: -8
-        Layout.rightMargin: -8
+        implicitWidth: 340
+        spacing: 4
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 125
+            implicitHeight: heroLayout.implicitHeight + 32
+            radius: Appearance.rounding.large
+            bottomLeftRadius: Appearance.rounding.small
+            bottomRightRadius: Appearance.rounding.small
+            color: Appearance.colors.colPrimaryContainer
 
-            topLeftRadius: Appearance.rounding.normal - 2
-            topRightRadius: Appearance.rounding.normal - 2
-            bottomLeftRadius: Appearance.rounding.normal
-            bottomRightRadius: Appearance.rounding.normal
+            ColumnLayout {
+                id: heroLayout
+                anchors {
+                    fill: parent
+                    margins: 16
+                }
+                spacing: 8
 
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: Appearance.colors.colPrimaryContainer }
-                GradientStop { position: 1.0; color: Appearance.colors.colSurfaceContainerLow }
-            }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 12
 
-            Item {
-                anchors.fill: parent
-                anchors.margins: 16 
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
+                        spacing: 0
 
-                ColumnLayout {
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.topMargin: -6
-                    spacing: -2
+                        RowLayout {
+                            spacing: 4
 
-                    StyledText {
-                        text: Weather.data?.city ?? "Paris, France"
-                        font.pixelSize: Appearance.font.pixelSize.normal
-                        font.weight: Font.DemiBold
-                        color: Appearance.colors.colOnLayer0
+                            MaterialSymbol {
+                                text: "location_on"
+                                fill: 1
+                                iconSize: Appearance.font.pixelSize.normal
+                                color: Appearance.colors.colOnPrimaryContainer
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                                text: Weather.data?.city ?? ""
+                                font.pixelSize: Appearance.font.pixelSize.normal
+                                font.weight: Font.DemiBold
+                                color: Appearance.colors.colOnPrimaryContainer
+                            }
+                        }
+
+                        StyledText {
+                            text: Weather.data?.temp ?? "--°"
+                            font.family: Appearance.font.family.expressive
+                            font.pixelSize: 64
+                            font.weight: Font.Medium
+                            color: Appearance.colors.colOnPrimaryContainer
+                        }
+
+                        StyledText {
+                            Layout.fillWidth: true
+                            elide: Text.ElideRight
+                            text: root.description
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            font.weight: Font.Medium
+                            color: Appearance.colors.colOnPrimaryContainer
+                        }
+
+                        StyledText {
+                            visible: (Weather.data?.tempFeelsLike ?? "") !== ""
+                            text: Translation.tr("Feels like %1").arg(Weather.data?.tempFeelsLike ?? "")
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colOnPrimaryContainer
+                            opacity: 0.75
+                        }
                     }
 
-                    StyledText {
-                        text: Weather.data?.description ?? "Cloudy"
-                        font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colOnLayer0
-                        opacity: 0.6
+                    MaterialShapeWrappedMaterialSymbol {
+                        Layout.alignment: Qt.AlignTop
+                        shape: MaterialShape.Shape.Sunny
+                        text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+                        fill: 1
+                        iconSize: 44
+                        implicitSize: 92
+                        color: Appearance.colors.colPrimary
+                        colSymbol: Appearance.colors.colOnPrimary
                     }
                 }
 
                 RowLayout {
-                    anchors.left: parent.left
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: -8
-                    spacing: 4
+                    Layout.fillWidth: true
+                    spacing: 6
 
-                    StyledText {
-                        text: Weather.data?.temp ?? "3"
-                        font.pixelSize: 48
-                        font.weight: Font.Light
-                        color: Appearance.colors.colOnLayer0
-                    }
-                }
-
-                MaterialShapeWrappedMaterialSymbol {
-                    anchors.right: parent.right
-                    anchors.top: parent.top
-                    anchors.topMargin: -3
-                    shape: MaterialShape.Shape.Sunny
-                    text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
-                    iconSize: 40
-                    implicitSize: 64
-                    color: Qt.alpha(Appearance.colors.colOnLayer0, 0.15)
-                    colSymbol: Appearance.colors.colPrimary
-                }
-
-                ColumnLayout {
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.rightMargin: 6
-                    anchors.bottomMargin: -1
-                    spacing: -2
-
-                    RowLayout {
-                        spacing: 4
-                        Layout.alignment: Qt.AlignRight
-                        MaterialSymbol {
-                            text: "wb_twilight"
-                            iconSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.colors.colPrimary
-                        }
-                        StyledText {
-                            text: Weather.data?.sunrise ?? "07:34 AM"
-                            font.pixelSize: Appearance.font.pixelSize.smallest
-                            color: Appearance.colors.colOnLayer0
-                            opacity: 0.8
-                        }
+                    SunChip {
+                        icon: "wb_twilight"
+                        label: Weather.data?.sunrise ?? "--"
                     }
 
-                    RowLayout {
-                        spacing: 4
-                        Layout.alignment: Qt.AlignRight
-                        MaterialSymbol {
-                            text: "bedtime"
-                            iconSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.colors.colPrimary
-                        }
-                        StyledText {
-                            text: Weather.data?.sunset ?? "05:21 PM"
-                            font.pixelSize: Appearance.font.pixelSize.smallest
-                            color: Appearance.colors.colOnLayer0
-                            opacity: 0.8
-                        }
+                    SunChip {
+                        icon: "bedtime"
+                        label: Weather.data?.sunset ?? "--"
+                    }
+
+                    Item {
+                        Layout.fillWidth: true
                     }
                 }
             }
         }
 
         GridLayout {
-            id: gridLayout
+            Layout.fillWidth: true
             columns: 2
             rowSpacing: 4
             columnSpacing: 4
             uniformCellWidths: true
-            
-            Layout.leftMargin: 2
-            Layout.rightMargin: 2
-            Layout.bottomMargin: 2
-            Layout.fillWidth: true
 
             WeatherCard {
                 title: Translation.tr("Rain?")
                 symbol: "rainy"
-                value: Weather.data?.cr ?? "24%"
+                value: Weather.data?.cr ?? "--"
+                shape: MaterialShape.Shape.Pentagon
+                shapeColor: Appearance.colors.colSecondaryContainer
+                symbolColor: Appearance.colors.colOnSecondaryContainer
             }
             WeatherCard {
                 title: Translation.tr("Wind")
                 symbol: "air"
-                value: `${Weather.data?.wind ?? "1.2 km/h"}`
+                value: `${Weather.data?.wind ?? "--"}`
+                shape: MaterialShape.Shape.Clover4Leaf
+                shapeColor: Appearance.colors.colTertiaryContainer
+                symbolColor: Appearance.colors.colOnTertiaryContainer
             }
             WeatherCard {
                 title: Translation.tr("Precipitation")
                 symbol: "rainy_light"
-                value: Weather.data?.precip ?? "10%"
+                value: Weather.data?.precip ?? "--"
+                shape: MaterialShape.Shape.Cookie6Sided
+                shapeColor: Appearance.colors.colPrimaryContainer
+                symbolColor: Appearance.colors.colOnPrimaryContainer
             }
             WeatherCard {
                 title: Translation.tr("Humidity")
                 symbol: "humidity_low"
-                value: Weather.data?.humidity ?? "65%"
+                value: Weather.data?.humidity ?? "--"
+                shape: MaterialShape.Shape.Puffy
+                shapeColor: Appearance.colors.colSecondaryContainer
+                symbolColor: Appearance.colors.colOnSecondaryContainer
             }
             WeatherCard {
                 title: Translation.tr("Visibility")
                 symbol: "visibility"
-                value: Weather.data?.visib ?? "10 km"
+                value: Weather.data?.visib ?? "--"
+                shape: MaterialShape.Shape.Gem
+                shapeColor: Appearance.colors.colTertiaryContainer
+                symbolColor: Appearance.colors.colOnTertiaryContainer
             }
             WeatherCard {
                 title: Translation.tr("Pressure")
                 symbol: "readiness_score"
-                value: Weather.data?.press ?? "720 hpa"
+                value: Weather.data?.press ?? "--"
+                shape: MaterialShape.Shape.Cookie4Sided
+                shapeColor: Appearance.colors.colPrimaryContainer
+                symbolColor: Appearance.colors.colOnPrimaryContainer
+            }
+        }
+    }
+
+    component SunChip: Rectangle {
+        id: chip
+        required property string icon
+        required property string label
+        implicitWidth: chipRow.implicitWidth + 20
+        implicitHeight: chipRow.implicitHeight + 10
+        radius: Appearance.rounding.full
+        color: Appearance.colors.colPrimary
+
+        RowLayout {
+            id: chipRow
+            anchors.centerIn: parent
+            spacing: 5
+
+            MaterialSymbol {
+                text: chip.icon
+                fill: 1
+                iconSize: Appearance.font.pixelSize.normal
+                color: Appearance.colors.colOnPrimary
+            }
+
+            StyledText {
+                text: chip.label
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                font.weight: Font.Medium
+                color: Appearance.colors.colOnPrimary
             }
         }
     }

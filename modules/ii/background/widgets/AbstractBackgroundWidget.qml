@@ -38,6 +38,10 @@ AbstractWidget {
     }
 
     draggable: placementStrategy === "free" && !Config.options.background.widgetsLocked
+
+    function requestDelete() {
+        Config.options.background.widgets[root.configEntryName].enable = false
+    }
     function restoreXYBinding() {
         root.x = Qt.binding(() => root.targetX);
         root.y = Qt.binding(() => root.targetY);

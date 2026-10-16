@@ -21,7 +21,7 @@ Item {
             leftMargin: root.isMaterial ? 4 : 12
             verticalCenter: parent.verticalCenter
         }
-        source: Quickshell.iconPath(notif?.appIcon ?? "", "notification-symbolic")
+        source: SystemAppearance.iconPath(notif?.appIcon ?? "", "notification-symbolic")
         visible: (notif?.appIcon ?? "") !== ""
         fillMode: Image.PreserveAspectFit
         asynchronous: true

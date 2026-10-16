@@ -9,8 +9,10 @@ import qs.modules.common.widgets
 
 Item {
     id: root
+    property color contentColor: Appearance.colors.colOnLayer0
+    property bool contentColorOverridden: false
     property bool vertical: Config.options.bar.vertical
-    property bool isMaterial: Config.options.bar.cornerStyle === 3
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     property bool mirrored: false
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property bool isPlaying: activePlayer?.isPlaying ?? false
@@ -60,7 +62,7 @@ Item {
                 height: pointValue
                 radius: width / 2
                 anchors.verticalCenter: parent.verticalCenter
-                color: Appearance.colors.colOnLayer0
+                color: root.contentColor
                 opacity: root.isPlaying ? 0.85 : 0.3
                 Behavior on height { NumberAnimation { duration: 80; easing.type: Easing.OutQuad } }
                 Behavior on opacity { NumberAnimation { duration: 300 } }

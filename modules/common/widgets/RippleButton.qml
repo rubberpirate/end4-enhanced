@@ -22,6 +22,8 @@ Button {
     property var releaseAction // When left clicking (release)
     property var altAction // When right clicking
     property var middleClickAction // When middle clicking
+    property var altLongPressAction
+    property bool altLongPressed: false
     property bool border: false
     property real borderWidth: 1
     property color colBorder: Appearance?.colors.colOutlineVariant ?? "#79747E"
@@ -66,7 +68,8 @@ Button {
         acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
         onPressed: (event) => { 
             if(event.button === Qt.RightButton) {
-                if (root.altAction) root.altAction(event);
+                root.altLongPressed = false
+                if (root.altAction && !root.altLongPressAction) root.altAction(event);
                 return;
             }
             if(event.button === Qt.MiddleButton) {
@@ -79,8 +82,17 @@ Button {
             const {x,y} = event
             startRipple(x, y)
         }
+        onPressAndHold: (event) => {
+            if (event.button !== Qt.RightButton || !root.altLongPressAction) return;
+            root.altLongPressed = true
+            root.altLongPressAction();
+        }
         onReleased: (event) => {
             root.down = false
+            if (event.button === Qt.RightButton && root.altLongPressAction && !root.altLongPressed) {
+                if (root.altAction) root.altAction(event);
+                return;
+            }
             if (event.button != Qt.LeftButton) return;
             if (root.releaseAction) root.releaseAction();
             root.click() // Because the MouseArea already consumed the event
@@ -146,7 +158,7 @@ Button {
             animation: Appearance?.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
-        layer.enabled: true
+        layer.enabled: ripple.opacity > 0
         layer.effect: OpacityMask {
             maskSource: Rectangle {
                 width: buttonBackground.width

@@ -24,7 +24,9 @@ Scope {
         id: cornerPanelWindow
         property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
         property bool fullscreen
-        visible: (Config.options.appearance.fakeScreenRounding === 1 || (Config.options.appearance.fakeScreenRounding === 2 && !fullscreen)) || Config.options.sidebar.cornerOpen.enable
+        readonly property bool showFakeRounding: Config.options.bar.cornerStyle !== 5
+            && (Config.options.appearance.fakeScreenRounding === 1 || (Config.options.appearance.fakeScreenRounding === 2 && !fullscreen))
+        visible: showFakeRounding || Config.options.sidebar.cornerOpen.enable
         property var corner
 
         exclusionMode: ExclusionMode.Ignore
@@ -53,6 +55,7 @@ Scope {
             id: cornerWidget
             anchors.fill: parent
             corner: cornerPanelWindow.corner
+            color: cornerPanelWindow.showFakeRounding ? "#000000" : "transparent"
             rightVisualMargin: (Config.options.interactions.deadPixelWorkaround.enable && cornerPanelWindow.anchors.right) * 1
             bottomVisualMargin: (Config.options.interactions.deadPixelWorkaround.enable && cornerPanelWindow.anchors.bottom) * 1
 

@@ -11,30 +11,6 @@ ContentPage {
     id: page
     forceWidth: true
 
-    function goTo(term) {
-        const t = term.toLowerCase().trim()
-
-        function findTarget(rootItem) {
-            for (let i = 0; i < rootItem.children.length; i++) {
-                let child = rootItem.children[i]
-                if (child.title && child.title.toLowerCase().includes(t)) {
-                    return child
-                }
-            }
-
-            for (let i = 0; i < rootItem.children.length; i++) {
-                let found = findTarget(rootItem.children[i])
-                if (found) return found
-            }
-            return null
-        }
-
-        let target = findTarget(mainLayout)
-        if (target) {
-            let pos = target.mapToItem(mainLayout, 0, 0)
-            page.contentY = Math.max(0, pos.y - 0)
-        }
-    }
     
     Process {
         id: translationProc
@@ -47,6 +23,92 @@ ContentPage {
         Layout.fillWidth: true   
         Layout.fillHeight: true
         spacing: 20
+
+        ContentSection {
+            icon: "palette"
+            shape: MaterialShape.Shape.Pentagon
+            title: Translation.tr("System Appearance")
+
+            GroupedList {
+                ConfigComboBox {
+                    Layout.fillWidth: true
+                    buttonIcon: "category"
+                    text: Translation.tr("Icon theme")
+                    fieldWidth: 260
+                    fixedWidth: true
+                    searchable: true
+                    model: SystemAppearance.toOptions(SystemAppearance.iconThemes)
+                    currentValue: SystemAppearance.iconTheme
+                    onSelected: newValue => SystemAppearance.setIcons(newValue)
+                }
+                ConfigComboBox {
+                    Layout.fillWidth: true
+                    buttonIcon: "mouse"
+                    text: Translation.tr("Cursor theme")
+                    fieldWidth: 260
+                    fixedWidth: true
+                    searchable: true
+                    model: SystemAppearance.toOptions(SystemAppearance.cursorThemes)
+                    currentValue: SystemAppearance.cursorTheme
+                    onSelected: newValue => SystemAppearance.setCursor(newValue, SystemAppearance.cursorSize)
+                }
+                ConfigSpinBox {
+                    icon: "ads_click"
+                    text: Translation.tr("Cursor size")
+                    value: SystemAppearance.cursorSize
+                    from: 16
+                    to: 64
+                    stepSize: 2
+                    onValueChanged: {
+                        if (value !== SystemAppearance.cursorSize) SystemAppearance.setCursor(SystemAppearance.cursorTheme, value)
+                    }
+                }
+                ConfigComboBox {
+                    Layout.fillWidth: true
+                    buttonIcon: "text_fields"
+                    text: Translation.tr("System font")
+                    fieldWidth: 260
+                    fixedWidth: true
+                    searchable: true
+                    model: SystemAppearance.toOptions(SystemAppearance.fonts)
+                    currentValue: SystemAppearance.fontFamily
+                    onSelected: newValue => SystemAppearance.setFont("ui", newValue, SystemAppearance.fontSize)
+                }
+                ConfigSpinBox {
+                    icon: "format_size"
+                    text: Translation.tr("System font size")
+                    value: SystemAppearance.fontSize
+                    from: 8
+                    to: 20
+                    stepSize: 1
+                    onValueChanged: {
+                        if (value !== SystemAppearance.fontSize) SystemAppearance.setFont("ui", SystemAppearance.fontFamily, value)
+                    }
+                }
+                ConfigComboBox {
+                    Layout.fillWidth: true
+                    buttonIcon: "terminal"
+                    text: Translation.tr("Monospace font")
+                    fieldWidth: 260
+                    fixedWidth: true
+                    searchable: true
+                    model: SystemAppearance.toOptions(SystemAppearance.fonts)
+                    currentValue: SystemAppearance.monoFamily
+                    onSelected: newValue => SystemAppearance.setFont("mono", newValue, SystemAppearance.monoSize)
+                }
+                ConfigSpinBox {
+                    icon: "format_size"
+                    text: Translation.tr("Monospace font size")
+                    value: SystemAppearance.monoSize
+                    from: 8
+                    to: 20
+                    stepSize: 1
+                    onValueChanged: {
+                        if (value !== SystemAppearance.monoSize) SystemAppearance.setFont("mono", SystemAppearance.monoFamily, value)
+                    }
+                }
+            }
+        }
 
         ContentSection {
             icon: "nest_clock_farsight_analog"
@@ -185,6 +247,48 @@ ContentPage {
         }
 
         ContentSection {
+            icon: "mouse"
+            shape: MaterialShape.Shape.Cookie7Sided
+            title: Translation.tr("Device batteries")
+
+            GroupedList {
+                ConfigRow {
+                    uniform: true
+                    ConfigSpinBox {
+                        icon: "warning"
+                        text: Translation.tr("Low warning")
+                        value: Config.options.battery.peripheralLow
+                        from: 0
+                        to: 100
+                        stepSize: 5
+                        onValueChanged: {
+                            Config.options.battery.peripheralLow = value;
+                        }
+                    }
+                    ConfigSpinBox {
+                        icon: "dangerous"
+                        text: Translation.tr("Critical warning")
+                        value: Config.options.battery.peripheralCritical
+                        from: 0
+                        to: 100
+                        stepSize: 5
+                        onValueChanged: {
+                            Config.options.battery.peripheralCritical = value;
+                        }
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "notifications"
+                    text: Translation.tr("Notify when a device battery is low")
+                    checked: Config.options.battery.peripheralNotify
+                    onCheckedChanged: {
+                        Config.options.battery.peripheralNotify = checked;
+                    }
+                }
+            }
+        }
+
+        ContentSection {
             icon: "battery_android_full"
             shape: MaterialShape.Shape.SemiCircle
             title: Translation.tr("Battery")
@@ -316,6 +420,89 @@ ContentPage {
                     checked: Config.options.sounds.pomodoro
                     onCheckedChanged: {
                         Config.options.sounds.pomodoro = checked;
+                    }
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Football")
+                visible: Config.options.sidebar.football.enable
+
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "notifications_active"
+                        text: Translation.tr("Live alerts")
+                        checked: Config.options.sidebar.football.alerts
+                        onCheckedChanged: { Config.options.sidebar.football.alerts = checked }
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Alerts for")
+                        icon: "filter_alt"
+                        currentValue: Config.options.sidebar.football.alertsScope
+                        onSelected: newValue => { Config.options.sidebar.football.alertsScope = newValue }
+                        options: [
+                            { displayName: Translation.tr("My parlay"), icon: "layers", value: "parlay" },
+                            { displayName: Translation.tr("All matches"), icon: "public", value: "all" }
+                        ]
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "campaign"
+                        text: Translation.tr("Goal sound")
+                        checked: Config.options.sidebar.football.goalSound
+                        onCheckedChanged: { Config.options.sidebar.football.goalSound = checked }
+                    }
+                    ConfigTextArea {
+                        id: goalFileField
+                        Layout.fillWidth: true
+                        fieldWidth: 320
+                        buttonIcon: "audio_file"
+                        text: Translation.tr("Goal sound file (empty = default)")
+                        placeholderText: "~/Music/goal.ogg"
+                        value: Config.options.sidebar.football.goalSoundPath
+                        onValueChanged: goalFileTimer.restart()
+
+                        Timer {
+                            id: goalFileTimer
+                            interval: 600
+                            onTriggered: Config.options.sidebar.football.goalSoundPath = goalFileField.value
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "flag"
+                        text: Translation.tr("Corner sound")
+                        checked: Config.options.sidebar.football.cornerSound
+                        onCheckedChanged: { Config.options.sidebar.football.cornerSound = checked }
+                    }
+                    ConfigTextArea {
+                        id: cornerFileField
+                        Layout.fillWidth: true
+                        fieldWidth: 320
+                        buttonIcon: "audio_file"
+                        text: Translation.tr("Corner sound file (empty = default)")
+                        placeholderText: "~/Music/corner.ogg"
+                        value: Config.options.sidebar.football.cornerSoundPath
+                        onValueChanged: cornerFileTimer.restart()
+
+                        Timer {
+                            id: cornerFileTimer
+                            interval: 600
+                            onTriggered: Config.options.sidebar.football.cornerSoundPath = cornerFileField.value
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "notifications"
+                        text: Translation.tr("Goal notifications")
+                        checked: Config.options.sidebar.football.notify
+                        onCheckedChanged: { Config.options.sidebar.football.notify = checked }
+                    }
+                    ConfigSpinBox {
+                        icon: "volume_up"
+                        text: Translation.tr("Sound volume")
+                        value: Config.options.sidebar.football.soundVolume
+                        from: 0
+                        to: 100
+                        stepSize: 5
+                        onValueChanged: { Config.options.sidebar.football.soundVolume = value }
                     }
                 }
             }

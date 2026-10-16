@@ -1,8 +1,10 @@
 import QtQuick
 import qs.modules.common
+import qs
 
 MouseArea {
     id: root
+    focus: true 
     property int gridSize: 24
     property bool showGrid: false
     readonly property bool isWidgetCanvas: true
@@ -19,6 +21,19 @@ MouseArea {
     property var groupDragMemberStarts: []
     property real groupDragStartX: 0
     property real groupDragStartY: 0
+
+    function deleteSelected() {
+        const toDelete = root.registeredWidgets.filter(w => w.selected)
+        for (const widget of toDelete) widget.requestDelete()
+        root.clearSelection()
+    }
+
+    Keys.onPressed: (event) => {
+        if (event.key === Qt.Key_Delete || event.key === Qt.Key_Backspace) {
+            root.deleteSelected()
+            event.accepted = true
+        }
+    }
 
     function setDragging(active) {
         root.showGrid = active
@@ -99,10 +114,16 @@ MouseArea {
 
     onPressed: (mouse) => {
         if (Config.options.background.widgetsLocked) return
+        GlobalStates.desktopWidgetKeyboardFocus = true 
+        root.forceActiveFocus() 
         root.selecting = true
         root.selectionStartPoint = Qt.point(mouse.x, mouse.y)
         root.selectionRect = Qt.rect(mouse.x, mouse.y, 0, 0)
         if (!(mouse.modifiers & Qt.ControlModifier)) root.clearSelection()
+    }
+
+    onActiveFocusChanged: {
+        if (!root.activeFocus) GlobalStates.desktopWidgetKeyboardFocus = false
     }
 
     onPositionChanged: (mouse) => {

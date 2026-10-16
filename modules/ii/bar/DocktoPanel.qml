@@ -13,12 +13,13 @@ import Quickshell.Widgets
 
 Item {
     id: root
+    signal styleEditorRequested()
 
     property real iconSize:      23
     property real btnSize:       28
     property real btnSpacing:    2
     property bool vertical:    Config.options.bar.vertical
-    property bool isMaterial:  Config.options.bar.cornerStyle === 3
+    property bool isMaterial:  Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     property var pinnedApps: Config.options?.dock.pinnedApps ?? []
     property var activeUnpinned: TaskbarApps.apps.filter(
         a => !a.pinned && a.appId !== "SEPARATOR" && a.toplevels.length > 0
@@ -325,6 +326,7 @@ Item {
                         }
                         middleClickAction: () => { slotItem.deskEntry?.execute() }
                         altAction:         () => { TaskbarApps.togglePin(slotItem.appId) }
+                        altLongPressAction: () => { root.styleEditorRequested() }
 
                         contentItem: Item {
                             anchors.centerIn: parent
@@ -332,7 +334,7 @@ Item {
                             IconImage {
                                 id: pinnedIcon
                                 anchors.centerIn: parent
-                                source: Quickshell.iconPath(
+                                source: SystemAppearance.iconPath(
                                     AppSearch.guessIcon(slotItem.appId), "image-missing")
                                 implicitSize: root.iconSize
                             }
@@ -430,6 +432,7 @@ Item {
                         altAction: () => {
                             TaskbarApps.togglePin(activeSlot.modelData.appId)
                         }
+                        altLongPressAction: () => root.styleEditorRequested()
 
                         contentItem: Item {
                             anchors.centerIn: parent
@@ -437,7 +440,7 @@ Item {
                             IconImage {
                                 id: activeIcon
                                 anchors.centerIn: parent
-                                source: Quickshell.iconPath(
+                                source: SystemAppearance.iconPath(
                                     AppSearch.guessIcon(activeSlot.modelData.appId), "image-missing")
                                 implicitSize: root.iconSize
                             }

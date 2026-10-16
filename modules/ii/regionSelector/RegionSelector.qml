@@ -81,7 +81,8 @@ Scope {
             Quickshell.execDetached([Directories.recordScriptPath]);
             return;
         }
-        root.action = RegionSelection.SnipAction.RecordWithSound
+        Config.options.screenRecord.systemAudio = true
+        root.action = RegionSelection.SnipAction.Record
         root.selectionMode = RegionSelection.SelectionMode.RectCorners
         GlobalStates.regionSelectorOpen = true
     }

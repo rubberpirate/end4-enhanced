@@ -7,9 +7,12 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
+    property color contentColor: Appearance.colors.colOnLayer1
+    property bool contentColorOverridden: false
+    signal styleEditorRequested()
 
     property bool vertical: false
-    property bool isMaterial: Config.options.bar.cornerStyle === 3
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     property bool hovered: containsMouse
     readonly property var screen: root.QsWindow?.window?.screen
     readonly property int screenWidth: screen?.width ?? 1920
@@ -40,6 +43,10 @@ MouseArea {
         ? Math.max(contentLoader.item?.implicitHeight ?? 0, Appearance.font.pixelSize.larger)
         : Appearance.sizes.barHeight
 
+    onPressAndHold: mouse => {
+        if (mouse.button === Qt.RightButton) root.styleEditorRequested();
+    }
+
     onClicked: mouse => {
         if (mouse.button === Qt.RightButton) {
             GlobalStates.requestBluetoothDialog();
@@ -64,7 +71,7 @@ MouseArea {
                 iconSize: Appearance.font.pixelSize.larger
                 color: root.isMaterial
                     ? Appearance.colors.colOnPrimaryContainer
-                    : Appearance.colors.colOnLayer1
+                    : root.contentColor
             }
 
             StyledText {
@@ -76,7 +83,7 @@ MouseArea {
                     ? Appearance.colors.colError
                     : root.isMaterial
                         ? Appearance.colors.colOnPrimaryContainer
-                        : Appearance.colors.colOnLayer1
+                        : root.contentColor
                 text: root.percentageText
             }
         }
@@ -94,7 +101,7 @@ MouseArea {
                 iconSize: Appearance.font.pixelSize.larger
                 color: root.isMaterial
                     ? Appearance.colors.colOnPrimaryContainer
-                    : Appearance.colors.colOnLayer1
+                    : root.contentColor
             }
 
             StyledText {
@@ -108,7 +115,7 @@ MouseArea {
                     ? Appearance.colors.colError
                     : root.isMaterial
                         ? Appearance.colors.colOnPrimaryContainer
-                        : Appearance.colors.colOnLayer1
+                        : root.contentColor
                 text: root.percentageText
             }
         }
