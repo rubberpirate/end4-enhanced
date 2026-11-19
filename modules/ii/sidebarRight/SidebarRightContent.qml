@@ -72,7 +72,7 @@ Item {
             // Find duplicates by trackTitle prefix
             for (let j = i + 1; j < players.length; ++j) {
                 let p2 = players[j];
-                if (p1.trackTitle && p2.trackTitle && (p1.trackTitle.includes(p2.trackTitle) || p2.trackTitle.includes(p1.trackTitle)) || (p1.position - p2.position <= 2 && p1.length - p2.length <= 2)) {
+                if (p1.trackTitle && p2.trackTitle && (p1.trackTitle.includes(p2.trackTitle) || p2.trackTitle.includes(p1.trackTitle)) || (Math.abs(p1.position - p2.position) <= 2 && Math.abs(p1.length - p2.length) <= 2)) {
                     group.push(j);
                 }
             }
@@ -139,6 +139,12 @@ Item {
     }
     Rectangle {
         id: sidebarRightBackground
+        WindowGlass {
+            anchors.fill: parent
+            glassEnabled: (parent?.color.a ?? 0) > 0
+            cardRadius: parent?.radius ?? 0
+            tint: parent?.color ?? 'transparent'
+        }
 
         anchors.fill: parent
         implicitHeight: parent.height - Appearance.sizes.hyprlandGapsOut * 2
@@ -208,6 +214,12 @@ Item {
 
                 Rectangle {
                     id: sysRect
+                    WindowGlass {
+                        anchors.fill: parent
+                        glassEnabled: (parent?.color.a ?? 0) > 0
+                        cardRadius: parent?.radius ?? 0
+                        tint: parent?.color ?? 'transparent'
+                    }
                     readonly property real inset: 5
                     anchors.fill: parent
                     radius: Appearance.rounding.normal
@@ -432,6 +444,19 @@ Item {
         Item {
             implicitHeight: (classicLoader.item?.implicitHeight ?? 0) + (androidLoader.item?.implicitHeight ?? 0)
 
+            Rectangle {
+                anchors.fill: parent
+                radius: Appearance.rounding.normal
+                color: Config.options.background.widgets.glass.enable ? Appearance.colors.colLayer1 : "transparent"
+
+                WindowGlass {
+                    anchors.fill: parent
+                    glassEnabled: parent.color.a > 0
+                    cardRadius: parent.radius
+                    tint: parent.color
+                }
+            }
+
             Loader {
                 id: classicLoader
                 anchors.left: parent.left
@@ -514,6 +539,7 @@ Item {
 
     Toolbar {
         id: editToolbar
+        glass: true
         z: 60
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom

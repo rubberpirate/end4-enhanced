@@ -44,43 +44,6 @@ Scope {
         onContainsMouseChanged: GlobalStates.setFrameHover(screenName, side, containsMouse)
     }
 
-    component FrameCornerWindow: PanelWindow {
-        id: cornerPanelWindow
-        property var corner
-
-        visible: Config.options.bar.showFrame 
-        exclusionMode: ExclusionMode.Ignore
-        mask: Region {}
-        WlrLayershell.namespace: "quickshell:screenframe-corner"
-        WlrLayershell.layer: WlrLayer.Top
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-        color: "transparent"
-
-        anchors {
-            top: cornerWidget.isTopLeft || cornerWidget.isTopRight
-            left: cornerWidget.isBottomLeft || cornerWidget.isTopLeft
-            bottom: cornerWidget.isBottomLeft || cornerWidget.isBottomRight
-            right: cornerWidget.isTopRight || cornerWidget.isBottomRight
-        }
-        margins {
-            left: cornerWidget.isLeft ? root.frameThickness : 0
-            right: cornerWidget.isRight ? root.frameThickness : 0
-            top: cornerWidget.isTop ? root.frameThickness : 0
-            bottom: cornerWidget.isBottom ? root.frameThickness : 0
-        }
-
-        implicitWidth: cornerWidget.implicitWidth
-        implicitHeight: cornerWidget.implicitHeight
-
-        RoundCorner {
-            id: cornerWidget
-            anchors.fill: parent
-            corner: cornerPanelWindow.corner
-            implicitSize: Math.max(0, Appearance.rounding.screenRounding - root.frameThickness)
-            color: root.frameColor
-        }
-    }
-
     Variants {
         model: Quickshell.screens
 
@@ -155,11 +118,6 @@ Scope {
 
                 FrameHoverArea { side: "right"; screenName: frameGroup.modelData.name }
             }
-
-            FrameCornerWindow { screen: frameGroup.modelData; corner: RoundCorner.CornerEnum.TopLeft }
-            FrameCornerWindow { screen: frameGroup.modelData; corner: RoundCorner.CornerEnum.TopRight }
-            FrameCornerWindow { screen: frameGroup.modelData; corner: RoundCorner.CornerEnum.BottomLeft }
-            FrameCornerWindow { screen: frameGroup.modelData; corner: RoundCorner.CornerEnum.BottomRight }
         }
     }
 }

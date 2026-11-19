@@ -170,6 +170,12 @@ PopupWindow {
 
         Rectangle {
             id: card
+            WindowGlass {
+                anchors.fill: parent
+                glassEnabled: (parent?.color.a ?? 0) > 0
+                cardRadius: parent?.radius ?? 0
+                tint: parent?.color ?? 'transparent'
+            }
             anchors {
                 fill: parent
                 leftMargin: Appearance.sizes.elevationMargin + (root.barEdge === "right" ? root.bounceRoom : 0)
@@ -335,7 +341,14 @@ PopupWindow {
                     radius: root.innerRadius
                     color: Appearance.colors.colLayer2Base
 
-                    GridView {
+                    WindowGlass {
+                        anchors.fill: parent
+                        cardRadius: parent.radius
+                        tint: parent.color
+                        tintStrength: 0.6
+                    }
+
+                    StyledGridView {
                         id: grid
                         visible: root.hasFolder && avatarModel.count > 0
                         anchors {

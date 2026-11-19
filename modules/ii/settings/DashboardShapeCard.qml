@@ -99,6 +99,8 @@ DashboardCard {
             contentHeight: grid.implicitHeight
             boundsBehavior: Flickable.StopAtBounds
 
+            TouchpadScrollArea { flickable: flick }
+
             Column {
                 id: grid
                 width: flick.width

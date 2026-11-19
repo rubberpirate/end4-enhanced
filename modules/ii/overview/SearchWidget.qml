@@ -185,6 +185,12 @@ Item { // Wrapper
     }
     Rectangle { // Background
         id: searchWidgetContent
+        WindowGlass {
+            anchors.fill: parent
+            glassEnabled: (parent?.color.a ?? 0) > 0
+            cardRadius: parent?.radius ?? 0
+            tint: parent?.color ?? 'transparent'
+        }
         anchors {
             top: parent.top
             horizontalCenter: parent.horizontalCenter
@@ -258,6 +264,8 @@ Item { // Wrapper
                         appResults.currentIndex = 1;
                 }
                 onContentYChanged: root.updatePreviewAnchor()
+
+                TouchpadScrollArea { flickable: appResults }
 
                 Connections {
                     target: root

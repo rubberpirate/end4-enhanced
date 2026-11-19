@@ -99,6 +99,7 @@ Item {
         { id: "hero:style", type: "style", title: Translation.tr("Settings panel style"), section: Translation.tr("Interface"), kw: "settings panel style default minimal dashboard window overlay" },
         { id: "hero:blur", type: "toggle", key: "desktop:Blur wall", title: Translation.tr("Blur wallpaper"), icon: "blur_on", section: Translation.tr("Desktop"), kw: "blur wallpaper background" },
         { id: "hero:transparency", type: "toggle", key: "interface:Transparency/Enable", title: Translation.tr("Transparency"), icon: "opacity", section: Translation.tr("Interface"), kw: "transparency opacity" },
+        { id: "hero:glass", type: "toggle", key: "interface:Glassy UI", title: Translation.tr("Glassy UI"), icon: "water_drop", section: Translation.tr("Interface"), kw: "glassy ui liquid glass frosted blur translucent ui panels bar sidebars dock widgets" },
         { id: "hero:collage", type: "toggle", key: "desktop:Collage enable", title: Translation.tr("Multiple wallpapers"), icon: "grid_view", section: Translation.tr("Desktop"), kw: "multiple wallpapers collage tiles" },
         { id: "hero:centered", type: "toggle", key: "desktop:Wallpaper/Centered wallpaper/Enable", title: Translation.tr("Centered wallpaper"), icon: "filter_center_focus", section: Translation.tr("Desktop"), kw: "centered wallpaper" },
         { id: "hero:schemes", type: "schemes", title: Translation.tr("Color scheme"), section: Translation.tr("Interface"), kw: "color scheme theme palette accent catppuccin gruvbox nord dracula tokyo everforest one dark" },
@@ -144,6 +145,7 @@ Item {
         if (e.when === "layoutdwindle" && (WM.compositor !== "hyprland" || Config.options.hyprland.general.layout !== "dwindle")) return false;
         if (e.when === "layoutmaster" && (WM.compositor !== "hyprland" || Config.options.hyprland.general.layout !== "master")) return false;
         if (e.when === "hyprbordercolor" && (WM.compositor !== "hyprland" || !Config.options.hyprland.general.borderColor.enable)) return false;
+        if (e.when === "glass" && !Config.options.background.widgets.glass.enable) return false;
         if (e.when === "football" && !Config.options.sidebar.football.enable) return false;
         if (e.when === "dockmagnify" && !Config.options.dock.magnify) return false;
         if (e.when === "dockhug" && Config.options.dock.style !== "hug") return false;
@@ -548,8 +550,13 @@ Item {
             flickDeceleration: 4000
             maximumFlickVelocity: 2500
 
+            TouchpadScrollArea {
+                id: touchpadScroll
+                flickable: flick
+            }
+
             Behavior on contentY {
-                enabled: !flick.moving && !flick.dragging
+                enabled: !touchpadScroll.scrolling && !flick.moving && !flick.dragging
                 NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
             }
 
@@ -601,6 +608,7 @@ Item {
                             : modelData.type === "schemes" ? schemesComponent
                             : modelData.type === "barpos" ? barposComponent
                             : modelData.type === "toggle" ? toggleComponent
+                            : modelData.type === "reset" ? resetComponent
                             : modelData.type === "slider" ? sliderComponent
                             : modelData.type === "spin" ? spinComponent
                             : modelData.type === "combo" ? comboComponent
@@ -730,6 +738,21 @@ Item {
                                 title: slot.modelData.title
                                 icon: slot.modelData.icon
                                 tileShape: slot.modelData.shape
+                                pager: root.pager
+                                staggerMs: root.staggerMs
+                                animIndex: slot.index % 6
+                                travelX: slot.modelData.travelX
+                                travelY: slot.modelData.travelY
+                            }
+                        }
+
+                        Component {
+                            id: resetComponent
+                            DashboardResetCard {
+                                anchors.fill: parent
+                                override: catalog.controlFor(slot.modelData.key)
+                                title: slot.modelData.title
+                                icon: slot.modelData.icon
                                 pager: root.pager
                                 staggerMs: root.staggerMs
                                 animIndex: slot.index % 6

@@ -19,6 +19,12 @@ Item {
 
     Rectangle {
         id: valueIndicator
+        WindowGlass {
+            anchors.fill: parent
+            glassEnabled: (parent?.color.a ?? 0) > 0
+            cardRadius: parent?.radius ?? 0
+            tint: parent?.color ?? 'transparent'
+        }
         anchors {
             fill: parent
             margins: Appearance.sizes.elevationMargin

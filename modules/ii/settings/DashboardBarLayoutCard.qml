@@ -423,12 +423,15 @@ DashboardCard {
                         }
 
                         Flickable {
+                            id: laneItemsFlick
                             Layout.fillWidth: true
                             Layout.fillHeight: true
                             clip: true
                             contentWidth: width
                             contentHeight: flow.implicitHeight
                             boundsBehavior: Flickable.StopAtBounds
+
+                            TouchpadScrollArea { flickable: laneItemsFlick }
 
                             Flow {
                                 id: flow
@@ -494,12 +497,15 @@ DashboardCard {
                 }
 
                 Flickable {
+                    id: trayItemsFlick
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     clip: true
                     contentWidth: width
                     contentHeight: trayFlow.implicitHeight
                     boundsBehavior: Flickable.StopAtBounds
+
+                    TouchpadScrollArea { flickable: trayItemsFlick }
 
                     Flow {
                         id: trayFlow

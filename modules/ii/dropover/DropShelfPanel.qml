@@ -49,6 +49,12 @@ PanelWindow {
 
     Rectangle {
         id: shelfBg
+        WindowGlass {
+            anchors.fill: parent
+            glassEnabled: (parent?.color.a ?? 0) > 0
+            cardRadius: parent?.radius ?? 0
+            tint: parent?.color ?? 'transparent'
+        }
         anchors.fill: parent
         radius: Appearance.rounding.large
         color: Appearance.colors.colUiBackground

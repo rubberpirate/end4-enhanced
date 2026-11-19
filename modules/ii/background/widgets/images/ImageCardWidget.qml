@@ -93,6 +93,9 @@ AbstractBackgroundWidget {
         implicitWidth: root.widgetWidth
         implicitHeight: root.widgetHeight
         widget: root
+        glass: false
+        blurred: false
+        color: "transparent"
 
         ClippingRectangle {
             anchors.fill: parent

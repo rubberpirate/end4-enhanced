@@ -202,7 +202,7 @@ Item {
             }
         }
 
-        GridView {
+        StyledGridView {
             id: grid
             Layout.fillWidth: true
             Layout.fillHeight: true

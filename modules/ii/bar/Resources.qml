@@ -12,6 +12,7 @@ BarWidgetSwitcherArea {
     property bool contentColorOverridden: false
     property bool alwaysShowAllResources: false
     horizontalExtraPadding: 12
+    leftExtraPadding: Config.options.bar.resources.style === "text" ? 4 : 0
 
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
 

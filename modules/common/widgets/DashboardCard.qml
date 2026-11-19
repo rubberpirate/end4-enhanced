@@ -1,5 +1,6 @@
 import QtQuick
 import qs.modules.common
+import qs.modules.common.functions
 
 Rectangle {
     id: root
@@ -21,7 +22,9 @@ Rectangle {
     property real offsetX: travelX
     property real offsetY: travelY
 
-    color: blurSource ? "transparent" : tint
+    readonly property bool glassDimmed: Config.options.background.widgets.glass.enable && Qt.colorEqual(tint, Appearance.colors.colLayer1)
+
+    color: blurSource ? "transparent" : glassDimmed ? ColorUtils.applyAlpha(ColorUtils.mix(tint, "#000000", 0.5), 0.6) : tint
     radius: cardRadius
 
     transformOrigin: Item.Center

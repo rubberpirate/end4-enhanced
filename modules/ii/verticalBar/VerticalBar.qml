@@ -80,6 +80,19 @@ Scope {
                     hoverEnabled: true
                     anchors.fill: parent
 
+                    Binding {
+                        target: GlassLayers
+                        property: "barZone"
+                        value: Math.max(0, barRoot.exclusiveZone)
+                        restoreMode: Binding.RestoreBinding
+                    }
+                    Binding {
+                        target: GlassLayers
+                        property: "barEdge"
+                        value: Config.options.bar.bottom ? "right" : "left"
+                        restoreMode: Binding.RestoreBinding
+                    }
+
                     Item {
                         id: hoverMaskRegion
                         anchors {
@@ -91,7 +104,8 @@ Scope {
 
                     RoundCorner {
                         id: topPillCorner
-                        visible: barContent.centerOnly && showBarBackground && Config.options.bar.cornerStyle === 0
+                        glass: true
+                        visible: barContent.centerOnly && showBarBackground && Config.options.bar.cornerStyle === 0 && !barContent.glassHug
                         y: barContent.centerPillY - implicitSize
                         implicitSize: Appearance.rounding.screenRounding
                         color: Config.options.bar.followFrameColor
@@ -121,7 +135,8 @@ Scope {
 
                     RoundCorner {
                         id: bottomPillCorner
-                        visible: barContent.centerOnly && showBarBackground && Config.options.bar.cornerStyle === 0
+                        glass: true
+                        visible: barContent.centerOnly && showBarBackground && Config.options.bar.cornerStyle === 0 && !barContent.glassHug
                         y: barContent.centerPillY + barContent.centerPillHeight
                         implicitSize: Appearance.rounding.screenRounding
                         color: Config.options.bar.followFrameColor
@@ -201,8 +216,8 @@ Scope {
                             right: undefined
                         }
                         width: Appearance.rounding.screenRounding
-                        active: (showBarBackground && Config.options.bar.cornerStyle === 0 && !barContent.centerOnly)
-                             || (Config.options.bar.cornerStyle === 4 || Config.options.bar.cornerStyle === 6)
+                        active: !barContent.glassTabs && !barContent.glassHug && ((showBarBackground && Config.options.bar.cornerStyle === 0 && !barContent.centerOnly)
+                             || (Config.options.bar.cornerStyle === 4 || Config.options.bar.cornerStyle === 6))
 
                         states: State {
                             name: "right"
@@ -229,6 +244,7 @@ Scope {
 
                             RoundCorner {
                                 id: topCorner
+                                glass: true
                                 visible: Config.options.bar.cornerStyle === 0 || barContent.effectiveLeftLayout.length > 0
                                 anchors { left: parent.left; right: parent.right; top: parent.top }
                                 implicitSize: Appearance.rounding.screenRounding
@@ -244,6 +260,7 @@ Scope {
                             }
                             RoundCorner {
                                 id: bottomCorner
+                                glass: true
                                 visible: Config.options.bar.cornerStyle === 0 || barContent.effectiveRightLayout.length > 0
                                 anchors {
                                     bottom: parent.bottom

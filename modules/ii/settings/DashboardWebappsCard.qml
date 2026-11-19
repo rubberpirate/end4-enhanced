@@ -76,6 +76,8 @@ DashboardCard {
                     }
 
                     ScrollView {
+                        id: webappInputScroll
+                        property TouchpadScrollArea _touchpadScroll: TouchpadScrollArea { flickable: webappInputScroll.contentItem }
                         anchors.fill: parent
                         anchors.margins: 10
                         clip: true

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Shapes
+import Qt5Compat.GraphicalEffects
 import qs.modules.common
 
 Item {
@@ -14,6 +15,8 @@ Item {
 
     property int implicitSize: 25
     property color color: "#000000"
+    property bool glass: false
+    readonly property bool glassOn: glass && color.a > 0 && Config.options.background.widgets.glass.enable
 
     implicitWidth: implicitSize
     implicitHeight: implicitSize
@@ -27,8 +30,28 @@ Item {
     property bool isLeft: isTopLeft || isBottomLeft
     property bool isRight: isTopRight || isBottomRight
 
+    Item {
+        id: glassLayer
+        visible: root.glassOn
+        x: shape.x
+        y: shape.y
+        width: root.implicitSize
+        height: root.implicitSize
+        layer.enabled: root.glassOn
+        layer.effect: OpacityMask {
+            maskSource: shape
+        }
+
+        WindowGlass {
+            anchors.fill: parent
+            glassEnabled: root.glassOn
+            tint: root.color
+        }
+    }
+
     Shape {
         id: shape
+        visible: !root.glassOn
         x: root.isLeft ? root.leftVisualMargin : root.width - shape.width - root.rightVisualMargin
         y: root.isTop ? root.topVisualMargin : root.height - shape.height - root.bottomVisualMargin
         layer.enabled: true

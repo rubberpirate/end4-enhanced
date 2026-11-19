@@ -38,8 +38,55 @@ ContentPage {
                     fixedWidth: true
                     searchable: true
                     model: SystemAppearance.toOptions(SystemAppearance.iconThemes)
-                    currentValue: SystemAppearance.iconTheme
-                    onSelected: newValue => SystemAppearance.setIcons(newValue)
+                    currentValue: Config.options.appearance.icons.theme
+                    onSelected: newValue => {
+                        if (Config.options.appearance.icons.theme === newValue) return
+                        Config.options.appearance.icons.theme = newValue
+                        SystemAppearance.applyIconScheme()
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "brightness_6"
+                    text: Translation.tr("Follow color scheme")
+                    checked: Config.options.appearance.icons.followScheme
+                    onCheckedChanged: {
+                        if (Config.options.appearance.icons.followScheme === checked) return
+                        Config.options.appearance.icons.followScheme = checked
+                        SystemAppearance.applyIconScheme()
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "palette"
+                    text: Translation.tr("Dynamic accent colors")
+                    checked: Config.options.appearance.icons.dynamicColor
+                    enabled: SystemAppearance.iconCapability() !== "none"
+                    onCheckedChanged: {
+                        if (Config.options.appearance.icons.dynamicColor === checked) return
+                        Config.options.appearance.icons.dynamicColor = checked
+                        SystemAppearance.applyIconScheme()
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "shield"
+                    text: Translation.tr("Prevent Breeze override")
+                    checked: Config.options.appearance.icons.preventBreezeOverride
+                    onCheckedChanged: {
+                        if (Config.options.appearance.icons.preventBreezeOverride === checked) return
+                        Config.options.appearance.icons.preventBreezeOverride = checked
+                        SystemAppearance.applyIconScheme()
+                    }
+                }
+                RippleButtonWithIcon {
+                    Layout.fillWidth: true
+                    materialIcon: "restart_alt"
+                    mainText: Translation.tr("Restore KDE icon settings")
+                    onClicked: {
+                        // Stop re-syncing the wrapper before restoring its
+                        // original values, otherwise the next apply would
+                        // immediately overwrite them again.
+                        Config.options.appearance.icons.preventBreezeOverride = false
+                        SystemAppearance.restoreKdeIcons()
+                    }
                 }
                 ConfigComboBox {
                     Layout.fillWidth: true

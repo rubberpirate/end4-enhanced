@@ -18,6 +18,11 @@ Scope {
             title: "illogical-impulse Settings"
             color: Appearance.colors.colUiBackground
 
+            WindowGlass {
+                anchors.fill: parent
+                tint: Appearance.colors.colUiBackground
+            }
+
             implicitWidth: 1100
             implicitHeight: 680
             minimumSize: Qt.size(900, 600)

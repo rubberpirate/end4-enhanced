@@ -284,6 +284,9 @@ ContentPage {
                         clip: true
                         interactive: contentHeight > height
                         boundsBehavior: Flickable.StopAtBounds
+
+                        TouchpadScrollArea { flickable: optionsFlick }
+
                         ScrollBar.vertical: StyledScrollBar {}
 
                         ColumnLayout {

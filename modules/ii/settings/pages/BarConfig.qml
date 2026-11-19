@@ -86,7 +86,8 @@ ContentPage {
         utilButtons: Translation.tr("Utility buttons"),
         workspaces: Translation.tr("Workspaces"),
         resources: Translation.tr("Resources"),
-        media: Translation.tr("Media")
+        media: Translation.tr("Media"),
+        aiUsage: Translation.tr("AI Usage")
     })
 
     function openWidgetSettings(id) {
@@ -851,6 +852,26 @@ ContentPage {
                     onValueChanged: {
                         Config.options.resources.updateInterval = value;
                     }
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "neurology"
+            title: Translation.tr("AI Usage")
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "terminal"
+                    text: Translation.tr("Claude Code")
+                    checked: Config.options.bar.aiUsage.claudeEnabled
+                    onCheckedChanged: Config.options.bar.aiUsage.claudeEnabled = checked
+                }
+                ConfigSwitch {
+                    buttonIcon: "code"
+                    text: Translation.tr("Codex")
+                    checked: Config.options.bar.aiUsage.codexEnabled
+                    onCheckedChanged: Config.options.bar.aiUsage.codexEnabled = checked
                 }
             }
         }

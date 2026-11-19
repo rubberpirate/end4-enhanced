@@ -58,6 +58,7 @@ WindowDialog {
     }
 
     ListView {
+        id: profilesView
         visible: Vpn.profiles.length > 0
         Layout.fillHeight: true
         Layout.fillWidth: true
@@ -72,6 +73,9 @@ WindowDialog {
         model: ScriptModel {
             values: Vpn.profiles
         }
+
+        TouchpadScrollArea { flickable: profilesView }
+
         delegate: VpnProfileItem {
             required property var modelData
             profile: modelData

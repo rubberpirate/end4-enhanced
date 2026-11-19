@@ -136,6 +136,12 @@ ContentPage {
                     enabled: Config.options.appearance.transparency.enable
                     onCheckedChanged: { Config.options.appearance.transparency.automatic = checked }
                 }
+                ConfigSwitch {
+                    buttonIcon: "water_drop"
+                    text: Translation.tr("Glassy UI")
+                    checked: Config.options.background.widgets.glass.enable
+                    onCheckedChanged: { Config.options.background.widgets.glass.enable = checked }
+                }
                 ConfigSlider {
                     buttonIcon: "layers"
                     text: Translation.tr("Background")
@@ -876,6 +882,18 @@ ContentPage {
                         checked: Config.options.dock.showPreviews
                         onCheckedChanged: { Config.options.dock.showPreviews = checked }
                     }
+                    ConfigSwitch {
+                        buttonIcon: "tooltip"
+                        text: Translation.tr("App name tooltips")
+                        checked: Config.options.dock.showTooltips
+                        onCheckedChanged: { Config.options.dock.showTooltips = checked }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "swap_vert"
+                        text: Translation.tr("Scroll to switch windows")
+                        checked: Config.options.dock.scrollToCycleWindows
+                        onCheckedChanged: { Config.options.dock.scrollToCycleWindows = checked }
+                    }
                     ConfigSpinBox {
                         icon: "photo_size_select_large"
                         text: Translation.tr("Icon size")
@@ -1499,6 +1517,12 @@ ContentPage {
                     text: Translation.tr("Terminal")
                     checked: Config.options.appearance.wallpaperTheming.enableTerminal
                     onCheckedChanged: { Config.options.appearance.wallpaperTheming.enableTerminal = checked }
+                }
+                ConfigSwitch {
+                    buttonIcon: "lock"
+                    text: Translation.tr("Keep Konsole color scheme")
+                    checked: Config.options.appearance.wallpaperTheming.lockKonsoleColors
+                    onCheckedChanged: { Config.options.appearance.wallpaperTheming.lockKonsoleColors = checked }
                 }
                 ConfigRow {
                     uniform: true

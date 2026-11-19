@@ -17,6 +17,12 @@ Item {
         anchors.fill: parent
         radius: Appearance.rounding.verylarge
         color: Appearance.colors.colUiBackground
+
+        WindowGlass {
+            anchors.fill: parent
+            cardRadius: parent.radius
+            tint: parent.color
+        }
     }
 
     ColumnLayout {

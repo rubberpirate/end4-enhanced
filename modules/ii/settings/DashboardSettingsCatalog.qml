@@ -31,6 +31,34 @@ QtObject {
         return Appearance.colors["col" + name.charAt(0).toUpperCase() + name.slice(1)] ?? Appearance.getColorFromName(name);
     }
 
+    readonly property var glassDefaults: ({
+        tintStrength: 0.3,
+        rimWidth: 16,
+        pull: 26,
+        split: 0.06,
+        haze: 3,
+        vividness: 1.3,
+        sheen: 0.55
+    })
+
+    function glassSlider(prop, scale, from, to) {
+        const glass = () => Config.options.background.widgets.glass;
+        const def = glassDefaults[prop];
+        return {
+            type: "slider",
+            get: () => glass()[prop] * scale,
+            set: v => { glass()[prop] = Math.round(v) / scale; },
+            from: from, to: to, stopIndicatorValues: [], usePercentTooltip: false,
+            defaultValue: def * scale,
+            reset: () => { glass()[prop] = def; }
+        };
+    }
+
+    function resetGlass() {
+        const glass = Config.options.background.widgets.glass;
+        for (const prop of Object.keys(glassDefaults)) glass[prop] = glassDefaults[prop];
+    }
+
     function controlFor(key) {
         return custom[key] ?? hyprControls[key] ?? null;
     }
@@ -82,6 +110,8 @@ QtObject {
     })
 
     readonly property var custom: ({
+        "bar:Claude Code": { type: "switch", get: () => Config.options.bar.aiUsage.claudeEnabled, set: v => { Config.options.bar.aiUsage.claudeEnabled = v; } },
+        "bar:Codex": { type: "switch", get: () => Config.options.bar.aiUsage.codexEnabled, set: v => { Config.options.bar.aiUsage.codexEnabled = v; } },
         "bar:Bar style": { type: "select", get: () => Config.options.bar.cornerStyle, set: v => { Config.options.bar.cornerStyle = v; }, options: [{ displayName: Translation.tr("Hug"), icon: "line_curve", value: 0 }, { displayName: Translation.tr("Split Hug"), icon: "splitscreen", value: 6 }, { displayName: Translation.tr("Float"), icon: "view_day", value: 1 }, { displayName: Translation.tr("Islands"), icon: "crop_3_2", value: 2 }, { displayName: Translation.tr("M3"), icon: "interests", value: 3 }, { displayName: Translation.tr("M3 Hug"), icon: "category", value: 4 }, { displayName: Translation.tr("Panel"), icon: "toolbar", value: 5 }] },
         "bar:Group color": { type: "select", get: () => Config.options.bar.groupColor, set: v => { Config.options.bar.groupColor = v; }, get options() { return ["primaryContainer", "secondaryContainer", "tertiaryContainer", "layer1", "layer0"].map(name => ({ value: name, color: roleColor(name) })); } },
         "interface:Football/Goal file": { type: "text", get: () => Config.options.sidebar.football.goalSoundPath, set: v => { Config.options.sidebar.football.goalSoundPath = v; } },
@@ -104,6 +134,8 @@ QtObject {
         "interface:Dock/Style": { type: "select", get: () => Config.options.dock.style, set: v => { Config.options.dock.style = v; }, options: [{ displayName: Translation.tr("Float"), icon: "call_to_action", value: "float" }, { displayName: Translation.tr("Hug"), icon: "dock_to_bottom", value: "hug" }] },
         "interface:Dock/Position": { type: "select", get: () => Config.options.dock.position, set: v => { Config.options.dock.position = v; }, options: [{ displayName: Translation.tr("Left"), icon: "dock_to_left", value: "left" }, { displayName: Translation.tr("Bottom"), icon: "dock_to_bottom", value: "bottom" }, { displayName: Translation.tr("Right"), icon: "dock_to_right", value: "right" }] },
         "interface:Dock/Previews": { type: "switch", get: () => Config.options.dock.showPreviews, set: v => { Config.options.dock.showPreviews = v; } },
+        "interface:Dock/Tooltips": { type: "switch", get: () => Config.options.dock.showTooltips, set: v => { Config.options.dock.showTooltips = v; } },
+        "interface:Dock/Scroll windows": { type: "switch", get: () => Config.options.dock.scrollToCycleWindows, set: v => { Config.options.dock.scrollToCycleWindows = v; } },
         "interface:Dock/Icon size": { type: "spin", get: () => Config.options.dock.iconSize, set: v => { Config.options.dock.iconSize = v; }, from: 20, to: 48, stepSize: 1 },
         "interface:Dock/Icon spacing": { type: "spin", get: () => Config.options.dock.iconSpacing, set: v => { Config.options.dock.iconSpacing = v; }, from: 0, to: 12, stepSize: 1 },
         "interface:Dock/Radius": { type: "spin", get: () => Config.options.dock.radius, set: v => { Config.options.dock.radius = v; }, from: 0, to: 40, stepSize: 1 },
@@ -136,6 +168,16 @@ QtObject {
         "desktop:Visualizer sensitivity": { type: "slider", get: () => Config.options.background.widgets.visualizer.sensitivity * 100, set: v => { Config.options.background.widgets.visualizer.sensitivity = Math.round(v) / 100; }, from: 50, to: 300, stopIndicatorValues: [], usePercentTooltip: false },
         "desktop:Visualizer height": { type: "slider", get: () => Config.options.background.widgets.visualizer.height, set: v => { Config.options.background.widgets.visualizer.height = Math.round(v); }, from: 120, to: 600, stopIndicatorValues: [], usePercentTooltip: false },
         "desktop:Visualizer size": { type: "slider", get: () => Config.options.background.widgets.visualizer.ringSize, set: v => { Config.options.background.widgets.visualizer.ringSize = Math.round(v); }, from: 200, to: 900, stopIndicatorValues: [], usePercentTooltip: false },
+        "interface:Glass tint": { type: "select", get: () => Config.options.background.widgets.glass.tint, set: v => { Config.options.background.widgets.glass.tint = v; }, options: [{ displayName: Translation.tr("Transparent"), icon: "opacity", value: "transparent" }, { displayName: Translation.tr("Primary"), icon: "palette", value: "primary" }, { displayName: Translation.tr("Black"), icon: "contrast", value: "black" }] },
+        "interface:Glass tint strength": glassSlider("tintStrength", 100, 0, 100),
+        "interface:Glass bezel": glassSlider("rimWidth", 1, 4, 40),
+        "interface:Glass refraction": glassSlider("pull", 1, 0, 80),
+        "interface:Glass dispersion": glassSlider("split", 100, 0, 30),
+        "interface:Glass blur": glassSlider("haze", 1, 1, 16),
+        "interface:Glass vividness": glassSlider("vividness", 100, 50, 200),
+        "interface:Glass shine": glassSlider("sheen", 100, 0, 150),
+        "interface:Glass reset": { type: "action", run: () => resetGlass() },
+        "interface:Glassy UI": { type: "switch", get: () => Config.options.background.widgets.glass.enable, set: v => { Config.options.background.widgets.glass.enable = v; } },
         "desktop:Text enable": { type: "switch", get: () => Config.options.background.widgets.customText.enable, set: v => { Config.options.background.widgets.customText.enable = v; } },
         "desktop:Text shadow": { type: "switch", get: () => Config.options.background.widgets.customText.shadow, set: v => { Config.options.background.widgets.customText.shadow = v; } },
         "desktop:Text auto colors": { type: "switch", get: () => Config.options.background.widgets.customText.color === "", set: v => { Config.options.background.widgets.customText.color = v ? "" : "primary"; } },
@@ -168,7 +210,10 @@ QtObject {
         "services:Prefix app": { type: "text", get: () => Config.options.search.prefix.app, set: v => { Config.options.search.prefix.app = v; } },
         "services:Prefix keybinds": { type: "text", get: () => Config.options.search.prefix.keybinds, set: v => { Config.options.search.prefix.keybinds = v; } },
         "services:City name": { type: "text", get: () => Config.options.bar.weather.city, set: v => { Config.options.bar.weather.city = v; } },
-        "general:Icon theme": { type: "select", get: () => SystemAppearance.iconTheme, set: v => SystemAppearance.setIcons(v), get options() { return SystemAppearance.toOptions(SystemAppearance.iconThemes); } },
+        "general:Icon theme": { type: "select", get: () => Config.options.appearance.icons.theme, set: v => { Config.options.appearance.icons.theme = v; SystemAppearance.applyIconScheme(); }, get options() { return SystemAppearance.toOptions(SystemAppearance.iconThemes); } },
+        "general:Follow icon color scheme": { type: "toggle", get: () => Config.options.appearance.icons.followScheme, set: v => { Config.options.appearance.icons.followScheme = v; SystemAppearance.applyIconScheme(); } },
+        "general:Dynamic icon accent colors": { type: "toggle", get: () => Config.options.appearance.icons.dynamicColor, set: v => { Config.options.appearance.icons.dynamicColor = v; SystemAppearance.applyIconScheme(); } },
+        "general:Prevent Breeze icon override": { type: "toggle", get: () => Config.options.appearance.icons.preventBreezeOverride, set: v => { Config.options.appearance.icons.preventBreezeOverride = v; SystemAppearance.applyIconScheme(); } },
         "general:Cursor theme": { type: "select", get: () => SystemAppearance.cursorTheme, set: v => SystemAppearance.setCursor(v, SystemAppearance.cursorSize), get options() { return SystemAppearance.toOptions(SystemAppearance.cursorThemes); } },
         "general:System font": { type: "select", get: () => SystemAppearance.fontFamily, set: v => SystemAppearance.setFont("ui", v, SystemAppearance.fontSize), get options() { return SystemAppearance.toOptions(SystemAppearance.fonts); } },
         "general:Monospace font": { type: "select", get: () => SystemAppearance.monoFamily, set: v => SystemAppearance.setFont("mono", v, SystemAppearance.monoSize), get options() { return SystemAppearance.toOptions(SystemAppearance.fonts); } },
@@ -179,6 +224,12 @@ QtObject {
     })
 
     readonly property var sections: [
+        {
+            page: Translation.tr("Bar"), title: Translation.tr("AI Usage"), icon: "neurology", requires: "aiUsage", cards: [
+                { type: "toggle", key: "bar:Claude Code", title: Translation.tr("Claude Code"), icon: "terminal", kw: "ai usage provider anthropic enable disable" },
+                { type: "toggle", key: "bar:Codex", title: Translation.tr("Codex"), icon: "code", kw: "ai usage provider openai enable disable" }
+            ]
+        },
         {
             page: Translation.tr("Bar"), title: Translation.tr("Bar layout"), icon: "view_week", cards: [
                 { type: "barlayout", key: "bar:Layout editor", title: Translation.tr("Bar layout"), icon: "view_week" }
@@ -291,6 +342,19 @@ QtObject {
             ]
         },
         {
+            page: Translation.tr("Interface"), title: Translation.tr("Glass"), icon: "water_drop", when: "glass", cards: [
+                { type: "select", w: 4, key: "interface:Glass tint", title: Translation.tr("Glass tint"), icon: "colorize", kw: "glass glassy tint color transparent primary black" },
+                { type: "slider", key: "interface:Glass tint strength", title: Translation.tr("Tint strength (%)"), icon: "colorize", percent: false },
+                { type: "slider", key: "interface:Glass bezel", title: Translation.tr("Edge width (px)"), icon: "crop_free", percent: false },
+                { type: "slider", key: "interface:Glass refraction", title: Translation.tr("Refraction"), icon: "lens_blur", percent: false },
+                { type: "slider", key: "interface:Glass dispersion", title: Translation.tr("Color split (%)"), icon: "gradient", percent: false },
+                { type: "slider", key: "interface:Glass blur", title: Translation.tr("Blur"), icon: "blur_on", percent: false },
+                { type: "slider", key: "interface:Glass vividness", title: Translation.tr("Vividness (%)"), icon: "palette", percent: false },
+                { type: "slider", key: "interface:Glass shine", title: Translation.tr("Edge shine (%)"), icon: "flare", percent: false },
+                { type: "reset", key: "interface:Glass reset", title: Translation.tr("Reset glass"), icon: "restart_alt" }
+            ]
+        },
+        {
             page: Translation.tr("Interface"), title: Translation.tr("Left Sidebar"), icon: "splitscreen_left", cards: [
                 { type: "toggle", key: "interface:Left Sidebar/Enable", title: Translation.tr("Media player"), icon: "music_note" },
                 { type: "toggle", key: "interface:Follow Album Colors", title: Translation.tr("Album colors"), icon: "palette" },
@@ -352,6 +416,8 @@ QtObject {
                 { type: "toggle", key: "interface:Show Apps Button", title: Translation.tr("Apps button"), icon: "apps" },
                 { type: "toggle", key: "interface:Tint app icons", title: Translation.tr("Tint app icons"), icon: "palette" },
                 { type: "toggle", key: "interface:Dock/Previews", title: Translation.tr("Window previews"), icon: "preview" },
+                { type: "toggle", key: "interface:Dock/Tooltips", title: Translation.tr("App name tooltips"), icon: "tooltip", kw: "dock tooltip label name hover" },
+                { type: "toggle", key: "interface:Dock/Scroll windows", title: Translation.tr("Scroll to switch windows"), icon: "swap_vert", kw: "dock scroll wheel cycle switch windows focus" },
                 { type: "spin", key: "interface:Dock/Icon size", title: Translation.tr("Icon size"), icon: "photo_size_select_large" },
                 { type: "spin", key: "interface:Dock/Icon spacing", title: Translation.tr("Icon spacing"), icon: "space_bar" }
             ]
@@ -541,6 +607,9 @@ QtObject {
         {
             page: Translation.tr("General"), title: Translation.tr("System Appearance"), icon: "palette", cards: [
                 { type: "combo", key: "general:Icon theme", title: Translation.tr("Icon theme"), icon: "category", kw: "icons" },
+                { type: "toggle", key: "general:Follow icon color scheme", title: Translation.tr("Follow color scheme"), icon: "brightness_6", kw: "icons light dark scheme" },
+                { type: "toggle", key: "general:Dynamic icon accent colors", title: Translation.tr("Dynamic accent colors"), icon: "palette", kw: "icons material you recolor" },
+                { type: "toggle", key: "general:Prevent Breeze icon override", title: Translation.tr("Prevent Breeze override"), icon: "shield", kw: "icons kde breeze kmyc" },
                 { type: "combo", key: "general:Cursor theme", title: Translation.tr("Cursor theme"), icon: "mouse" },
                 { type: "combo", key: "general:System font", title: Translation.tr("System font"), icon: "text_fields", kw: "typography" },
                 { type: "combo", key: "general:Monospace font", title: Translation.tr("Monospace font"), icon: "terminal", kw: "terminal code" },
