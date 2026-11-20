@@ -320,7 +320,7 @@ Scope {
                             }
 
                             DockAppsButton {
-                                onClicked: GlobalStates.overviewOpen = !GlobalStates.overviewOpen
+                                onClicked: GlobalStates.launcherOpen = !GlobalStates.launcherOpen
                             }
                         }
                     }

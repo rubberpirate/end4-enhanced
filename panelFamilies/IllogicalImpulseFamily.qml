@@ -13,6 +13,7 @@ import qs.modules.ii.notificationPopup
 import qs.modules.ii.onScreenDisplay
 import qs.modules.ii.onScreenKeyboard
 import qs.modules.ii.overview
+import qs.modules.ii.launcher
 import qs.modules.ii.polkit
 import qs.modules.ii.settings
 import qs.modules.ii.regionSelector
@@ -40,6 +41,7 @@ Scope {
     PanelLoader { component: OnScreenKeyboard {} }
     PanelLoader { component: Overlay {} }
     PanelLoader { component: Overview {} }
+    PanelLoader { component: LauncherWindow {} }
     PanelLoader { component: Polkit {} }
     PanelLoader { component: RegionSelector {} }
     PanelLoader { component: ScreenCorners {} }

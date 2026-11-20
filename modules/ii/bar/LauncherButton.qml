@@ -22,10 +22,10 @@ RippleButton {
     colBackgroundToggled: "transparent"
     colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
     colRippleToggled: Appearance.colors.colSecondaryContainerActive
-    toggled: GlobalStates.overviewOpen
+    toggled: GlobalStates.launcherOpen
 
     onPressed: {
-        GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+        GlobalStates.launcherOpen = !GlobalStates.launcherOpen;
     }
 
     MaterialSymbol {

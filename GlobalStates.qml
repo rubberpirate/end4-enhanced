@@ -23,6 +23,13 @@ Singleton {
     property bool oskOpen: false
     property bool overlayOpen: false
     property bool overviewOpen: false
+    property bool launcherOpen: false
+    onLauncherOpenChanged: {
+        if (launcherOpen) overviewOpen = false;
+    }
+    onOverviewOpenChanged: {
+        if (overviewOpen) launcherOpen = false;
+    }
     property bool regionSelectorOpen: false
     property bool searchOpen: false
     property bool screenLocked: false
@@ -102,6 +109,7 @@ Singleton {
         { displayName: Translation.tr("Left Sidebar"),           value: "sidebarLeftOpen" },
         { displayName: Translation.tr("Right Sidebar"),          value: "sidebarRightOpen" },
         { displayName: Translation.tr("Overview Launcher"),               value: "overviewOpen" },
+        { displayName: Translation.tr("App Launcher"),            value: "launcherOpen" },
         { displayName: Translation.tr("Wallpaper Selector"),     value: "wallpaperSelectorOpen" },
         { displayName: Translation.tr("Media Controls"),         value: "mediaControlsOpen" },
         { displayName: Translation.tr("Overlay"),                value: "overlayOpen" },

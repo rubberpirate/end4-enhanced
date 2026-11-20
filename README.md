@@ -110,7 +110,9 @@ hl.bind("SUPER + escape", hl.dsp.global("quickshell:settingsToggle"), {descripti
 
 ### How do I see my keybinds?
 
-Open the launcher (`SUPER`) and type `<` — it'll show you the full list of configured keybinds.
+Open the launcher (`SUPER`) and type `<` — it'll show you the configured keybinds. Use arrows, Tab, or the mouse wheel to rotate the results, then press Enter to activate one.
+
+The app launcher uses Nebula's animated clover layout. Type `>` for session commands and settings. `SUPER + Tab` opens the workspace overview; clipboard and emoji shortcuts keep their existing search panels. See the [launcher notes](modules/ii/launcher/README.md) for attribution and runtime checks.
 
 ### Why doesn't Settings have a search bar?
 

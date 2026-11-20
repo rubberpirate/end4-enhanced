@@ -198,16 +198,17 @@ Scope {
         target: "search"
 
         function toggle() {
-            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+            GlobalStates.launcherOpen = !GlobalStates.launcherOpen;
         }
         function workspacesToggle() {
             GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
         }
         function close() {
             GlobalStates.overviewOpen = false;
+            GlobalStates.launcherOpen = false;
         }
         function open() {
-            GlobalStates.overviewOpen = true;
+            GlobalStates.launcherOpen = true;
         }
         function toggleReleaseInterrupt() {
             GlobalStates.superReleaseMightTrigger = false;
@@ -222,7 +223,7 @@ Scope {
         description: "Toggles search on press"
 
         onPressed: {
-            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+            GlobalStates.launcherOpen = !GlobalStates.launcherOpen;
         }
     }
     CompositorGlobalShortcut {
@@ -254,7 +255,7 @@ Scope {
                 GlobalStates.superReleaseMightTrigger = true;
                 return;
             }
-            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+            GlobalStates.launcherOpen = !GlobalStates.launcherOpen;
         }
     }
     CompositorGlobalShortcut {

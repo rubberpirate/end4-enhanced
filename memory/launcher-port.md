@@ -1,0 +1,3 @@
+The app launcher in `modules/ii/launcher/` is ported from the supplied Nebula files in `laucnher/`. Its service is `services/Launcher.qml`; `GlobalStates.launcherOpen` controls it. Super, `search open/toggle`, and the bar/dock launcher buttons use it. The overview retains its own state and workspace/clipboard/emoji shortcuts. Attribution and the source AGPL license are kept with the port.
+
+Validate with `python3 tests/launcher/check.py` on Wayland. It uses temporary config/state, briefly displays the UI, and executes no apps or session actions. This machine's configured Ryoku vault path was absent and its skill symlink was broken during the port; the detected session was Hyprland.
