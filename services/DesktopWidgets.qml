@@ -15,6 +15,7 @@ Singleton {
         { key: "media",       icon: "music_note",        name: Translation.tr("Media") },
         { key: "visualizer",  icon: "graphic_eq",        name: Translation.tr("Visualizer") },
         { key: "resources",   icon: "monitor_heart",     name: Translation.tr("Resources") },
+        { key: "battery",     icon: "battery_full",      name: Translation.tr("Battery") },
         { key: "userCard",    icon: "person",            name: Translation.tr("User Card") },
         { key: "github",      icon: "code",              name: Translation.tr("GitHub Heatmap") },
         { key: "devices",     icon: "devices",           name: Translation.tr("Connected Devices") },

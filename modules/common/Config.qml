@@ -459,6 +459,15 @@ Singleton {
                         property bool vertical: false
                     }
 
+                    property JsonObject battery: JsonObject {
+                        property bool enable: true
+                        property string placementStrategy: "free"
+                        property real x: 600
+                        property real y: 100
+                        property real z: 0
+                        property real size: 200
+                    }
+
                     property JsonObject github: JsonObject {
                         property bool enable: false
                         property string username: "rubberpirate"

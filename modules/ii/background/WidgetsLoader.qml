@@ -12,6 +12,7 @@ import qs.modules.ii.background.widgets.weather
 import qs.modules.ii.background.widgets.media
 import qs.modules.ii.background.widgets.images
 import qs.modules.ii.background.widgets.resources
+import qs.modules.ii.background.widgets.battery
 import qs.modules.ii.background.widgets.visualizer
 import qs.modules.ii.background.widgets.calendar
 import qs.modules.ii.background.widgets.worldclock
@@ -48,6 +49,7 @@ Item {
             { key: "media" },
             { key: "images" },
             { key: "resources" },
+            { key: "battery" },
             { key: "worldClock" },
             { key: "userCard" },
             { key: "todo" },
@@ -84,6 +86,7 @@ Item {
                     case "media":       return mediaComp
                     case "images":      return imagesComp
                     case "resources":   return resourcesComp
+                    case "battery":     return batteryComp
                     case "worldClock":  return worldClockComp
                     case "userCard":    return userCardComp
                     case "github":      return githubComp
@@ -218,6 +221,17 @@ Item {
     Component {
         id: imagesComp
         ImageConverterWidget {
+            screenWidth: root.screen.width
+            screenHeight: root.screen.height
+            scaledScreenWidth: root.screen.width
+            scaledScreenHeight: root.screen.height
+            wallpaperScale: 1
+            wallpaperItem: root.wallpaperItem
+        }
+    }
+    Component {
+        id: batteryComp
+        BatteryWidget {
             screenWidth: root.screen.width
             screenHeight: root.screen.height
             scaledScreenWidth: root.screen.width

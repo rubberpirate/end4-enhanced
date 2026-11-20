@@ -171,6 +171,14 @@
                 "x": 1776,
                 "y": 24
             },
+            "battery": {
+                "enable": true,
+                "placementStrategy": "free",
+                "size": 200,
+                "x": 600,
+                "y": 100,
+                "z": 0
+            },
             "userCard": {
                 "enable": true,
                 "placementStrategy": "free",

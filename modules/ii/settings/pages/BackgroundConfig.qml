@@ -1429,6 +1429,12 @@ ContentPage {
                             enabled: Config.options.background.widgets.resources.enable
                         },
                         {
+                            icon: "battery_full",
+                            key: "battery",
+                            name: Translation.tr("Battery"),
+                            enabled: Config.options.background.widgets.battery.enable
+                        },
+                        {
                             icon: "calendar_month",
                             key: "calendar",
                             name: Translation.tr("Calendar"),
@@ -1527,6 +1533,8 @@ ContentPage {
                                             Config.options.background.widgets.media.enable = checked
                                         else if (modelData.icon === "memory")
                                             Config.options.background.widgets.resources.enable = checked
+                                        else if (modelData.icon === "battery_full")
+                                            Config.options.background.widgets.battery.enable = checked
                                         else if (modelData.icon === "calendar_month")
                                             Config.options.background.widgets.calendar.enable = checked
                                         else if (modelData.icon === "public")

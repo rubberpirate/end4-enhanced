@@ -108,6 +108,10 @@ hl.bind("SUPER + escape", hl.dsp.global("quickshell:settingsToggle"), {descripti
 
 ## ❓ FAQ
 
+### Where is the desktop battery widget?
+
+The base config includes a scalloped battery widget with an animated charge ring, percentage, and charging estimate. Toggle it under **Settings → Desktop → Widgets → Battery** or the desktop menu's **Widgets → Battery**. Unlock widget positions to move or resize it. See the [battery widget notes](modules/ii/background/widgets/battery/README.md).
+
 ### How do I see my keybinds?
 
 Open the launcher (`SUPER`) and type `<` — it'll show you the configured keybinds. Use arrows, Tab, or the mouse wheel to rotate the results, then press Enter to activate one.

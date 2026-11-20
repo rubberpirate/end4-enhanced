@@ -506,7 +506,7 @@ QtObject {
         },
         {
             page: Translation.tr("Desktop"), title: Translation.tr("Desktop widgets"), icon: "widgets", cards: [
-                { type: "widgets", key: "desktop:Widgets", title: Translation.tr("Desktop widgets"), icon: "widgets", kw: "widgets desktop menu star favorite clock weather calendar media resources todo notes timers sticker visualizer" }
+                { type: "widgets", key: "desktop:Widgets", title: Translation.tr("Desktop widgets"), icon: "widgets", kw: "widgets desktop menu star favorite clock weather calendar media resources battery todo notes timers sticker visualizer" }
             ]
         },
         {
