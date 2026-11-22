@@ -1,10 +1,15 @@
 """Run a short launcher check on Wayland with temporary shell config and state."""
 from pathlib import Path
 import os
+import argparse
+import json
 import subprocess
 import tempfile
 
 
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--skin", choices=("clover", "omnitrix"), default="clover")
+args = parser.parse_args()
 repo = Path(__file__).resolve().parents[2]
 with tempfile.TemporaryDirectory(prefix="end4-launcher-check-") as directory:
     temp = Path(directory)
@@ -13,10 +18,10 @@ with tempfile.TemporaryDirectory(prefix="end4-launcher-check-") as directory:
     for name in ("config", "state", "cache"):
         (temp / name).mkdir()
     (temp / "config/illogical-impulse").mkdir()
-    (temp / "config/illogical-impulse/config.json").write_bytes(
-        (repo / "config/illogical-impulse/config.json").read_bytes()
-    )
-    (temp / "shell.qml").symlink_to(Path(__file__).with_name("check.qml"))
+    configuration = json.loads((repo / "config/illogical-impulse/config.json").read_text())
+    configuration["launcher"]["skin"] = args.skin
+    (temp / "config/illogical-impulse/config.json").write_text(json.dumps(configuration))
+    (temp / "shell.qml").symlink_to(Path(__file__).with_name("omnitrix.qml" if args.skin == "omnitrix" else "check.qml"))
     environment = os.environ | {
         "QT_QPA_PLATFORM": "wayland",
         "XDG_CONFIG_HOME": str(temp / "config"),

@@ -189,6 +189,7 @@ QtObject {
         "desktop:Text color": { type: "select", get: () => Config.options.background.widgets.customText.color, set: v => { Config.options.background.widgets.customText.color = v; }, get options() { return ["primary", "secondary", "tertiary", "primaryContainer", "secondaryContainer", "tertiaryContainer", "layer1", "layer0"].map(name => ({ value: name, color: Appearance.getColorFromName(name) })); } },
         "interface:AI policy": { type: "select", get: () => Config.options.policies.ai, set: v => { Config.options.policies.ai = v; }, options: [{ displayName: Translation.tr("No"), icon: "close", value: 0 }, { displayName: Translation.tr("Yes"), icon: "check", value: 1 }, { displayName: Translation.tr("Local"), icon: "sync_saved_locally", value: 2 }] },
         "interface:Weeb policy": { type: "select", get: () => Config.options.policies.weeb, set: v => { Config.options.policies.weeb = v; }, options: [{ displayName: Translation.tr("No"), icon: "close", value: 0 }, { displayName: Translation.tr("Yes"), icon: "check", value: 1 }, { displayName: Translation.tr("Closet"), icon: "ev_shadow", value: 2 }] },
+        "interface:Launcher skin": { type: "select", get: () => Config.options.launcher.skin, set: v => { Config.options.launcher.skin = v; }, options: [{ displayName: Translation.tr("Clover"), value: "clover" }, { displayName: "Omnitrix", value: "omnitrix" }] },
         "interface:Overview order horizontal": { type: "select", get: () => Config.options.overview.orderRightLeft, set: v => { Config.options.overview.orderRightLeft = v; }, options: [{ displayName: Translation.tr("Left to right"), icon: "arrow_forward", value: 0 }, { displayName: Translation.tr("Right to left"), icon: "arrow_back", value: 1 }] },
         "interface:Overview order vertical": { type: "select", get: () => Config.options.overview.orderBottomUp, set: v => { Config.options.overview.orderBottomUp = v; }, options: [{ displayName: Translation.tr("Top-down"), icon: "arrow_downward", value: 0 }, { displayName: Translation.tr("Bottom-up"), icon: "arrow_upward", value: 1 }] },
         "interface:Hot corner bottom-left": { type: "select", get: () => Config.options.sidebar.cornerOpen.bottomLeftAction, set: v => { Config.options.sidebar.cornerOpen.bottomLeftAction = v; }, get options() { return GlobalStates.hotCornerOptions; } },
@@ -391,6 +392,11 @@ QtObject {
                 { type: "spin", key: "interface:Region height", title: Translation.tr("Region height"), icon: "height" },
                 { type: "combo", key: "interface:Hot corner bottom-left", title: Translation.tr("Bottom-left"), icon: "position_bottom_left" },
                 { type: "combo", key: "interface:Hot corner bottom-right", title: Translation.tr("Bottom-right"), icon: "position_bottom_right" }
+            ]
+        },
+        {
+            page: Translation.tr("Interface"), title: Translation.tr("App launcher"), icon: "apps", cards: [
+                { type: "select", key: "interface:Launcher skin", title: Translation.tr("Launcher skin"), icon: "palette", kw: "clover omnitrix ben 10 theme skin launcher dial" }
             ]
         },
         {

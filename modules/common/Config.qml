@@ -779,6 +779,7 @@ Singleton {
             }
 
             property JsonObject launcher: JsonObject {
+                property string skin: "clover"
                 property list<string> pinnedApps: [ "org.kde.dolphin", "kitty", "cmake-gui"]
             }
 

@@ -20,7 +20,7 @@ ShellRoot {
 
     function findItem(parent, predicate) {
         if (predicate(parent)) return parent;
-        for (const child of parent.children ?? []) {
+        for (const child of parent.data ?? parent.children ?? []) {
             const found = findItem(child, predicate);
             if (found) return found;
         }
@@ -35,6 +35,7 @@ ShellRoot {
         running: true
         onTriggered: {
             Launcher.open();
+            root.findItem(launcher.contentItem, item => item.objectName === "launcherWheel").enabled = false;
             root.check(Launcher.results.length > 0 && Launcher.results.length <= 8, "initial app results");
             root.firstApp = Launcher.results[0];
         }
@@ -74,31 +75,33 @@ ShellRoot {
             root.check(GlobalStates.launcherOpen, "empty activation stays open");
             Launcher.close();
             root.check(launcher.visible, "window remains visible during exit");
+            reopenTimer.restart();
         }
     }
 
     Timer {
-        interval: 3400
-        running: true
-        onTriggered: Launcher.open()
+        id: reopenTimer
+        interval: 200
+        onTriggered: { Launcher.open(); checkReopenTimer.restart(); }
     }
 
     Timer {
-        interval: 4400
-        running: true
+        id: checkReopenTimer
+        interval: 1100
         onTriggered: {
-            root.check(launcher.progress === 1 && Launcher.query === "", "reopening reverses exit and clears query");
+            root.check(launcher.progress === 1 && Launcher.query === "", "reopening reverses exit and clears query: " + launcher.progress + " / " + Launcher.query);
             GlobalStates.overviewOpen = true;
             root.check(!GlobalStates.launcherOpen, "overview closes launcher");
             Launcher.open();
             root.check(!GlobalStates.overviewOpen, "launcher closes overview");
             Launcher.close();
+            finishTimer.restart();
         }
     }
 
     Timer {
-        interval: 5100
-        running: true
+        id: finishTimer
+        interval: 700
         onTriggered: {
             root.check(!launcher.visible && launcher.progress === 0, "close animation ends and window hides");
             if (!root.failed) console.log("LAUNCHER CHECK PASSED");

@@ -612,6 +612,26 @@ ContentPage {
             }
         }
     
+        ContentSection {
+            icon: "apps"
+            shape: MaterialShape.Shape.Circle
+            title: Translation.tr("App launcher")
+
+            GroupedList {
+                ConfigComboBox {
+                    buttonIcon: "palette"
+                    text: Translation.tr("Launcher skin")
+                    description: Translation.tr("Choose the clover or Ben 10 Omnitrix dial")
+                    currentValue: Config.options.launcher.skin
+                    onSelected: newValue => Config.options.launcher.skin = newValue
+                    model: [
+                        { displayName: Translation.tr("Clover"), value: "clover" },
+                        { displayName: "Omnitrix", value: "omnitrix" }
+                    ]
+                }
+            }
+        }
+
         ContentSection { // I see that for many the overview is important, I put it first why not
             visible: WM.compositor !== "niri"
             icon: "overview_key"

@@ -17,6 +17,7 @@ Singleton {
     property string query: ""
     readonly property bool commandMode: query.startsWith(">")
     readonly property int slots: commandMode ? commandSlots : appSlots
+    readonly property bool fullCatalog: Config.options.launcher.skin === "omnitrix"
     readonly property var apps: AppSearch.list.filter(e => !e.noDisplay).sort((a, b) => a.name.localeCompare(b.name))
     readonly property var commands: [
         { name: Translation.tr("Theme"), iconName: "palette", execute: () => GlobalStates.openSettingsAt("interface", Translation.tr("Color Schemes")) },
@@ -38,9 +39,10 @@ Singleton {
             const search = query.slice(1).trim().toLowerCase();
             return commands.filter(c => c.name.toLowerCase().includes(search));
         }
-        if (query.trim() !== "") return LauncherSearch.results.slice(0, appSlots);
+        if (query.trim() !== "") return fullCatalog ? LauncherSearch.results : LauncherSearch.results.slice(0, appSlots);
         const recent = Persistent.states.launcherRecentApps.map(id => apps.find(e => e.id === id)).filter(Boolean);
-        return recent.concat(apps.filter(e => !recent.includes(e))).slice(0, appSlots).map(entry => ({
+        const catalog = recent.concat(apps.filter(e => !recent.includes(e)));
+        return (fullCatalog ? catalog : catalog.slice(0, appSlots)).map(entry => ({
             id: entry.id,
             name: entry.name,
             iconName: entry.icon,
@@ -70,10 +72,24 @@ Singleton {
         function onScreenLockedChanged() { if (GlobalStates.screenLocked) root.close(); }
     }
 
+    property string workspaceKey: ""
+    property string monitorKey: ""
+    Component.onCompleted: {
+        workspaceKey = String(WM.activeWorkspace?.id ?? "");
+        monitorKey = String(WM.focusedMonitor?.name ?? "");
+    }
     Connections {
         target: WM
-        function onActiveWorkspaceChanged() { root.close(); }
-        function onFocusedMonitorChanged() { root.close(); }
+        function onActiveWorkspaceChanged() {
+            const next = String(WM.activeWorkspace?.id ?? "");
+            if (root.workspaceKey !== "" && next !== "" && next !== root.workspaceKey) root.close();
+            root.workspaceKey = next;
+        }
+        function onFocusedMonitorChanged() {
+            const next = String(WM.focusedMonitor?.name ?? "");
+            if (root.monitorKey !== "" && next !== "" && next !== root.monitorKey) root.close();
+            root.monitorKey = next;
+        }
     }
 
     IpcHandler {

@@ -14,6 +14,8 @@ PanelWindow {
     id: window
 
     readonly property bool open: GlobalStates.launcherOpen
+    readonly property bool omnitrix: Config.options.launcher.skin === "omnitrix"
+    readonly property real skinScale: Math.max(0.1, Math.min(0.82, (height - 48) / 680, (width - 48) / 620))
     property real progress: 0
     readonly property real pillT: Curves.phase(progress, 0.45, 0.45)
 
@@ -53,8 +55,9 @@ PanelWindow {
 
     property int selected: 0
     property int cursor: 0
+    property int turns: 0
     readonly property var results: Launcher.results
-    onResultsChanged: { cursor = 0; selected = 0; }
+    onResultsChanged: { cursor = 0; selected = 0; turns = 0; }
 
     property bool rushing: false
 
@@ -63,7 +66,23 @@ PanelWindow {
         if (repeat) rushTimer.restart();
         if (results.length === 0) return;
         cursor = (cursor + delta + results.length) % results.length;
-        selected = cursor;
+        const slots = Math.min(9, results.length);
+        selected = omnitrix ? ((selected + delta) % slots + slots) % slots : cursor;
+        turns += delta;
+    }
+
+    function selectIndex(index) {
+        let delta = index - cursor;
+        if (delta > results.length / 2) delta -= results.length;
+        if (delta < -results.length / 2) delta += results.length;
+        step(delta, false);
+    }
+
+    onOmnitrixChanged: {
+        cursor = 0;
+        selected = 0;
+        turns = 0;
+        if (open) Qt.callLater(() => input.forceActiveFocus());
     }
 
     Timer {
@@ -79,6 +98,7 @@ PanelWindow {
         Launcher.query = "";
         selected = 0;
         cursor = 0;
+        turns = 0;
         closeAnim.stop();
         openAnim.restart();
         Qt.callLater(() => input.forceActiveFocus());
@@ -95,7 +115,7 @@ PanelWindow {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(Appearance.m3colors.m3scrim, LauncherStyle.backdropDim * window.progress)
+        color: Qt.alpha(window.omnitrix ? "#020601" : Appearance.m3colors.m3scrim, (window.omnitrix ? 0.18 : LauncherStyle.backdropDim) * window.progress)
 
         MouseArea {
             anchors.fill: parent
@@ -104,6 +124,7 @@ PanelWindow {
     }
 
     WheelHandler {
+        objectName: "launcherWheel"
         property real delta: 0
 
         acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
@@ -117,6 +138,7 @@ PanelWindow {
 
     Item {
         id: cloverGlow
+        visible: !window.omnitrix
 
         readonly property real pad: ring.width * LauncherStyle.glassPad
 
@@ -165,22 +187,38 @@ PanelWindow {
 
     LauncherRing {
         id: ring
+        visible: !window.omnitrix
         anchors.centerIn: parent
         intro: window.progress
-        selected: window.selected
+        selected: window.omnitrix ? 0 : Math.min(window.selected, Launcher.slots - 1)
         rushing: window.rushing
+    }
+
+    Loader {
+        anchors.centerIn: parent
+        active: window.omnitrix
+        sourceComponent: OmnitrixRing {
+            intro: window.progress
+            cursor: window.cursor
+            selected: window.selected
+            turns: window.turns
+            rushing: window.rushing
+            scale: window.skinScale
+            onSelectRequested: index => window.selectIndex(index)
+        }
     }
 
     Rectangle {
         id: pill
         anchors.centerIn: parent
-        width: LauncherStyle.searchHeight + (LauncherStyle.searchWidth - LauncherStyle.searchHeight) * Math.max(0, Curves.back(window.pillT, LauncherStyle.overshoot))
+        anchors.verticalCenterOffset: window.omnitrix ? 318 * window.skinScale : 0
+        width: LauncherStyle.searchHeight + ((window.omnitrix ? 248 : LauncherStyle.searchWidth) - LauncherStyle.searchHeight) * Math.max(0, Curves.back(window.pillT, LauncherStyle.overshoot))
         height: LauncherStyle.searchHeight
-        scale: Math.min(1, window.pillT * 4)
+        scale: Math.min(1, window.pillT * 4) * (window.omnitrix ? window.skinScale : 1)
         radius: height / 2
-        color: Appearance.m3colors.m3surfaceContainerLowest
+        color: window.omnitrix ? "#081005" : Appearance.m3colors.m3surfaceContainerLowest
         border.width: 1
-        border.color: Appearance.m3colors.m3outlineVariant
+        border.color: window.omnitrix ? "#77b831" : Appearance.m3colors.m3outlineVariant
 
         Text {
             x: 12
@@ -189,7 +227,7 @@ PanelWindow {
             text: "search"
             font.family: Fonts.iconMaterialFamily
             font.pixelSize: LauncherStyle.searchIconSize
-            color: Appearance.m3colors.m3onSurfaceVariant
+            color: window.omnitrix ? "#aaff32" : Appearance.m3colors.m3onSurfaceVariant
         }
 
         TextInput {
@@ -201,8 +239,8 @@ PanelWindow {
             verticalAlignment: TextInput.AlignVCenter
             clip: true
             opacity: Math.max(0, window.pillT * 3 - 2)
-            color: text === ">" ? "transparent" : Appearance.m3colors.m3onSurface
-            selectionColor: Appearance.m3colors.m3primary
+            color: text === ">" ? "transparent" : window.omnitrix ? "#e6ffc7" : Appearance.m3colors.m3onSurface
+            selectionColor: window.omnitrix ? "#508317" : Appearance.m3colors.m3primary
             font.family: Appearance.font.family.main
             font.pixelSize: 14
             onTextChanged: Launcher.query = text
@@ -222,7 +260,7 @@ PanelWindow {
             anchors.verticalCenter: parent.verticalCenter
             visible: input.text === "" || input.text === ">"
             text: input.text === ">" ? "> " + Translation.tr("Commands") : Translation.tr("Search")
-            color: Appearance.m3colors.m3onSurfaceVariant
+            color: window.omnitrix ? "#adca94" : Appearance.m3colors.m3onSurfaceVariant
             opacity: input.opacity
             font: input.font
         }

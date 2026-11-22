@@ -418,6 +418,7 @@
         "ui": "auto"
     },
     "launcher": {
+        "skin": "clover",
         "pinnedApps": [
             "org.kde.dolphin",
             "kitty",
