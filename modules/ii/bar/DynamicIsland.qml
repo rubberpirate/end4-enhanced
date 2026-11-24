@@ -50,7 +50,7 @@ Item {
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property bool hasMedia: root.activePlayer !== null
         && ((root.activePlayer.trackTitle ?? "") !== "" || root.activePlayer.isPlaying)
-    readonly property var latestNotification: Notifications.popupList.length > 0
+    readonly property var latestNotification: (Config.options.notifications.style !== "bubble" || Config.options.bar.vertical) && Notifications.popupList.length > 0
         ? Notifications.popupList[Notifications.popupList.length - 1]
         : null
     readonly property bool isRecording: Persistent.states.record.enable

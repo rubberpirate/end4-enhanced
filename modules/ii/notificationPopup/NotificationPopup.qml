@@ -10,10 +10,15 @@ import Quickshell.Hyprland
 
 Scope {
     id: notificationPopup
+    readonly property alias popupWindow: root
+    readonly property alias bubbleWindow: bubblePopup
+
+    BubblePopup { id: bubblePopup }
 
     PanelWindow {
         id: root
-        visible: (Notifications.popupList.length > 0) && !GlobalStates.screenLocked && !GlobalStates.dynamicIslandEnabled
+        objectName: "notificationStandard"
+        visible: (Config.options.notifications.style !== "bubble" || Config.options.bar.vertical) && (Notifications.popupList.length > 0) && !GlobalStates.screenLocked && !GlobalStates.dynamicIslandEnabled
         screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? null
 
         property string position: {

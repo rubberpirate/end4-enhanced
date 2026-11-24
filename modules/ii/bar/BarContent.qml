@@ -8,6 +8,7 @@ import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
+import qs.modules.ii.notificationPopup
 
 Item {
     id: root
@@ -30,6 +31,15 @@ Item {
         : Appearance.colors.colUiBackground
     readonly property real centerPillX: centerPill.x
     readonly property real centerPillWidth: centerPill.width
+    readonly property Item notificationAnchor: root.effectiveMiddleLayout.length === 0 ? barBackground : root.useTabWrapper ? centerMaterialPill
+        : centerPill.visible && centerPill.width > 0 ? centerPill : absoluteCenter
+    property alias notificationBubbles: notificationBubbles
+
+    BubbleNotifications {
+        id: notificationBubbles
+        anchorItem: root.notificationAnchor
+        anchorColor: root.materialPillBgColor
+    }
     readonly property bool isPanel: Config.options.bar.cornerStyle === 5
     readonly property var diLeftWidgets:  filterLayout(Config.options.bar.dynamicIsland.leftWidgets ?? [])
     readonly property var diRightWidgets: filterLayout(Config.options.bar.dynamicIsland.rightWidgets ?? [])

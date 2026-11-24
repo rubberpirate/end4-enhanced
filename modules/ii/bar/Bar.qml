@@ -70,6 +70,7 @@ Scope {
                 }
                 property bool superShow: false
                 property bool mustShow: hoverRegion.containsMouse || superShow
+                    || barContent.notificationBubbles.active
                     || (Config.options.bar.autoHide.enable && GlobalStates.isFrameHovered(barRoot.screen?.name, Config.options.bar.bottom ? "bottom" : "top"))
                 property var thisMonitorData: HyprlandData.monitors.find(m => m.name === barRoot.screen?.name)
                 property bool monitorHasFullscreen: HyprlandData.workspaceById[thisMonitorData?.activeWorkspace?.id]?.hasfullscreen ?? false
@@ -87,8 +88,9 @@ Scope {
                 WlrLayershell.namespace: "quickshell:bar"
                 // Overlay layer only while special workspace sits on top of a fullscreen window on this monitor,
                 // else Top layer so fullscreen apps cover the bar as normal (Hyprland buries Top layer under fullscreen+special).
-                WlrLayershell.layer: (monitorHasFullscreen && monitorHasSpecialOpen) ? WlrLayer.Overlay : WlrLayer.Top
-                implicitHeight: Appearance.sizes.barHeight + Appearance.rounding.screenRounding
+                WlrLayershell.layer: (monitorHasFullscreen && monitorHasSpecialOpen) || barContent.notificationBubbles.active ? WlrLayer.Overlay : WlrLayer.Top
+                implicitHeight: Appearance.sizes.barHeight + Math.max(Appearance.rounding.screenRounding,
+                    barContent.notificationBubbles.active ? barContent.notificationBubbles.height : 0)
                 // When Overlay-layer, bar shares a layer with the screen-corner click zones (ScreenCorners.qml)
                 // and same-layer overlap is resolved by stacking, not layer priority - bar was winning and
                 // swallowing the tiny corner-open hit rects. Carve them out of the bar's own mask so clicks
@@ -98,6 +100,10 @@ Scope {
                 property int cornerOpenCutHeight: cutOutCornerOpenZones ? Config.options.sidebar.cornerOpen.cornerRegionHeight : 0
                 mask: Region {
                     item: hoverMaskRegion
+                    Region { item: barContent.notificationBubbles.cards[0] ?? null; radius: (barContent.notificationBubbles.cards[0]?.height ?? 0) / 2 }
+                    Region { item: barContent.notificationBubbles.cards[1] ?? null; radius: (barContent.notificationBubbles.cards[1]?.height ?? 0) / 2 }
+                    Region { item: barContent.notificationBubbles.cards[2] ?? null; radius: (barContent.notificationBubbles.cards[2]?.height ?? 0) / 2 }
+                    Region { item: barContent.notificationBubbles.counterCard; radius: 16 }
                     Region {
                         intersection: Intersection.Subtract
                         x: 0

@@ -6,6 +6,7 @@ import qs
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import Quickshell.Wayland
 import Quickshell.Services.Notifications
 
 /**
@@ -28,12 +29,15 @@ Singleton {
         property bool isTransient: notification?.hints.transient ?? false
         property string appIcon: notification?.appIcon ?? ""
         property string appName: notification?.appName ?? ""
+        property string desktopEntry: notification?.desktopEntry ?? ""
         property string body: notification?.body ?? ""
         property string image: notification?.image ?? ""
         property string summary: notification?.summary ?? ""
         property double time
         property string urgency: notification?.urgency.toString() ?? "normal"
         property Timer timer
+        property bool popupPresented: false
+        property double popupStartedAt: 0
 
         onNotificationChanged: {
             if (notification === null) {
@@ -48,6 +52,7 @@ Singleton {
             "actions": notif.actions,
             "appIcon": notif.appIcon,
             "appName": notif.appName,
+            "desktopEntry": notif.desktopEntry,
             "body": notif.body,
             "image": notif.image,
             "summary": notif.summary,
@@ -61,8 +66,13 @@ Singleton {
 
     component NotifTimer: Timer {
         required property int notificationId
-        interval: 7000
-        running: true
+        property int requestedTimeout: -1
+        interval: requestedTimeout < 0 ? Config.options.notifications.timeout : requestedTimeout
+        running: !root.bubbleMode
+        onIntervalChanged: {
+            const notification = root.list.find(notif => notif.notificationId === notificationId);
+            if (running && notification) notification.popupStartedAt = Date.now();
+        }
         onTriggered: () => {
             const index = root.list.findIndex((notif) => notif.notificationId === notificationId);
             // Already dismissed or discarded while the timer was running
@@ -79,12 +89,27 @@ Singleton {
     }
 
     property bool silent: false
+    readonly property bool bubbleMode: Config.options.notifications.style === "bubble" && !Config.options.bar.vertical
+    readonly property string popupPosition: {
+        const value = Config.options.notifications.position;
+        if (value === "top") return "top_right";
+        if (value === "bottom") return "bottom_right";
+        return ["top_left", "top_center", "top_right", "bottom_left", "bottom_center", "bottom_right"].includes(value) ? value : "top_right";
+    }
+    readonly property bool bubbleFromBar: bubbleMode && popupPosition === (Config.options.bar.bottom ? "bottom_center" : "top_center")
     property int unread: 0
     property var filePath: Directories.notificationsPath
     property list<Notif> list: []
     property var popupList: list.filter((notif) => notif.popup);
     property bool popupInhibited: (GlobalStates?.sidebarRightOpen ?? false) || silent
     property var latestTimeForApp: ({})
+    onBubbleModeChanged: {
+        for (const notification of popupList) {
+            notification.popupPresented = false;
+            if (bubbleMode) notification.timer?.stop();
+            else restartPopupTimeout(notification.notificationId);
+        }
+    }
     Component {
         id: notifComponent
         Notif {}
@@ -179,8 +204,9 @@ Singleton {
                 if (notification.expireTimeout != 0) {
                     newNotifObject.timer = notifTimerComponent.createObject(root, {
                         "notificationId": newNotifObject.notificationId,
-                        "interval": notification.expireTimeout < 0 ? (Config?.options.notifications.timeout ?? 7000) : notification.expireTimeout,
+                        "requestedTimeout": notification.expireTimeout,
                     });
+                    newNotifObject.popupStartedAt = Date.now();
                 }
                 root.unread++;
             }
@@ -201,6 +227,11 @@ Singleton {
     function discardNotifications(ids) {
         console.log("[Notifications] Discarding notifications with IDs: " + ids.join(", "));
         const idSet = new Set(ids);
+        root.list.filter(notif => idSet.has(notif.notificationId)).forEach(notif => {
+            notif.timer?.stop();
+            notif.timer?.destroy();
+            notif.timer = null;
+        });
         // Assign a new array instead of splicing: on a list<> property, splice()
         // shifts the following elements one by one and emits listChanged for each,
         // re-running the grouping and every model bound to the list each time.
@@ -216,6 +247,7 @@ Singleton {
     }
 
     function discardAllNotifications() {
+        root.list.forEach(notif => { notif.timer?.stop(); notif.timer?.destroy(); notif.timer = null; });
         root.list = []
         triggerListChange()
         notifFileView.setText(stringifyList(root.list));
@@ -231,10 +263,58 @@ Singleton {
             root.list[index].timer.stop();
     }
 
+    function restartPopupTimeout(id) {
+        const notification = root.list.find(notif => notif.notificationId === id);
+        if (!notification?.popup || !notification.timer) return;
+        notification.popupStartedAt = Date.now();
+        notification.timer.restart();
+    }
+
+    function presentPopup(id) {
+        const notification = root.list.find(notif => notif.notificationId === id);
+        if (!notification?.popup || notification.popupPresented) return;
+        notification.popupPresented = true;
+        restartPopupTimeout(id);
+    }
+
+    function suspendPopup(id) {
+        const notification = root.list.find(notif => notif.notificationId === id);
+        if (!notification) return;
+        notification.popupPresented = false;
+        if (root.bubbleMode) notification.timer?.stop();
+    }
+
+    function activateNotification(id) {
+        const notification = root.list.find(notif => notif.notificationId === id);
+        if (!notification) return false;
+        const hasDefaultAction = notification.actions.some(action => action.identifier === "default");
+        const normalize = value => (value ?? "").toLowerCase().replace(/\.desktop$/, "").replace(/[ _-]/g, "");
+        const desktopId = notification.desktopEntry.replace(/\.desktop$/, "");
+        const entry = (desktopId ? DesktopEntries.byId(desktopId) : null)
+            ?? DesktopEntries.applications.values.find(app => normalize(app.name) === normalize(notification.appName));
+        const names = [desktopId, notification.appName, entry?.id, entry?.startupClass, entry?.name].filter(Boolean).map(normalize);
+        const toplevels = ToplevelManager.toplevels.values.filter(win => names.includes(normalize(win.appId)));
+        const toplevel = toplevels.find(win => win.activated) ?? toplevels[0];
+        const window = WM.windowList.find(win => names.includes(normalize(win.appId)));
+        // Default actions can select a tab/document but cannot always raise their app on Wayland.
+        if (toplevel) toplevel.activate();
+        else if (window) WM.focusWindow(window.id);
+        if (hasDefaultAction && root.attemptInvokeAction(id, "default")) return true;
+        if (!toplevel && !window) {
+            if (!entry) return false;
+            entry.execute();
+        }
+        root.timeoutNotification(id);
+        return true;
+    }
+
     function timeoutNotification(id) {
         const index = root.list.findIndex((notif) => notif.notificationId === id);
         if (root.list[index] != null)
+        {
             root.list[index].popup = false;
+            root.list[index].timer?.stop();
+        }
         root.timeout(id);
     }
 
@@ -243,6 +323,7 @@ Singleton {
             root.timeout(notif.notificationId);
         })
         root.popupList.forEach((notif) => {
+            notif.timer?.stop();
             notif.popup = false;
         });
     }
@@ -257,6 +338,8 @@ Singleton {
             // console.log("Action found: " + JSON.stringify(action));
             if (action) {
                 action.invoke();
+                root.discardNotification(id);
+                return true;
             } else {
                 console.warn("[Notifications] Action not found:", notifIdentifier);
             }
@@ -264,7 +347,7 @@ Singleton {
         else {
             console.log("Notification not found in server: " + id)
         }
-        root.discardNotification(id);
+        return false;
     }
 
     function triggerListChange() {
@@ -291,6 +374,7 @@ Singleton {
                         "actions": [], // Notification actions are meaningless if they're not tracked by the server or the sender is dead
                         "appIcon": notif.appIcon,
                         "appName": notif.appName,
+                        "desktopEntry": notif.desktopEntry ?? "",
                         "body": notif.body,
                         "image": notif.image,
                         "summary": notif.summary,

@@ -424,6 +424,16 @@ ContentPage {
             title: Translation.tr("Notifications")
             
             GroupedList {
+                ConfigSelectionArray {
+                    text: Translation.tr("Popup style")
+                    icon: "notifications"
+                    currentValue: Config.options.notifications.style
+                    onSelected: newValue => { Config.options.notifications.style = newValue; }
+                    options: [
+                        { displayName: Translation.tr("Standard"), value: "standard" },
+                        { displayName: Translation.tr("Bubble"), value: "bubble" }
+                    ]
+                }
                 ConfigComboBox { // too much items for configselectionarray - I know it's not the best place to put this but I can change it later
                     text: Translation.tr("Popup position")
                     buttonIcon: "my_location" 

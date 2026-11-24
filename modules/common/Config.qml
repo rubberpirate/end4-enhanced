@@ -826,6 +826,7 @@ Singleton {
             }
 
             property JsonObject notifications: JsonObject {
+                property string style: "standard"
                 property int timeout: 7000
                 property string position: "top_right"
             }
